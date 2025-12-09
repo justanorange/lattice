@@ -7,6 +7,7 @@ import React from "react";
 import { useLotteryStore } from "../../entities/lottery/store";
 import { calculateEV } from "../../entities/lottery/calculation";
 import { Card, CardHeader, CardBody, Input, Slider, Button, Container } from "../../shared/ui";
+import type { PrizeRow } from "../../entities/lottery/types";
 import { STRINGS } from "../../shared/constants";
 
 export interface LotteryDetailPageProps {
@@ -31,6 +32,8 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
     currentPrizeTable,
     updateSuperprice,
     selectLottery,
+    updatePrizeRow,
+    resetPrizeTableToDefaults,
   } = useLotteryStore();
 
   // Ensure correct lottery is selected
@@ -156,9 +159,18 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
       {/* Prize Table */}
       <Card className="mb-6">
         <CardHeader>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            {STRINGS.detail_prize_table}
-          </h2>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {STRINGS.detail_prize_table}
+            </h2>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={resetPrizeTableToDefaults}
+            >
+              Сбросить к умолчаниям
+            </Button>
+          </div>
         </CardHeader>
         <CardBody>
           <div className="overflow-x-auto">
@@ -174,24 +186,66 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
                 </tr>
               </thead>
               <tbody>
-                {currentPrizeTable.rows.map((row, index) => (
-                  <tr
-                    key={index}
-                    className="border-b border-gray-100 dark:border-gray-800"
-                  >
-                    <td className="py-2 px-3 text-sm text-gray-900 dark:text-white">
-                      {row.matches.join(" + ")}
-                    </td>
-                    <td className="py-2 px-3 text-sm text-right font-medium text-gray-900 dark:text-white">
-                      {typeof row.prize === "number"
-                        ? `${row.prize.toLocaleString()} ₽`
-                        : row.prize}
-                    </td>
-                  </tr>
-                ))}
+                {currentPrizeTable.rows.map((row, index) => {
+                  const isEditable =
+                    typeof row.prize === "number" && row.prize > 0;
+                  const isSuperprice = row.prize === "Суперприз";
+                  const isSecondaryPrize = row.prize === "Приз";
+
+                  return (
+                    <tr
+                      key={index}
+                      className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    >
+                      <td className="py-2 px-3 text-sm text-gray-900 dark:text-white">
+                        {row.matches.join(" + ")}
+                      </td>
+                      <td className="py-2 px-3 text-sm text-right">
+                        {isEditable ? (
+                          <div className="flex items-center justify-end gap-2">
+                            <Input
+                              type="number"
+                              value={row.prize.toString()}
+                              onChange={(e) => {
+                                const value =
+                                  Number.parseFloat(e.target.value) || 0;
+                                if (value >= 0) {
+                                  updatePrizeRow(index, {
+                                    ...row,
+                                    prize: value,
+                                  } as PrizeRow);
+                                }
+                              }}
+                              min={0}
+                              step={100}
+                              className="w-32 text-right"
+                            />
+                            <span className="text-gray-600 dark:text-gray-400">
+                              ₽
+                            </span>
+                          </div>
+                        ) : isSuperprice || isSecondaryPrize ? (
+                          <span className="font-medium text-amber-600 dark:text-amber-400">
+                            {row.prize}
+                          </span>
+                        ) : (
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {typeof row.prize === "number"
+                              ? `${row.prize.toLocaleString()} ₽`
+                              : row.prize}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
+          <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+            Примечание: Суперприз и специальные призы редактируются отдельно.
+            Числовые призы можно редактировать напрямую в таблице.
+          </p>
         </CardBody>
       </Card>
 

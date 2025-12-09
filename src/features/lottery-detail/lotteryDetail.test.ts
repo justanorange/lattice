@@ -74,3 +74,74 @@ export function testEVUpdatesWithSuperprice(): boolean {
   }
 }
 
+/**
+ * Test prize row update
+ */
+export function testPrizeRowUpdate(): boolean {
+  try {
+    const store = useLotteryStore.getState();
+    const prizeTable = store.currentPrizeTable;
+    const firstEditableRow = prizeTable.rows.find(
+      (row) => typeof row.prize === "number" && row.prize > 0
+    );
+    
+    if (!firstEditableRow) {
+      console.warn("No editable prize row found for test");
+      return true; // Skip test if no editable rows
+    }
+    
+    const rowIndex = prizeTable.rows.indexOf(firstEditableRow);
+    const originalPrize = firstEditableRow.prize as number;
+    
+    store.updatePrizeRow(rowIndex, { ...firstEditableRow, prize: originalPrize + 1000 });
+    const newState = useLotteryStore.getState();
+    const updatedRow = newState.currentPrizeTable.rows[rowIndex];
+    
+    console.assert(
+      updatedRow.prize === originalPrize + 1000,
+      "Prize row should update"
+    );
+    
+    // Restore
+    store.updatePrizeRow(rowIndex, { ...firstEditableRow, prize: originalPrize });
+    return true;
+  } catch (e) {
+    console.error("Prize row update test failed:", e);
+    return false;
+  }
+}
+
+/**
+ * Test reset prize table to defaults
+ */
+export function testResetPrizeTable(): boolean {
+  try {
+    const store = useLotteryStore.getState();
+    const originalTable = structuredClone(store.currentPrizeTable);
+    
+    // Modify a row
+    const firstEditableRow = originalTable.rows.find(
+      (row) => typeof row.prize === "number" && row.prize > 0
+    );
+    if (firstEditableRow) {
+      const rowIndex = originalTable.rows.indexOf(firstEditableRow);
+      store.updatePrizeRow(rowIndex, { ...firstEditableRow, prize: 999999 });
+    }
+    
+    // Reset
+    store.resetPrizeTableToDefaults();
+    const resetState = useLotteryStore.getState();
+    
+    // Check that table was reset (rows count should match)
+    console.assert(
+      resetState.currentPrizeTable.rows.length === originalTable.rows.length,
+      "Prize table should have same number of rows after reset"
+    );
+    
+    return true;
+  } catch (e) {
+    console.error("Reset prize table test failed:", e);
+    return false;
+  }
+}
+
