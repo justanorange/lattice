@@ -71,28 +71,17 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
         </p>
       </div>
 
-      {/* Superprice Input with Slider */}
+      {/* Superprice Input */}
       <Card className="mb-6">
         <CardHeader>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             {STRINGS.detail_superprice}
           </h2>
         </CardHeader>
-        <CardBody className="space-y-4">
-          {/* Slider for quick adjustment */}
-          <Slider
-            label="Суперприз (₽)"
-            value={currentSuperprice}
-            onValueChange={(value) => updateSuperprice(value)}
-            min={superpriceMin}
-            max={superpriceMax}
-            step={superpriceStep}
-            helper="Используйте слайдер для быстрой настройки или введите точное значение ниже"
-          />
-          {/* Input for precise value */}
+        <CardBody>
           <Input
             type="number"
-            label="Точное значение (₽)"
+            label="Суперприз (₽)"
             value={currentSuperprice.toString()}
             onChange={(e) => {
               const value = Number.parseFloat(e.target.value) || 0;
@@ -106,6 +95,29 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
             max={superpriceMax}
             step={superpriceStep}
             helper={`Минимум: ${superpriceMin.toLocaleString()} ₽, Максимум: ${superpriceMax.toLocaleString()} ₽`}
+          />
+        </CardBody>
+      </Card>
+
+      {/* Risk Level Slider */}
+      <Card className="mb-6">
+        <CardHeader>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+            Уровень риска
+          </h2>
+        </CardHeader>
+        <CardBody>
+          <Slider
+            label="Риск (%)"
+            value={0}
+            onValueChange={(value) => {
+              // TODO: Store risk level in store when risk feature is implemented
+              console.log("Risk level:", value);
+            }}
+            min={0}
+            max={100}
+            step={1}
+            helper="Выберите уровень риска от 0% (минимальный риск) до 100% (максимальный риск)"
           />
         </CardBody>
       </Card>

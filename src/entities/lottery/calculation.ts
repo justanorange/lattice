@@ -143,8 +143,8 @@ export function isWinningCombination(
 
 /**
  * Calculate Expected Value (EV) for a lottery
- * EV = average_prize - ticket_cost
- * EV% = (average_prize / ticket_cost - 1) * 100
+ * EV = sum(prize * probability) - ticket_cost
+ * Uses actual probability calculations for accurate EV
  *
  * @param lottery - The lottery definition
  * @param superprice - Current superprice
@@ -162,33 +162,72 @@ export function calculateEV(
   secondaryPrize?: number,
   poolAmount: number = 0
 ): EVCalculation {
-  // This is a simplified EV calculation
-  // Real EV would require complex probability analysis per combination
+  // Import probability functions
+  const {
+    probabilityOfMatch,
+    twoFieldCombinations,
+  } = require("../calculations/probability");
 
-  // For now, we'll calculate based on average prize assuming equal distribution
-  const totalPrizes = prizeTable.rows.length;
-  let totalPrizeValue = 0;
-  let prizeCount = 0;
+  let expectedValue = -ticketCost; // Start with negative (cost of ticket)
 
+  // Calculate EV based on actual probabilities
   for (const row of prizeTable.rows) {
+    let prizeValue = 0;
+    
+    // Get prize value
     if (row.prize === "Суперприз") {
-      totalPrizeValue += superprice;
-      prizeCount++;
+      prizeValue = superprice;
     } else if (row.prize === "Приз" && secondaryPrize) {
-      totalPrizeValue += secondaryPrize;
-      prizeCount++;
+      prizeValue = secondaryPrize;
     } else if (typeof row.prize === "number") {
-      totalPrizeValue += row.prize;
-      prizeCount++;
+      prizeValue = row.prize;
     } else if (row.prizePercent !== undefined && poolAmount > 0) {
-      totalPrizeValue += (row.prizePercent / 100) * poolAmount;
-      prizeCount++;
+      prizeValue = (row.prizePercent / 100) * poolAmount;
     }
+
+    if (prizeValue === 0) continue;
+
+    // Calculate probability for this match combination
+    let probability = 0;
+
+    if (lottery.fieldCount === 1) {
+      // Single field lottery
+      const field = lottery.fields[0];
+      const matches = row.matches[0];
+      probability = probabilityOfMatch(
+        field.from,
+        field.count,
+        field.count, // drawn = selected
+        matches
+      );
+    } else if (lottery.fieldCount === 2 && row.matches.length === 2) {
+      // Two field lottery (e.g., 8+1)
+      const field1 = lottery.fields[0];
+      const field2 = lottery.fields[1];
+      const matches1 = row.matches[0];
+      const matches2 = row.matches[1];
+
+      const prob1 = probabilityOfMatch(
+        field1.from,
+        field1.count,
+        field1.count,
+        matches1
+      );
+      const prob2 = probabilityOfMatch(
+        field2.from,
+        field2.count,
+        field2.count,
+        matches2
+      );
+
+      // Probability of both fields matching = prob1 * prob2
+      probability = prob1 * prob2;
+    }
+
+    // Add to expected value: prize * probability
+    expectedValue += prizeValue * probability;
   }
 
-  const averagePrize =
-    prizeCount > 0 ? totalPrizeValue / prizeCount : 0;
-  const expectedValue = averagePrize - ticketCost;
   const evPercent = (expectedValue / ticketCost) * 100;
 
   return {
@@ -196,7 +235,9 @@ export function calculateEV(
     evPercent,
     isProfitable: expectedValue > 0,
     drawsToBreakEven:
-      expectedValue > 0 ? undefined : Math.ceil(Math.abs(expectedValue) / expectedValue || 1),
+      expectedValue <= 0
+        ? Math.ceil(Math.abs(expectedValue) / Math.abs(expectedValue) || 1)
+        : undefined,
   };
 }
 
