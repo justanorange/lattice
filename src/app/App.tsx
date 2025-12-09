@@ -7,6 +7,7 @@ import { useLotteryStore } from '../entities/lottery/store';
 import { LotterySelectionPage } from '../features/lottery-selection/LotterySelectionPage';
 import { LotteryDetailPage } from '../features/lottery-detail/LotteryDetailPage';
 import { GenerationPage } from '../features/generation/GenerationPage';
+import { SimulationPage } from '../features/simulation/SimulationPage';
 import './styles/App.css';
 
 /**
@@ -23,7 +24,8 @@ const LOTTERY_AVAILABILITY: Record<string, boolean> = {
 
 function App() {
   const { isDark, setTheme } = useTheme();
-  const [currentPage, setCurrentPage] = useState<'lottery' | 'detail' | 'strategy' | 'generation'>('lottery');
+  const [currentPage, setCurrentPage] = useState<'lottery' | 'detail' | 'strategy' | 'generation' | 'simulation'>('lottery');
+  const [simulationTickets, setSimulationTickets] = useState<any[]>([]);
   const [selectedLotteryId, setSelectedLotteryId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -52,7 +54,9 @@ function App() {
   };
 
   const handlePrevPage = () => {
-    if (currentPage === 'generation') {
+    if (currentPage === 'simulation') {
+      setCurrentPage('generation');
+    } else if (currentPage === 'generation') {
       setCurrentPage('strategy');
     } else if (currentPage === 'strategy') {
       setCurrentPage('detail');
@@ -60,6 +64,11 @@ function App() {
       setCurrentPage('lottery');
       setSelectedLotteryId(null);
     }
+  };
+
+  const handleSimulate = (tickets: any[]) => {
+    setSimulationTickets(tickets);
+    setCurrentPage('simulation');
   };
 
   return (

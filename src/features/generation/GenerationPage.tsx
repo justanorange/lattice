@@ -14,6 +14,7 @@ export interface GenerationPageProps {
   strategyId?: string;
   strategyParams?: Record<string, unknown>;
   onBack?: () => void;
+  onSimulate?: (tickets: Ticket[]) => void;
 }
 
 /**
@@ -24,6 +25,7 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
   strategyId = "coverage",
   strategyParams = { budget: 50 },
   onBack,
+  onSimulate,
 }) => {
   const {
     selectedLottery,
