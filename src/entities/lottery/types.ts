@@ -10,7 +10,7 @@ export interface PrizeRow {
   /** Array of number matches (e.g., [8, 1] for 8+1 lottery) */
   matches: number[];
   /** Prize amount in rubles, or "Суперприз" / "Приз" for jackpot variants */
-  prize: number | string;
+  prize?: number | string;
   /** Optional: percentage of prize fund (for 4из20 pool variant) */
   prizePercent?: number;
   /** Optional: note for jackpot entries */
