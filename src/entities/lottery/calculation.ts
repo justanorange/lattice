@@ -7,12 +7,12 @@ import type {
   Lottery,
   PrizeTable,
   PrizeRow,
-  LotteryState,
+
   EVCalculation,
 } from "./types";
-import { ALL_LOTTERIES } from "./config";
 
-import { probabilityOfMatch, twoFieldCombinations } from "../calculations/probability";
+
+import { probabilityOfMatch } from "../calculations/probability";
 
 /**
  * Find prize amount for given matches
@@ -55,8 +55,8 @@ export function findPrizeByMatches(
 export function calculatePrizeAmount(
   prizeTable: PrizeTable,
   matches: number[],
-  superprice: number,
-  secondaryPrize?: number,
+  _superprice: number,
+  _secondaryPrize?: number,
   poolAmount: number = 0
 ): number | "Суперприз" | "Приз" {
   // Find the row for these matches

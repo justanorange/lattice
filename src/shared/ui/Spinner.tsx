@@ -10,6 +10,8 @@ interface SpinnerProps {
   className?: string;
 }
 
+export type { SpinnerProps };
+
 const sizeClasses = {
   sm: 'w-4 h-4',
   md: 'w-8 h-8',

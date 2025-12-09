@@ -226,7 +226,6 @@ export function coefficientOfVariation(values: number[]): number {
 export function findOutliers(values: number[]): number[] {
   if (values.length < 4) return [];
 
-  const sorted = [...values].sort((a, b) => a - b);
   const q1 = percentile(values, 25);
   const q3 = percentile(values, 75);
   const iqr = q3 - q1;

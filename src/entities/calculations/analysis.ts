@@ -3,7 +3,7 @@
  * Complex analysis functions for strategy evaluation
  */
 
-import type { Lottery, Ticket, PrizeTable } from '../lottery/types';
+import type { Lottery, PrizeTable } from '../lottery/types';
 import { probabilityOfMatch, oddsFormat } from './probability';
 import { calculateBasicStats } from './statistics';
 

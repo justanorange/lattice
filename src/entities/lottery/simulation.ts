@@ -10,7 +10,7 @@ import type {
   MatchResult,
   SimulationRound,
   SimulationResult,
-  SimulationStatistics,
+
   PrizeTable,
 } from "./types";
 import { calculatePrizeAmount } from "./calculation";
@@ -21,11 +21,13 @@ import { uniqueRandomNumbers } from "../calculations/combinatorics";
  * Generate random draw for lottery
  */
 function generateDraw(lottery: Lottery): DrawResult {
-  const draw: DrawResult = {};
+  const draw: DrawResult = {
+    field1: [],
+  };
 
   for (let i = 0; i < lottery.fields.length; i++) {
     const field = lottery.fields[i];
-    const drawn = uniqueRandomNumbers(field.from, field.count);
+    const drawn = uniqueRandomNumbers(1, field.from, field.count);
     if (i === 0) {
       draw.field1 = drawn;
     } else {

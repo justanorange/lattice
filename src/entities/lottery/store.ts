@@ -7,7 +7,6 @@ import { create } from "zustand";
 import type { Lottery, PrizeTable, PrizeRow } from "./types";
 import {
   LOTTERY_8_PLUS_1,
-  ALL_LOTTERIES,
   getLotteryById,
 } from "./config";
 

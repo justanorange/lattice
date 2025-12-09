@@ -14,7 +14,6 @@ export interface GenerationPageProps {
   strategyId?: string;
   strategyParams?: Record<string, unknown>;
   onBack?: () => void;
-  onSimulate?: (tickets: Ticket[]) => void;
 }
 
 /**
@@ -25,7 +24,6 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
   strategyId = "coverage",
   strategyParams = { budget: 50 },
   onBack,
-  onSimulate,
 }) => {
   const {
     selectedLottery,
@@ -140,9 +138,10 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
                         #{index + 1}
                       </span>
                       <div className="flex gap-1 flex-wrap">
-                        {ticket.fields.map((field, fieldIndex) => (
-                          <div key={fieldIndex} className="flex gap-1">
-                            {field.numbers.map((num, numIndex) => (
+                        {/* Field 1 */}
+                        {ticket.field1 && (
+                          <div className="flex gap-1">
+                            {ticket.field1.map((num, numIndex) => (
                               <span
                                 key={numIndex}
                                 className="px-2 py-1 text-xs font-medium rounded bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200"
@@ -150,11 +149,23 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
                                 {num}
                               </span>
                             ))}
-                            {fieldIndex < ticket.fields.length - 1 && (
-                              <span className="px-1 text-gray-400">+</span>
-                            )}
                           </div>
-                        ))}
+                        )}
+                        {/* Separator if two fields */}
+                        {ticket.field2 && <span className="px-1 text-gray-400">+</span>}
+                        {/* Field 2 */}
+                        {ticket.field2 && (
+                          <div className="flex gap-1">
+                            {ticket.field2.map((num, numIndex) => (
+                              <span
+                                key={numIndex}
+                                className="px-2 py-1 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200"
+                              >
+                                {num}
+                              </span>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>

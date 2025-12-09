@@ -14,6 +14,8 @@ interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
   onClose?: () => void;
 }
 
+export type { AlertProps };
+
 const typeClasses: Record<AlertType, string> = {
   success: 'bg-green-50 border-green-200 text-green-800',
   error: 'bg-red-50 border-red-200 text-red-800',

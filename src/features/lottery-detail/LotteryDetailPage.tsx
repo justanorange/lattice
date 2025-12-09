@@ -276,7 +276,7 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
                           <div className="flex items-center justify-end gap-2">
                             <Input
                               type="number"
-                              value={row.prize.toString()}
+                              value={typeof row.prize === 'number' ? row.prize.toString() : '0'}
                               onChange={(e) => {
                                 const value =
                                   Number.parseFloat(e.target.value) || 0;

@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { STRINGS, LOTTERY_STRATEGIES } from '../shared/constants';
+import { STRINGS } from '../shared/constants';
 import { Container, Stack, Grid, Card, CardHeader, CardBody, Button, Spinner, Alert } from '../shared/ui';
 import { useTheme } from '../shared/hooks';
 import { LOTTERIES_ARRAY } from '../entities/lottery/config';
 import { useLotteryStore } from '../entities/lottery/store';
-import { LotterySelectionPage } from '../features/lottery-selection/LotterySelectionPage';
 import { LotteryDetailPage } from '../features/lottery-detail/LotteryDetailPage';
 import { GenerationPage } from '../features/generation/GenerationPage';
 import { SimulationPage } from '../features/simulation/SimulationPage';
@@ -25,9 +24,8 @@ const LOTTERY_AVAILABILITY: Record<string, boolean> = {
 function App() {
   const { isDark, setTheme } = useTheme();
   const [currentPage, setCurrentPage] = useState<'lottery' | 'detail' | 'strategy' | 'generation' | 'simulation'>('lottery');
-  const [simulationTickets, setSimulationTickets] = useState<any[]>([]);
   const [selectedLotteryId, setSelectedLotteryId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { selectLottery } = useLotteryStore();
 
@@ -64,11 +62,6 @@ function App() {
       setCurrentPage('lottery');
       setSelectedLotteryId(null);
     }
-  };
-
-  const handleSimulate = (tickets: any[]) => {
-    setSimulationTickets(tickets);
-    setCurrentPage('simulation');
   };
 
   return (
@@ -175,13 +168,11 @@ function App() {
                 strategyId="coverage"
                 strategyParams={{ budget: 50 }}
                 onBack={handlePrevPage}
-                onSimulate={handleSimulate}
               />
             )
           ) : (
             // Page: Simulation
             <SimulationPage
-              tickets={simulationTickets}
               onBack={handlePrevPage}
             />
           )}

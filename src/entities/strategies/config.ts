@@ -5,13 +5,10 @@
 
 import type {
   Strategy,
-  StrategyResult,
   StrategyParams,
   StrategyGuarantee,
 } from './types';
-import type { Lottery, Ticket } from '../lottery/types';
-import { combinations, randomSample, uniqueRandomNumbers } from '../calculations/combinatorics';
-import { totalCombinations } from '../calculations/probability';
+import type { Lottery } from '../lottery/types';
 
 /**
  * Strategy 1: Minimum Risk
@@ -285,7 +282,7 @@ export function validateStrategyParams(
  * Generate guarantee info for a strategy
  */
 export function getStrategyGuarantee(
-  strategy: Strategy,
+  _strategy: Strategy,
   lottery: Lottery,
   params: StrategyParams
 ): StrategyGuarantee | null {

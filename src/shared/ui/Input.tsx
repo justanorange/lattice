@@ -11,6 +11,8 @@ interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   helper?: string;
 }
 
+export type { InputProps };
+
 /**
  * Input component
  */

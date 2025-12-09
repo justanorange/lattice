@@ -11,12 +11,10 @@ import { LotteryCard } from './LotteryCard';
 
 export interface LotterySelectionPageProps {
   onSelect: (lotteryId: string) => void;
-  isLoading?: boolean;
 }
 
 export const LotterySelectionPage: React.FC<LotterySelectionPageProps> = ({
   onSelect,
-  isLoading = false,
 }) => {
   return (
     <Container>
@@ -34,7 +32,7 @@ export const LotterySelectionPage: React.FC<LotterySelectionPageProps> = ({
             id={lottery.id}
             name={lottery.name}
             description={lottery.description}
-            available={lottery.isActive}
+            available={true}
             onSelect={onSelect}
           />
         ))}

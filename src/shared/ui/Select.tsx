@@ -17,6 +17,8 @@ interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
   placeholder?: string;
 }
 
+export type { SelectProps };
+
 /**
  * Select component
  */
