@@ -1,0 +1,41 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g clip-path="url(#clip0_43_33)">
+<rect width="512" height="512" fill="white"/>
+<g clip-path="url(#clip1_43_33)">
+<path d="M512 0H0V512H512V0Z" fill="white" fill-opacity="0.01"/>
+<path d="M64 85.3334H106.667" stroke="#FF9500" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M149.333 170.667H192" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M170.667 64V106.667" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M85.3333 149.333V192" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M234.667 85.3334H277.333" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M320 170.667H362.667" stroke="#FF9500" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M341.333 64V106.667" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M256 149.333V192" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M405.333 85.3334H448" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M426.667 149.333V192" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M64 256H106.667" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M149.333 341.333H192" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M170.667 234.667V277.333" stroke="#FF9500" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M85.3333 320V362.667" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M234.667 256H277.333" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M320 341.333H362.667" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M341.333 234.667V277.333" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M256 320V362.667" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M405.333 256H448" stroke="#FF9500" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M426.667 320V362.667" stroke="#FF9500" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M64 426.667H106.667" stroke="#FF9500" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M170.667 405.333V448" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M234.667 426.667H277.333" stroke="#FF9500" stroke-width="48" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M341.333 405.333V448" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<path d="M405.333 426.667H448" stroke="#D4CABB" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+</g>
+</g>
+<defs>
+<clipPath id="clip0_43_33">
+<rect width="512" height="512" fill="white"/>
+</clipPath>
+<clipPath id="clip1_43_33">
+<rect width="512" height="512" fill="white"/>
+</clipPath>
+</defs>
+</svg>
