@@ -11,3 +11,4 @@ export { Select, type SelectProps } from './Select';
 export { Alert, type AlertProps } from './Alert';
 export { Spinner, type SpinnerProps } from './Spinner';
 export { Container, Grid, Stack } from './Layout';
+export { LotteryGrid, type LotteryGridProps } from './LotteryGrid';

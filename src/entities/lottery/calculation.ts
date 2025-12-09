@@ -302,3 +302,55 @@ export function calculatePrizesForMatches(
     );
   });
 }
+
+/**
+ * Calculate probabilities for all prize rows in a lottery
+ * @param lottery - The lottery definition
+ * @param prizeTable - The prize table
+ * @returns Prize table with calculated probabilities
+ */
+export function calculatePrizeTableWithProbabilities(
+  lottery: Lottery,
+  prizeTable: PrizeTable
+): PrizeTable {
+  const rowsWithProbs: PrizeRow[] = prizeTable.rows.map((row) => {
+    let probability = 0;
+
+    if (lottery.fieldCount === 1) {
+      // Single field lottery
+      const field = lottery.fields[0];
+      const matches = row.matches[0];
+      probability = probabilityOfMatch(
+        field.from,
+        field.count,
+        field.count,
+        matches
+      );
+    } else if (lottery.fieldCount === 2 && row.matches.length === 2) {
+      // Two field lottery
+      const field1 = lottery.fields[0];
+      const field2 = lottery.fields[1];
+      const matches1 = row.matches[0];
+      const matches2 = row.matches[1];
+
+      const prob1 = probabilityOfMatch(
+        field1.from,
+        field1.count,
+        field1.count,
+        matches1
+      );
+      const prob2 = probabilityOfMatch(
+        field2.from,
+        field2.count,
+        field2.count,
+        matches2
+      );
+
+      probability = prob1 * prob2;
+    }
+
+    return { ...row, probability };
+  });
+
+  return { ...prizeTable, rows: rowsWithProbs };
+}

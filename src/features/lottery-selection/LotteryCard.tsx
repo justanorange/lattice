@@ -1,10 +1,10 @@
 /**
  * LotteryCard Component
- * Display lottery with selection option
+ * Display lottery with visual grid and selection option
  */
 
 import React from "react";
-import { Card, CardHeader, CardBody, Button } from "../../shared/ui";
+import { Card, CardHeader, CardBody, Button, LotteryGrid } from "../../shared/ui";
 
 export interface LotteryCardProps {
   id: string;
@@ -39,6 +39,11 @@ export const LotteryCard: React.FC<LotteryCardProps> = ({
         )}
       </CardHeader>
       <CardBody className="flex flex-col gap-4">
+        {/* Visual grid representation */}
+        <div className="flex justify-center py-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
+          <LotteryGrid lotteryId={id} size="sm" />
+        </div>
+
         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
           <span className="inline-flex h-2 w-2 rounded-full bg-amber-500" />
           <span>{available ? "Доступна для расчётов" : "Скоро станет доступна"}</span>

@@ -15,6 +15,8 @@ export interface PrizeRow {
   prizePercent?: number;
   /** Optional: note for jackpot entries */
   prizeNote?: string;
+  /** Optional: probability of this match combination (calculated) */
+  probability?: number;
 }
 
 /**

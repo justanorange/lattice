@@ -9,6 +9,7 @@ import { calculateEV } from "../../entities/lottery/calculation";
 import { Card, CardHeader, CardBody, Input, Slider, Button, Container } from "../../shared/ui";
 import type { PrizeRow } from "../../entities/lottery/types";
 import { STRINGS } from "../../shared/constants";
+import { probabilityOfMatch } from "../../entities/calculations/probability";
 
 export interface LotteryDetailPageProps {
   lotteryId: string;
@@ -278,6 +279,9 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
                   <th className="text-left py-2 px-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                     Совпадения
                   </th>
+                  <th className="text-center py-2 px-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                    Вероятность
+                  </th>
                   <th className="text-right py-2 px-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
                     Приз
                   </th>
@@ -290,6 +294,43 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
                   const isSuperprice = row.prize === "Суперприз";
                   const isSecondaryPrize = row.prize === "Приз";
 
+                  // Calculate probability for this row
+                  let probability = 0;
+                  if (selectedLottery.fieldCount === 1) {
+                    const field = selectedLottery.fields[0];
+                    const matches = row.matches[0];
+                    probability = probabilityOfMatch(
+                      field.from,
+                      field.count,
+                      field.count,
+                      matches
+                    );
+                  } else if (selectedLottery.fieldCount === 2 && row.matches.length === 2) {
+                    const field1 = selectedLottery.fields[0];
+                    const field2 = selectedLottery.fields[1];
+                    const matches1 = row.matches[0];
+                    const matches2 = row.matches[1];
+
+                    const prob1 = probabilityOfMatch(
+                      field1.from,
+                      field1.count,
+                      field1.count,
+                      matches1
+                    );
+                    const prob2 = probabilityOfMatch(
+                      field2.from,
+                      field2.count,
+                      field2.count,
+                      matches2
+                    );
+
+                    probability = prob1 * prob2;
+                  }
+
+                  // Format probability
+                  const probPercent = (probability * 100).toFixed(4);
+                  const probOneIn = probability > 0 ? Math.round(1 / probability) : null;
+
                   return (
                     <tr
                       key={index}
@@ -297,6 +338,15 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
                     >
                       <td className="py-2 px-3 text-sm text-gray-900 dark:text-white">
                         {row.matches.join(" + ")}
+                      </td>
+                      <td className="py-2 px-3 text-sm text-center text-gray-600 dark:text-gray-400">
+                        {probOneIn ? (
+                          <span title={`${probPercent}%`}>
+                            1:{probOneIn.toLocaleString()}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
                       </td>
                       <td className="py-2 px-3 text-sm text-right">
                         {isEditable ? (
@@ -343,6 +393,7 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
           <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
             Примечание: Суперприз и специальные призы редактируются отдельно.
             Числовые призы можно редактировать напрямую в таблице.
+            Вероятность показана в формате 1:N (один выигрыш на N попыток).
           </p>
         </CardBody>
       </Card>
