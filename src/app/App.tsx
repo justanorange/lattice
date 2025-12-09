@@ -6,6 +6,7 @@ import { useTheme } from '../shared/hooks';
 import { LOTTERIES_ARRAY } from '../entities/lottery/config';
 import { useLotteryStore } from '../entities/lottery/store';
 import { LotteryDetailPage } from '../features/lottery-detail/LotteryDetailPage';
+import { StrategySelectionPage } from '../features/strategy-selection/StrategySelectionPage';
 import { GenerationPage } from '../features/generation/GenerationPage';
 import { SimulationPage } from '../features/simulation/SimulationPage';
 import './styles/App.css';
@@ -147,26 +148,19 @@ function App() {
             )
           ) : currentPage === 'strategy' ? (
             // Page: Strategy Selection
-            <div>
-              <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-                {STRINGS.strategy_title}
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                Доступные стратегии для {selectedLotteryId}
-              </p>
-              <div className="mt-6 flex gap-2">
-                <Button variant="secondary" onClick={handlePrevPage}>
-                  {STRINGS.button_back}
-                </Button>
-                <Button onClick={handleNextPage}>{STRINGS.button_next}</Button>
-              </div>
-            </div>
+            <StrategySelectionPage
+              onNext={(_strategyId, _params) => {
+                // Store strategy params and move to generation
+                setCurrentPage('generation');
+              }}
+              onBack={handlePrevPage}
+            />
           ) : currentPage === 'generation' ? (
             // Page: Generation
             selectedLotteryId && (
               <GenerationPage
                 strategyId="coverage"
-                strategyParams={{ budget: 50 }}
+                strategyParams={{ budget: 500 }}
                 onBack={handlePrevPage}
               />
             )
