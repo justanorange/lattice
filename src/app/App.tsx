@@ -6,6 +6,7 @@ import { LOTTERIES_ARRAY } from '../entities/lottery/config';
 import { useLotteryStore } from '../entities/lottery/store';
 import { LotterySelectionPage } from '../features/lottery-selection/LotterySelectionPage';
 import { LotteryDetailPage } from '../features/lottery-detail/LotteryDetailPage';
+import { GenerationPage } from '../features/generation/GenerationPage';
 import './styles/App.css';
 
 /**
@@ -160,20 +161,13 @@ function App() {
             </div>
           ) : (
             // Page: Generation
-            <div>
-              <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-                {STRINGS.generation_title}
-              </h2>
-              <p className="text-gray-600 dark:text-gray-400">
-                Генерация билетов для {selectedLotteryId}
-              </p>
-              <div className="mt-6 flex gap-2">
-                <Button variant="secondary" onClick={handlePrevPage}>
-                  {STRINGS.button_back}
-                </Button>
-                <Button variant="primary">{STRINGS.generation_download_pdf}</Button>
-              </div>
-            </div>
+            selectedLotteryId && (
+              <GenerationPage
+                strategyId="coverage"
+                strategyParams={{ budget: 50 }}
+                onBack={handlePrevPage}
+              />
+            )
           )}
         </Container>
       </main>
