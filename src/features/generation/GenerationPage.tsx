@@ -7,7 +7,7 @@ import React, { useState, useEffect } from "react";
 import { useLotteryStore } from "../../entities/lottery/store";
 import { executeStrategy } from "../../entities/strategies/generator";
 import type { StrategyResult } from "../../entities/strategies/types";
-import { Card, CardHeader, CardBody, Button, Container, Spinner } from "../../shared/ui";
+import { Card, CardHeader, CardBody, Button, Container, Spinner, TicketVisualization } from "../../shared/ui";
 import { STRINGS } from "../../shared/constants";
 
 export interface GenerationPageProps {
@@ -54,7 +54,7 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
     };
 
     generateTickets();
-  }, [strategyId, selectedLottery.id, currentTicketCost]);
+  }, [strategyId, strategyParams, selectedLottery.id, currentTicketCost]);
 
   return (
     <Container>
@@ -119,58 +119,32 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
             </CardBody>
           </Card>
 
-          {/* Tickets List */}
+          {/* Tickets Visualization */}
           <Card className="mb-6">
             <CardHeader>
               <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-                Сгенерированные билеты
+                Визуализация билетов
               </h2>
             </CardHeader>
             <CardBody>
-              <div className="space-y-2 max-h-96 overflow-y-auto">
-                {result.tickets.map((ticket, index) => (
-                  <div
-                    key={index}
-                    className="p-3 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800/50"
-                  >
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
-                        #{index + 1}
-                      </span>
-                      <div className="flex gap-1 flex-wrap">
-                        {/* Field 1 */}
-                        {ticket.field1 && (
-                          <div className="flex gap-1">
-                            {ticket.field1.map((num, numIndex) => (
-                              <span
-                                key={numIndex}
-                                className="px-2 py-1 text-xs font-medium rounded bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-200"
-                              >
-                                {num}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                        {/* Separator if two fields */}
-                        {ticket.field2 && <span className="px-1 text-gray-400">+</span>}
-                        {/* Field 2 */}
-                        {ticket.field2 && (
-                          <div className="flex gap-1">
-                            {ticket.field2.map((num, numIndex) => (
-                              <span
-                                key={numIndex}
-                                className="px-2 py-1 text-xs font-medium rounded bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-200"
-                              >
-                                {num}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
+                {result.tickets.slice(0, 12).map((ticket, index) => (
+                  <div key={index}>
+                    <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+                      Билет #{index + 1}
                     </div>
+                    <TicketVisualization
+                      ticket={ticket}
+                      lottery={selectedLottery}
+                    />
                   </div>
                 ))}
               </div>
+              {result.tickets.length > 12 && (
+                <p className="mt-4 text-xs text-gray-600 dark:text-gray-400">
+                  ... и еще {result.tickets.length - 12} билетов
+                </p>
+              )}
             </CardBody>
           </Card>
         </>

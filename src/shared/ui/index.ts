@@ -12,3 +12,4 @@ export { Alert, type AlertProps } from './Alert';
 export { Spinner, type SpinnerProps } from './Spinner';
 export { Container, Grid, Stack } from './Layout';
 export { LotteryGrid, type LotteryGridProps } from './LotteryGrid';
+export { TicketVisualization, type TicketVisualizationProps } from './TicketVisualization';

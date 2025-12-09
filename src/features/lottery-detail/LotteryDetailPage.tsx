@@ -140,7 +140,7 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
             value={0}
             onValueChange={(value) => {
               // TODO: Store risk level in store when risk feature is implemented
-              console.log("Risk level:", value);
+              console.log("Risk level:", value[0]);
             }}
             min={0}
             max={100}
@@ -200,18 +200,6 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
                 {evCalculation.evPercent.toFixed(2)}%
               </span>
             </div>
-
-            {/* Break-even info */}
-            {evCalculation.drawsToBreakEven !== undefined && (
-              <div className="flex justify-between items-center text-sm">
-                <span className="text-gray-600 dark:text-gray-400">
-                  Тиражов до окупаемости:
-                </span>
-                <span className="font-medium text-gray-900 dark:text-white">
-                  {evCalculation.drawsToBreakEven}
-                </span>
-              </div>
-            )}
 
             {/* Profitability Indicator */}
             <div

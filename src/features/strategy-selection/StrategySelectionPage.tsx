@@ -117,7 +117,7 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
                       value={
                         (params[param.key] as number) || (param.defaultValue as number) || 0
                       }
-                      onValueChange={(value) => handleParamChange(param.key, value)}
+                      onValueChange={(value) => handleParamChange(param.key, value[0])}
                       min={param.min}
                       max={param.max}
                       step={param.step || 1}

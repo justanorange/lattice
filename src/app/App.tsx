@@ -27,6 +27,8 @@ function App() {
   const { isDark, setTheme } = useTheme();
   const [currentPage, setCurrentPage] = useState<'lottery' | 'detail' | 'strategy' | 'generation' | 'simulation'>('lottery');
   const [selectedLotteryId, setSelectedLotteryId] = useState<string | null>(null);
+  const [selectedStrategyId, setSelectedStrategyId] = useState<string>('coverage');
+  const [selectedStrategyParams, setSelectedStrategyParams] = useState<Record<string, unknown>>({ budget: 500 });
   const [isLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { selectLottery } = useLotteryStore();
@@ -149,8 +151,9 @@ function App() {
           ) : currentPage === 'strategy' ? (
             // Page: Strategy Selection
             <StrategySelectionPage
-              onNext={(_strategyId, _params) => {
-                // Store strategy params and move to generation
+              onNext={(strategyId, params) => {
+                setSelectedStrategyId(strategyId);
+                setSelectedStrategyParams(params);
                 setCurrentPage('generation');
               }}
               onBack={handlePrevPage}
@@ -159,8 +162,8 @@ function App() {
             // Page: Generation
             selectedLotteryId && (
               <GenerationPage
-                strategyId="coverage"
-                strategyParams={{ budget: 500 }}
+                strategyId={selectedStrategyId}
+                strategyParams={selectedStrategyParams}
                 onBack={handlePrevPage}
               />
             )

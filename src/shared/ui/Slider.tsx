@@ -1,6 +1,6 @@
 /**
  * Slider Component (shadcn/ui style)
- * Range slider using Radix UI
+ * Range slider using Radix UI - Controlled Component
  */
 
 import * as React from "react";
@@ -21,7 +21,7 @@ export interface SliderProps {
 
 /**
  * Slider component using Radix UI
- * Supports single value or range
+ * Controlled component that updates value in real-time
  */
 export const Slider = React.forwardRef<
   React.ElementRef<typeof SliderPrimitive.Root>,
@@ -42,12 +42,37 @@ export const Slider = React.forwardRef<
     },
     ref
   ) => {
-    // Normalize value to array for Radix UI
-    const sliderValue = Array.isArray(value)
+    // Keep track of internal state for controlled component
+    const [internalValue, setInternalValue] = React.useState<number[]>(() => {
+      if (Array.isArray(value)) {
+        return value;
+      }
+      if (value !== undefined) {
+        return [value];
+      }
+      return [min];
+    });
+
+    // Update internal state when external value changes
+    React.useEffect(() => {
+      if (Array.isArray(value)) {
+        setInternalValue(value);
+      } else if (value !== undefined) {
+        setInternalValue([value]);
+      }
+    }, [value]);
+
+    // Normalize value to array for display
+    const displayValue = Array.isArray(value)
       ? value
       : value !== undefined
         ? [value]
-        : [min];
+        : internalValue;
+
+    const handleValueChange = (newValue: number[]) => {
+      setInternalValue(newValue);
+      onValueChange?.(newValue);
+    };
 
     return (
       <div className="w-full">
@@ -62,8 +87,8 @@ export const Slider = React.forwardRef<
             min={min}
             max={max}
             step={step}
-            value={sliderValue}
-            onValueChange={onValueChange}
+            value={displayValue}
+            onValueChange={handleValueChange}
             disabled={disabled}
             className={cn(
               "relative flex items-center w-full h-10 touch-none select-none",
@@ -78,7 +103,7 @@ export const Slider = React.forwardRef<
             <SliderPrimitive.Thumb
               className={cn(
                 "block h-5 w-5 rounded-full border-2 border-amber-500 bg-white dark:bg-gray-800",
-                "shadow-md transition-shadow",
+                "shadow-md transition-shadow cursor-pointer hover:shadow-lg",
                 "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2",
                 "dark:focus-visible:ring-offset-gray-950",
                 "disabled:pointer-events-none disabled:opacity-50"
@@ -86,7 +111,7 @@ export const Slider = React.forwardRef<
             />
           </SliderPrimitive.Root>
           <span className="text-sm font-medium text-gray-900 dark:text-white min-w-12 text-right">
-            {sliderValue[0]}
+            {displayValue[0]}
           </span>
         </div>
         {helper && (

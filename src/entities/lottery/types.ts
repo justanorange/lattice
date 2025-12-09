@@ -239,6 +239,4 @@ export interface EVCalculation {
   evPercent: number;
   /** Whether lottery is profitable (EV > 0) */
   isProfitable: boolean;
-  /** Number of draws until break-even */
-  drawsToBreakEven?: number;
 }

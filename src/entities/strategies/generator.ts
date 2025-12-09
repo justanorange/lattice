@@ -138,25 +138,12 @@ function generateCoverageStrategy(
   const ticketCount = Math.floor(budget / ticketCost);
   const tickets: Ticket[] = [];
 
-  // Spread numbers across tickets for better coverage
-  const spreadNumbers = (params['spreadNumbers'] as boolean) ?? true;
   const totalAvailable = lottery.fields[0].from;
   const selection = lottery.fields[0].count;
 
   for (let i = 0; i < ticketCount; i++) {
-    let field1: number[];
-
-    if (spreadNumbers) {
-      // Rotate through available numbers
-      const start = (i * selection) % (totalAvailable - selection + 1);
-      field1 = Array.from(
-        { length: selection },
-        (_, j) => ((start + j) % totalAvailable) + 1
-      );
-    } else {
-      // Random selection
-      field1 = uniqueRandomNumbers(1, totalAvailable, selection);
-    }
+    // Always use random selection for proper coverage
+    const field1 = uniqueRandomNumbers(1, totalAvailable, selection);
 
     const ticket: Ticket = {
       lotteryId: lottery.id,

@@ -233,10 +233,6 @@ export function calculateEV(
     expectedValue: finalEV,
     evPercent,
     isProfitable: finalEV > 0,
-    drawsToBreakEven:
-      finalEV < 0
-        ? Math.ceil(ticketCost / (expectedValue || 1))
-        : undefined,
   };
 }
 

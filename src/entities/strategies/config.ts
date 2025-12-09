@@ -67,14 +67,7 @@ export const COVERAGE_STRATEGY: Strategy = {
       min: 100,
       max: 100000,
       step: 100,
-      description: 'Сколько денег потратить',
-    },
-    {
-      key: 'spreadNumbers',
-      label: 'Распределять числа',
-      type: 'boolean',
-      defaultValue: true,
-      description: 'Распределять числа равномерно для лучшего покрытия',
+      description: 'Сколько денег потратить на билеты',
     },
   ],
 };
