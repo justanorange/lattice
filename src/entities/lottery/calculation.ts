@@ -1,0 +1,264 @@
+/**
+ * Prize Calculation Logic
+ * Core functions for determining prizes based on matches
+ */
+
+import type {
+  Lottery,
+  PrizeTable,
+  PrizeRow,
+  LotteryState,
+  EVCalculation,
+} from "./types";
+import { ALL_LOTTERIES } from "./config";
+
+/**
+ * Find prize amount for given matches
+ * @param prizeTable - The prize table to search
+ * @param matches - Array of match counts (e.g., [8, 1] for 8+1 lottery)
+ * @returns Prize amount (number or string like "Суперприз") or 0 if no match
+ */
+export function findPrizeByMatches(
+  prizeTable: PrizeTable,
+  matches: number[]
+): number | string {
+  // Sort matches for comparison
+  const sortedMatches = [...matches].sort((a, b) => b - a);
+
+  for (const row of prizeTable.rows) {
+    const sortedRowMatches = [...row.matches].sort((a, b) => b - a);
+
+    // Check if matches arrays are equal
+    if (
+      sortedMatches.length === sortedRowMatches.length &&
+      sortedMatches.every((val, idx) => val === sortedRowMatches[idx])
+    ) {
+      return row.prize ?? 0;
+    }
+  }
+
+  return 0; // No prize found
+}
+
+/**
+ * Calculate prize amount in rubles
+ * Handles both fixed prizes and percentage-based prizes
+ * @param prizeTable - The prize table
+ * @param matches - Match counts
+ * @param superprice - Current superprice (for "Суперприз")
+ * @param secondaryPrize - Secondary prize (for 5из36+1)
+ * @param poolAmount - Prize pool amount (for percentage-based prizes)
+ * @returns Prize amount in rubles, or undefined for superprice
+ */
+export function calculatePrizeAmount(
+  prizeTable: PrizeTable,
+  matches: number[],
+  superprice: number,
+  secondaryPrize?: number,
+  poolAmount: number = 0
+): number | "Суперприз" | "Приз" {
+  // Find the row for these matches
+  const sortedMatches = [...matches].sort((a, b) => b - a);
+  let matchedRow: PrizeRow | undefined;
+
+  for (const row of prizeTable.rows) {
+    const sortedRowMatches = [...row.matches].sort((a, b) => b - a);
+    if (
+      sortedMatches.length === sortedRowMatches.length &&
+      sortedMatches.every((val, idx) => val === sortedRowMatches[idx])
+    ) {
+      matchedRow = row;
+      break;
+    }
+  }
+
+  if (!matchedRow) {
+    return 0;
+  }
+
+  // Handle superprice marker
+  if (matchedRow.prize === "Суперприз") {
+    return "Суперприз";
+  }
+
+  // Handle secondary prize marker (5из36+1)
+  if (matchedRow.prize === "Приз") {
+    return "Приз";
+  }
+
+  // Handle numeric prize
+  if (typeof matchedRow.prize === "number") {
+    return matchedRow.prize;
+  }
+
+  // Handle percentage-based prize
+  if (matchedRow.prizePercent !== undefined && poolAmount > 0) {
+    return Math.floor((matchedRow.prizePercent / 100) * poolAmount);
+  }
+
+  return 0;
+}
+
+/**
+ * Get numeric prize value
+ * For "Суперприз" returns superprice, for "Приз" returns secondary prize
+ * @param prize - Prize value (number or string marker)
+ * @param superprice - Superprice amount
+ * @param secondaryPrize - Secondary prize amount
+ * @returns Numeric prize value
+ */
+export function getPrizeNumericValue(
+  prize: number | string | "Суперприз" | "Приз",
+  superprice: number,
+  secondaryPrize?: number
+): number {
+  if (typeof prize === "number") {
+    return prize;
+  }
+
+  if (prize === "Суперприз") {
+    return superprice;
+  }
+
+  if (prize === "Приз" && secondaryPrize) {
+    return secondaryPrize;
+  }
+
+  return 0;
+}
+
+/**
+ * Check if a match combination wins a prize
+ * @param matches - Match counts
+ * @param prizeTable - Prize table
+ * @returns true if this combination wins any prize
+ */
+export function isWinningCombination(
+  matches: number[],
+  prizeTable: PrizeTable
+): boolean {
+  const prize = findPrizeByMatches(prizeTable, matches);
+  return prize !== 0 && prize !== undefined;
+}
+
+/**
+ * Calculate Expected Value (EV) for a lottery
+ * EV = average_prize - ticket_cost
+ * EV% = (average_prize / ticket_cost - 1) * 100
+ *
+ * @param lottery - The lottery definition
+ * @param superprice - Current superprice
+ * @param prizeTable - Current prize table
+ * @param ticketCost - Ticket cost in rubles
+ * @param secondaryPrize - Secondary prize (if applicable)
+ * @param poolAmount - Average prize pool (for percentage-based lotteries)
+ * @returns EV calculation
+ */
+export function calculateEV(
+  lottery: Lottery,
+  superprice: number,
+  prizeTable: PrizeTable,
+  ticketCost: number,
+  secondaryPrize?: number,
+  poolAmount: number = 0
+): EVCalculation {
+  // This is a simplified EV calculation
+  // Real EV would require complex probability analysis per combination
+
+  // For now, we'll calculate based on average prize assuming equal distribution
+  const totalPrizes = prizeTable.rows.length;
+  let totalPrizeValue = 0;
+  let prizeCount = 0;
+
+  for (const row of prizeTable.rows) {
+    if (row.prize === "Суперприз") {
+      totalPrizeValue += superprice;
+      prizeCount++;
+    } else if (row.prize === "Приз" && secondaryPrize) {
+      totalPrizeValue += secondaryPrize;
+      prizeCount++;
+    } else if (typeof row.prize === "number") {
+      totalPrizeValue += row.prize;
+      prizeCount++;
+    } else if (row.prizePercent !== undefined && poolAmount > 0) {
+      totalPrizeValue += (row.prizePercent / 100) * poolAmount;
+      prizeCount++;
+    }
+  }
+
+  const averagePrize =
+    prizeCount > 0 ? totalPrizeValue / prizeCount : 0;
+  const expectedValue = averagePrize - ticketCost;
+  const evPercent = (expectedValue / ticketCost) * 100;
+
+  return {
+    expectedValue,
+    evPercent,
+    isProfitable: expectedValue > 0,
+    drawsToBreakEven:
+      expectedValue > 0 ? undefined : Math.ceil(Math.abs(expectedValue) / expectedValue || 1),
+  };
+}
+
+/**
+ * Get prize category label for histogram/statistics
+ * @param matches - Match counts
+ * @param prizeTable - Prize table
+ * @returns Category label (e.g., "4+1", "3+0", etc.)
+ */
+export function getPrizeCategory(matches: number[]): string {
+  return matches.map((m) => m.toString()).join("+");
+}
+
+/**
+ * Validate that matches array is valid for a lottery
+ * @param lottery - The lottery
+ * @param matches - Match counts to validate
+ * @returns true if valid
+ */
+export function isValidMatchesForLottery(
+  lottery: Lottery,
+  matches: number[]
+): boolean {
+  if (matches.length !== lottery.fieldCount) {
+    return false;
+  }
+
+  return matches.every((m, idx) => {
+    const field = lottery.fields[idx];
+    return m >= 0 && m <= field.count;
+  });
+}
+
+/**
+ * Batch calculate prizes for multiple match combinations
+ * @param lottery - The lottery
+ * @param matchesArray - Array of match combinations
+ * @param superprice - Current superprice
+ * @param secondaryPrize - Secondary prize (if applicable)
+ * @param poolAmount - Prize pool (if percentage-based)
+ * @returns Array of prizes in same order
+ */
+export function calculatePrizesForMatches(
+  lottery: Lottery,
+  matchesArray: number[][],
+  superprice: number,
+  secondaryPrize?: number,
+  poolAmount: number = 0
+): (number | string)[] {
+  const prizeTable = lottery.prizeTable!;
+
+  return matchesArray.map((matches) => {
+    if (!isValidMatchesForLottery(lottery, matches)) {
+      return 0;
+    }
+
+    return calculatePrizeAmount(
+      prizeTable,
+      matches,
+      superprice,
+      secondaryPrize,
+      poolAmount
+    );
+  });
+}
