@@ -118,39 +118,98 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
           </h2>
         </CardHeader>
         <CardBody>
-          <div className="space-y-2">
-            <div className="flex justify-between">
+          <div className="space-y-4">
+            {/* Ticket Cost */}
+            <div className="flex justify-between items-center pb-2 border-b border-gray-200 dark:border-gray-700">
+              <span className="text-sm text-gray-600 dark:text-gray-400">
+                Стоимость билета:
+              </span>
+              <span className="text-sm font-medium text-gray-900 dark:text-white">
+                {currentTicketCost.toLocaleString()} ₽
+              </span>
+            </div>
+
+            {/* Expected Value */}
+            <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">
                 Математическое ожидание:
               </span>
               <span
-                className={`font-semibold ${
+                className={`text-lg font-semibold ${
                   evCalculation.isProfitable
                     ? "text-green-600 dark:text-green-400"
                     : "text-red-600 dark:text-red-400"
                 }`}
               >
+                {evCalculation.expectedValue >= 0 ? "+" : ""}
                 {evCalculation.expectedValue.toFixed(2)} ₽
               </span>
             </div>
-            <div className="flex justify-between">
+
+            {/* EV Percentage */}
+            <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">EV%:</span>
               <span
-                className={`font-semibold ${
+                className={`text-lg font-semibold ${
                   evCalculation.isProfitable
                     ? "text-green-600 dark:text-green-400"
                     : "text-red-600 dark:text-red-400"
                 }`}
               >
+                {evCalculation.evPercent >= 0 ? "+" : ""}
                 {evCalculation.evPercent.toFixed(2)}%
               </span>
             </div>
-            <div className="mt-4 p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800">
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                {evCalculation.isProfitable
-                  ? "✅ Лотерея прибыльна при текущих параметрах"
-                  : "❌ Лотерея убыточна при текущих параметрах"}
-              </p>
+
+            {/* Break-even info */}
+            {evCalculation.drawsToBreakEven !== undefined && (
+              <div className="flex justify-between items-center text-sm">
+                <span className="text-gray-600 dark:text-gray-400">
+                  Тиражов до окупаемости:
+                </span>
+                <span className="font-medium text-gray-900 dark:text-white">
+                  {evCalculation.drawsToBreakEven}
+                </span>
+              </div>
+            )}
+
+            {/* Profitability Indicator */}
+            <div
+              className={`mt-4 p-4 rounded-lg border ${
+                evCalculation.isProfitable
+                  ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
+                  : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+              }`}
+            >
+              <div className="flex items-start gap-2">
+                <span className="text-lg">
+                  {evCalculation.isProfitable ? "✅" : "❌"}
+                </span>
+                <div>
+                  <p
+                    className={`text-sm font-medium ${
+                      evCalculation.isProfitable
+                        ? "text-green-800 dark:text-green-200"
+                        : "text-red-800 dark:text-red-200"
+                    }`}
+                  >
+                    {evCalculation.isProfitable
+                      ? "Лотерея прибыльна"
+                      : "Лотерея убыточна"}
+                  </p>
+                  <p
+                    className={`text-xs mt-1 ${
+                      evCalculation.isProfitable
+                        ? "text-green-700 dark:text-green-300"
+                        : "text-red-700 dark:text-red-300"
+                    }`}
+                  >
+                    {evCalculation.isProfitable
+                      ? "При текущих параметрах математическое ожидание положительное"
+                      : "При текущих параметрах математическое ожидание отрицательное"}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </CardBody>
