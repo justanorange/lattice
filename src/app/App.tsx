@@ -74,7 +74,6 @@ function App() {
               <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
                 {STRINGS.app_title}
               </h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{STRINGS.app_subtitle}</p>
             </div>
             <button
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
@@ -180,13 +179,13 @@ function App() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-12 py-6">
+      {/* <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-12 py-6">
         <Container>
           <p className="text-center text-sm text-gray-600 dark:text-gray-400">
             © 2025 Lattice - Mathematical Lottery System
           </p>
         </Container>
-      </footer>
+      </footer> */}
     </div>
   );
 }

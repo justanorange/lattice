@@ -6,7 +6,7 @@
 // Navigation & Pages
 export const STRINGS = {
   // App
-  app_title: 'Lattice - Система игры в лотереи',
+  app_title: 'Lattice',
   app_subtitle: 'Честный математический инструмент',
 
   // Navigation
