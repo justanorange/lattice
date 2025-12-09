@@ -22,7 +22,7 @@ export interface GenerationPageProps {
  */
 export const GenerationPage: React.FC<GenerationPageProps> = ({
   strategyId = "coverage",
-  strategyParams = { budget: 50 },
+  strategyParams = { budget: 500 },
   onBack,
 }) => {
   const {

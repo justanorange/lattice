@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import { STRINGS } from '../shared/constants';
 import { Container, Stack, Grid, Card, CardHeader, CardBody, Button, Spinner, Alert } from '../shared/ui';
 import { useTheme } from '../shared/hooks';
@@ -77,9 +78,9 @@ function App() {
             </div>
             <button
               onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="px-3 py-2 rounded hover:bg-gray-100 dark:hover:bg-gray-800"
+              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition"
             >
-              {isDark ? '☀️' : '🌙'}
+              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
             </button>
           </Stack>
         </Container>

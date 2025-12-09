@@ -23,8 +23,16 @@ export async function executeStrategy(
     throw new Error(`Strategy not found: ${strategyId}`);
   }
 
+  // Fill in default parameters
+  const filledParams: StrategyParams = { ...params };
+  for (const param of strategy.parameters) {
+    if (filledParams[param.key] === undefined && param.defaultValue !== undefined) {
+      filledParams[param.key] = param.defaultValue;
+    }
+  }
+
   // Validate parameters
-  const validation = validateStrategyParams(strategyId, params);
+  const validation = validateStrategyParams(strategyId, filledParams);
   if (!validation.valid) {
     throw new Error(`Invalid parameters: ${validation.errors.join(', ')}`);
   }
@@ -39,22 +47,22 @@ export async function executeStrategy(
   // Route to strategy implementation
   switch (strategyId) {
     case 'min_risk':
-      tickets = generateMinRiskStrategy(lottery, params);
+      tickets = generateMinRiskStrategy(lottery, filledParams);
       break;
     case 'coverage':
-      tickets = generateCoverageStrategy(lottery, params, ticketCost);
+      tickets = generateCoverageStrategy(lottery, filledParams, ticketCost);
       break;
     case 'full_wheel':
-      tickets = generateFullWheelStrategy(lottery, params);
+      tickets = generateFullWheelStrategy(lottery, filledParams);
       break;
     case 'key_wheel':
-      tickets = generateKeyWheelStrategy(lottery, params);
+      tickets = generateKeyWheelStrategy(lottery, filledParams);
       break;
     case 'guaranteed_win':
-      tickets = generateGuaranteedWinStrategy(lottery, params);
+      tickets = generateGuaranteedWinStrategy(lottery, filledParams);
       break;
     case 'budget_optimizer':
-      tickets = generateBudgetOptimizerStrategy(lottery, params, ticketCost);
+      tickets = generateBudgetOptimizerStrategy(lottery, filledParams, ticketCost);
       break;
     default:
       throw new Error(`Unknown strategy: ${strategyId}`);
@@ -79,7 +87,7 @@ export async function executeStrategy(
     } : undefined,
     metadata: {
       strategy: strategyId,
-      parameters: params,
+      parameters: filledParams,
       generatedAt: new Date(),
       notes: `Generated ${tickets.length} tickets`,
     },

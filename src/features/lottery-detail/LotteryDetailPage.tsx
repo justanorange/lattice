@@ -31,6 +31,7 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
     currentTicketCost,
     currentPrizeTable,
     updateSuperprice,
+    updateTicketCost,
     selectLottery,
     updatePrizeRow,
     resetPrizeTableToDefaults,
@@ -71,33 +72,59 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
         </p>
       </div>
 
-      {/* Superprice Input */}
-      <Card className="mb-6">
-        <CardHeader>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            {STRINGS.detail_superprice}
-          </h2>
-        </CardHeader>
-        <CardBody>
-          <Input
-            type="number"
-            label="Суперприз (₽)"
-            value={currentSuperprice.toString()}
-            onChange={(e) => {
-              const value = Number.parseFloat(e.target.value) || 0;
-              const clampedValue = Math.max(
-                superpriceMin,
-                Math.min(superpriceMax, value)
-              );
-              updateSuperprice(clampedValue);
-            }}
-            min={superpriceMin}
-            max={superpriceMax}
-            step={superpriceStep}
-            helper={`Минимум: ${superpriceMin.toLocaleString()} ₽, Максимум: ${superpriceMax.toLocaleString()} ₽`}
-          />
-        </CardBody>
-      </Card>
+      {/* Ticket Cost & Superprice - Side by Side */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        {/* Ticket Cost Input */}
+        <Card>
+          <CardHeader>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Стоимость билета
+            </h2>
+          </CardHeader>
+          <CardBody>
+            <Input
+              type="number"
+              label="Цена (₽)"
+              value={currentTicketCost.toString()}
+              onChange={(e) => {
+                const value = Number.parseFloat(e.target.value) || 100;
+                updateTicketCost(Math.max(10, value));
+              }}
+              min={10}
+              step={10}
+              helper="Стоимость одного билета в рублях"
+            />
+          </CardBody>
+        </Card>
+
+        {/* Superprice Input */}
+        <Card>
+          <CardHeader>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {STRINGS.detail_superprice}
+            </h2>
+          </CardHeader>
+          <CardBody>
+            <Input
+              type="number"
+              label="Суперприз (₽)"
+              value={currentSuperprice.toString()}
+              onChange={(e) => {
+                const value = Number.parseFloat(e.target.value) || 0;
+                const clampedValue = Math.max(
+                  superpriceMin,
+                  Math.min(superpriceMax, value)
+                );
+                updateSuperprice(clampedValue);
+              }}
+              min={superpriceMin}
+              max={superpriceMax}
+              step={superpriceStep}
+              helper={`Мин: ${(superpriceMin / 1000000).toLocaleString()} млн ₽`}
+            />
+          </CardBody>
+        </Card>
+      </div>
 
       {/* Risk Level Slider */}
       <Card className="mb-6">

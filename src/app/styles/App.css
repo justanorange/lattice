@@ -1,5 +1,4 @@
 @import "tailwindcss";
-@custom-variant dark (&:where(.dark, .dark *));
 
 /* App Styles */
 :root {
@@ -18,7 +17,6 @@ body {
   @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-white;
 }
 
-
 html.dark {
   color-scheme: dark;
 }
@@ -28,6 +26,19 @@ body {
   padding: 0;
 }
 
-#root {
+/* Increase border-radius for better visual appeal */
+@layer components {
+  .card {
+    @apply rounded-2xl;
+  }
+  
+  .btn {
+    @apply rounded-xl;
+  }
+  
+  .input {
+    @apply rounded-xl;
+  }
+}#root {
   width: 100%;
 }

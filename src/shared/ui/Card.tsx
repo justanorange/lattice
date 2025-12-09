@@ -18,8 +18,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
       <div
         ref={ref}
         className={`
-          bg-white rounded-lg shadow p-4
-          border border-gray-200
+          bg-white dark:bg-gray-800 rounded-2xl shadow p-6
+          border border-gray-200 dark:border-gray-700
           ${className || ''}
         `}
         {...props}
@@ -38,7 +38,7 @@ interface CardHeaderProps {
 }
 
 export const CardHeader: React.FC<CardHeaderProps> = ({ children, className }) => (
-  <div className={`mb-4 pb-4 border-b border-gray-200 ${className || ''}`}>{children}</div>
+  <div className={`mb-4 pb-4 border-b border-gray-200 dark:border-gray-700 ${className || ''}`}>{children}</div>
 );
 
 interface CardBodyProps {
