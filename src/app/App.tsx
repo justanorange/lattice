@@ -168,15 +168,22 @@ function App() {
                 <Button onClick={handleNextPage}>{STRINGS.button_next}</Button>
               </div>
             </div>
-          ) : (
+          ) : currentPage === 'generation' ? (
             // Page: Generation
             selectedLotteryId && (
               <GenerationPage
                 strategyId="coverage"
                 strategyParams={{ budget: 50 }}
                 onBack={handlePrevPage}
+                onSimulate={handleSimulate}
               />
             )
+          ) : (
+            // Page: Simulation
+            <SimulationPage
+              tickets={simulationTickets}
+              onBack={handlePrevPage}
+            />
           )}
         </Container>
       </main>
