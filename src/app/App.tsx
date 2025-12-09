@@ -3,6 +3,9 @@ import { STRINGS, LOTTERY_STRATEGIES } from '../shared/constants';
 import { Container, Stack, Grid, Card, CardHeader, CardBody, Button, Spinner, Alert } from '../shared/ui';
 import { useTheme } from '../shared/hooks';
 import { LOTTERIES_ARRAY } from '../entities/lottery/config';
+import { useLotteryStore } from '../entities/lottery/store';
+import { LotterySelectionPage } from '../features/lottery-selection/LotterySelectionPage';
+import { LotteryDetailPage } from '../features/lottery-detail/LotteryDetailPage';
 import './styles/App.css';
 
 /**
@@ -23,6 +26,7 @@ function App() {
   const [selectedLotteryId, setSelectedLotteryId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { selectLottery } = useLotteryStore();
 
   const lotteries = LOTTERIES_ARRAY.map((lottery) => ({
     id: lottery.id,
@@ -32,6 +36,7 @@ function App() {
   }));
 
   const handleSelectLottery = (lotteryId: string) => {
+    selectLottery(lotteryId);
     setSelectedLotteryId(lotteryId);
     setCurrentPage('detail');
     setError(null);
