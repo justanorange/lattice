@@ -1,0 +1,63 @@
+tasks:
+  - id: app_001
+    title: "Set up React Router with page routes"
+    description: "Routes: /, /lottery/:id, /strategy, /generation, /simulation"
+    status: pending
+    priority: 1
+    dependencies: []
+    tests_required: true
+    tests_block: true
+
+  - id: app_002
+    title: "Create App shell component"
+    description: "Root component with Router, Header with theme toggle, footer"
+    status: pending
+    priority: 1
+    dependencies: [app_001]
+    tests_required: true
+    tests_block: true
+
+  - id: app_003
+    title: "Create Header component"
+    description: "Logo, title, back button (context-aware), theme toggle"
+    status: pending
+    priority: 2
+    dependencies: [ui_001]
+    tests_required: true
+    tests_block: true
+
+  - id: app_004
+    title: "Implement theme setup (Tailwind dark mode)"
+    description: "Configure theme context and CSS variables"
+    status: pending
+    priority: 1
+    dependencies: []
+    tests_required: false
+    tests_block: false
+
+  - id: app_005
+    title: "Set up Zustand stores (context providers)"
+    description: "Initialize lottery, strategy, generation stores"
+    status: pending
+    priority: 1
+    dependencies: []
+    tests_required: false
+    tests_block: false
+
+  - id: app_006
+    title: "Set up Vite build configuration"
+    description: "Configure entry point, dev port 3106, build output"
+    status: pending
+    priority: 2
+    dependencies: []
+    tests_required: false
+    tests_block: false
+
+  - id: app_007
+    title: "Set up ESLint and TypeScript"
+    description: "Configure linting rules (semicolons required)"
+    status: pending
+    priority: 2
+    dependencies: []
+    tests_required: false
+    tests_block: false

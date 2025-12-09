@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+/* App Styles */
+:root {
+  color-scheme: light dark;
+}
+
+* {
+  @apply transition-colors;
+}
+
+html {
+  @apply scroll-smooth;
+}
+
+body {
+  @apply bg-white dark:bg-gray-900 text-gray-900 dark:text-white;
+}
+
+
+html.dark {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  width: 100%;
+}

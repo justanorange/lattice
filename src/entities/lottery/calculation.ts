@@ -12,6 +12,8 @@ import type {
 } from "./types";
 import { ALL_LOTTERIES } from "./config";
 
+import { probabilityOfMatch, twoFieldCombinations } from "../calculations/probability";
+
 /**
  * Find prize amount for given matches
  * @param prizeTable - The prize table to search
@@ -162,11 +164,6 @@ export function calculateEV(
   secondaryPrize?: number,
   poolAmount: number = 0
 ): EVCalculation {
-  // Import probability functions
-  const {
-    probabilityOfMatch,
-    twoFieldCombinations,
-  } = require("../calculations/probability");
 
   let expectedValue = -ticketCost; // Start with negative (cost of ticket)
 

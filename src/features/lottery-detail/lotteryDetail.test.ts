@@ -4,6 +4,7 @@
  */
 
 import { useLotteryStore } from "../../entities/lottery/store";
+import { calculateEV } from "../../entities/lottery/calculation";
 
 /**
  * Test that store provides required data
@@ -49,7 +50,6 @@ export function testSuperpriceUpdate(): boolean {
 export function testEVUpdatesWithSuperprice(): boolean {
   try {
     const store = useLotteryStore.getState();
-    const { calculateEV } = require("../../entities/lottery/calculation");
     
     const ev1 = calculateEV(
       store.selectedLottery,
