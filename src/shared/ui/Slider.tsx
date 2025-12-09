@@ -1,26 +1,32 @@
 /**
  * Slider Component (shadcn/ui style)
- * Range input for numeric values
+ * Range slider using Radix UI
  */
 
 import * as React from "react";
+import * as SliderPrimitive from "@radix-ui/react-slider";
 import { cn } from "../lib/utils";
 
-export interface SliderProps
-  extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "type"> {
-  value?: number;
-  onValueChange?: (value: number) => void;
+export interface SliderProps {
+  value?: number | number[];
+  onValueChange?: (value: number[]) => void;
   min?: number;
   max?: number;
   step?: number;
   label?: string;
   helper?: string;
+  disabled?: boolean;
+  className?: string;
 }
 
 /**
- * Slider component for numeric input
+ * Slider component using Radix UI
+ * Supports single value or range
  */
-export const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
+export const Slider = React.forwardRef<
+  React.ElementRef<typeof SliderPrimitive.Root>,
+  SliderProps
+>(
   (
     {
       className,
@@ -31,45 +37,60 @@ export const Slider = React.forwardRef<HTMLInputElement, SliderProps>(
       step = 1,
       label,
       helper,
+      disabled = false,
       ...props
     },
     ref
   ) => {
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      const newValue = Number.parseFloat(e.target.value);
-      onValueChange?.(newValue);
-    };
+    // Normalize value to array for Radix UI
+    const sliderValue = Array.isArray(value)
+      ? value
+      : value !== undefined
+        ? [value]
+        : [min];
 
     return (
       <div className="w-full">
         {label && (
-          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
             {label}
           </label>
         )}
-        <div className="flex items-center gap-3">
-          <input
+        <div className="flex items-center gap-4">
+          <SliderPrimitive.Root
             ref={ref}
-            type="range"
             min={min}
             max={max}
             step={step}
-            value={value ?? min}
-            onChange={handleChange}
+            value={sliderValue}
+            onValueChange={onValueChange}
+            disabled={disabled}
             className={cn(
-              "w-full h-2 bg-gray-200 dark:bg-gray-700 rounded-lg appearance-none cursor-pointer",
-              "accent-amber-500 hover:accent-amber-600",
-              "focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2",
+              "relative flex items-center w-full h-10 touch-none select-none",
+              disabled && "opacity-50",
               className
             )}
             {...props}
-          />
-          <span className="text-sm font-medium text-gray-900 dark:text-white min-w-[3rem] text-right">
-            {value ?? min}
+          >
+            <SliderPrimitive.Track className="relative h-2 w-full grow overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+              <SliderPrimitive.Range className="absolute h-full bg-amber-500 dark:bg-amber-600" />
+            </SliderPrimitive.Track>
+            <SliderPrimitive.Thumb
+              className={cn(
+                "block h-5 w-5 rounded-full border-2 border-amber-500 bg-white dark:bg-gray-800",
+                "shadow-md transition-shadow",
+                "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2",
+                "dark:focus-visible:ring-offset-gray-950",
+                "disabled:pointer-events-none disabled:opacity-50"
+              )}
+            />
+          </SliderPrimitive.Root>
+          <span className="text-sm font-medium text-gray-900 dark:text-white min-w-12 text-right">
+            {sliderValue[0]}
           </span>
         </div>
         {helper && (
-          <p className="mt-1 text-xs text-gray-500 dark:text-gray-400">{helper}</p>
+          <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">{helper}</p>
         )}
       </div>
     );

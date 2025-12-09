@@ -56,6 +56,7 @@ export const COVERAGE_STRATEGY: Strategy = {
     'lottery_6_45',
     'lottery_7_49',
     'lottery_5_36_1',
+    'lottery_8_1',
   ],
   parameters: [
     {

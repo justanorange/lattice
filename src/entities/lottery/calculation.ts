@@ -165,7 +165,7 @@ export function calculateEV(
   poolAmount: number = 0
 ): EVCalculation {
 
-  let expectedValue = -ticketCost; // Start with negative (cost of ticket)
+  let expectedValue = 0; // Sum of (prize * probability)
 
   // Calculate EV based on actual probabilities
   for (const row of prizeTable.rows) {
@@ -182,13 +182,13 @@ export function calculateEV(
       prizeValue = (row.prizePercent / 100) * poolAmount;
     }
 
-    if (prizeValue === 0) continue;
+    if (prizeValue <= 0) continue;
 
     // Calculate probability for this match combination
     let probability = 0;
 
     if (lottery.fieldCount === 1) {
-      // Single field lottery
+      // Single field lottery (6из45, 7из49)
       const field = lottery.fields[0];
       const matches = row.matches[0];
       probability = probabilityOfMatch(
@@ -198,7 +198,7 @@ export function calculateEV(
         matches
       );
     } else if (lottery.fieldCount === 2 && row.matches.length === 2) {
-      // Two field lottery (e.g., 8+1)
+      // Two field lottery (8+1, 5из36+1)
       const field1 = lottery.fields[0];
       const field2 = lottery.fields[1];
       const matches1 = row.matches[0];
@@ -225,15 +225,17 @@ export function calculateEV(
     expectedValue += prizeValue * probability;
   }
 
-  const evPercent = (expectedValue / ticketCost) * 100;
+  // Final EV = sum(prize * prob) - ticket_cost
+  const finalEV = expectedValue - ticketCost;
+  const evPercent = (finalEV / ticketCost) * 100;
 
   return {
-    expectedValue,
+    expectedValue: finalEV,
     evPercent,
-    isProfitable: expectedValue > 0,
+    isProfitable: finalEV > 0,
     drawsToBreakEven:
-      expectedValue <= 0
-        ? Math.ceil(Math.abs(expectedValue) / Math.abs(expectedValue) || 1)
+      finalEV < 0
+        ? Math.ceil(ticketCost / (expectedValue || 1))
         : undefined,
   };
 }

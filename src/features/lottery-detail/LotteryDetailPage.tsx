@@ -87,12 +87,12 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
               label="Цена (₽)"
               value={currentTicketCost.toString()}
               onChange={(e) => {
-                const value = Number.parseFloat(e.target.value) || 100;
-                updateTicketCost(Math.max(10, value));
+                const value = Number.parseFloat(e.target.value);
+                if (!Number.isNaN(value) && value > 0) {
+                  updateTicketCost(value);
+                }
               }}
-              min={10}
-              step={10}
-              helper="Стоимость одного билета в рублях"
+              helper="Введите стоимость одного билета в рублях"
             />
           </CardBody>
         </Card>

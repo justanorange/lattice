@@ -86,7 +86,7 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
           <Slider
             label="Количество тиражей"
             value={roundsCount}
-            onValueChange={setRoundsCount}
+            onValueChange={(value) => setRoundsCount(value[0])}
             min={10}
             max={10000}
             step={10}
