@@ -6,7 +6,7 @@
 import React from "react";
 import { useLotteryStore } from "../../entities/lottery/store";
 import { calculateEV } from "../../entities/lottery/calculation";
-import { Card, CardHeader, CardBody, Input, Button, Container } from "../../shared/ui";
+import { Card, CardHeader, CardBody, Input, Slider, Button, Container } from "../../shared/ui";
 import { STRINGS } from "../../shared/constants";
 
 export interface LotteryDetailPageProps {
@@ -40,13 +40,22 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
     }
   }, [lotteryId, selectedLottery.id, selectLottery]);
 
-  // Calculate EV
-  const evCalculation = calculateEV(
-    selectedLottery,
-    currentSuperprice,
-    currentPrizeTable,
-    currentTicketCost
+  // Calculate EV - updates in real-time when superprice changes
+  const evCalculation = React.useMemo(
+    () =>
+      calculateEV(
+        selectedLottery,
+        currentSuperprice,
+        currentPrizeTable,
+        currentTicketCost
+      ),
+    [selectedLottery, currentSuperprice, currentPrizeTable, currentTicketCost]
   );
+
+  // Superprice range for slider (0 to 500M with 1M steps)
+  const superpriceMin = 0;
+  const superpriceMax = 500000000;
+  const superpriceStep = 1000000;
 
   return (
     <Container>
@@ -59,24 +68,41 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
         </p>
       </div>
 
-      {/* Superprice Input */}
+      {/* Superprice Input with Slider */}
       <Card className="mb-6">
         <CardHeader>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
             {STRINGS.detail_superprice}
           </h2>
         </CardHeader>
-        <CardBody>
+        <CardBody className="space-y-4">
+          {/* Slider for quick adjustment */}
+          <Slider
+            label="Суперприз (₽)"
+            value={currentSuperprice}
+            onValueChange={(value) => updateSuperprice(value)}
+            min={superpriceMin}
+            max={superpriceMax}
+            step={superpriceStep}
+            helper="Используйте слайдер для быстрой настройки или введите точное значение ниже"
+          />
+          {/* Input for precise value */}
           <Input
             type="number"
-            label="Суперприз (₽)"
+            label="Точное значение (₽)"
             value={currentSuperprice.toString()}
             onChange={(e) => {
               const value = Number.parseFloat(e.target.value) || 0;
-              updateSuperprice(value);
+              const clampedValue = Math.max(
+                superpriceMin,
+                Math.min(superpriceMax, value)
+              );
+              updateSuperprice(clampedValue);
             }}
-            min={0}
-            step={1000000}
+            min={superpriceMin}
+            max={superpriceMax}
+            step={superpriceStep}
+            helper={`Минимум: ${superpriceMin.toLocaleString()} ₽, Максимум: ${superpriceMax.toLocaleString()} ₽`}
           />
         </CardBody>
       </Card>

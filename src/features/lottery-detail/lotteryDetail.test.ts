@@ -43,3 +43,34 @@ export function testSuperpriceUpdate(): boolean {
   }
 }
 
+/**
+ * Test EV calculation updates with superprice change
+ */
+export function testEVUpdatesWithSuperprice(): boolean {
+  try {
+    const store = useLotteryStore.getState();
+    const { calculateEV } = require("../../entities/lottery/calculation");
+    
+    const ev1 = calculateEV(
+      store.selectedLottery,
+      store.currentSuperprice,
+      store.currentPrizeTable,
+      store.currentTicketCost
+    );
+    
+    store.updateSuperprice(200000000);
+    const ev2 = calculateEV(
+      store.selectedLottery,
+      store.currentSuperprice,
+      store.currentPrizeTable,
+      store.currentTicketCost
+    );
+    
+    console.assert(ev2.expectedValue !== ev1.expectedValue, "EV should change with superprice");
+    return true;
+  } catch (e) {
+    console.error("EV update test failed:", e);
+    return false;
+  }
+}
+
