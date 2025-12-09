@@ -135,27 +135,13 @@ function App() {
             </div>
           ) : currentPage === 'detail' ? (
             // Page: Lottery Detail
-            <div>
-              <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-                {STRINGS.detail_prize_table}
-              </h2>
-              <Card>
-                <CardBody>
-                  <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    Lottery: {selectedLotteryId}
-                  </p>
-                  <p className="text-gray-600 dark:text-gray-400">
-                    {STRINGS.detail_cost}: 100 ₽
-                  </p>
-                </CardBody>
-              </Card>
-              <div className="mt-6 flex gap-2">
-                <Button variant="secondary" onClick={handlePrevPage}>
-                  {STRINGS.button_back}
-                </Button>
-                <Button onClick={handleNextPage}>{STRINGS.button_next}</Button>
-              </div>
-            </div>
+            selectedLotteryId && (
+              <LotteryDetailPage
+                lotteryId={selectedLotteryId}
+                onNext={handleNextPage}
+                onBack={handlePrevPage}
+              />
+            )
           ) : currentPage === 'strategy' ? (
             // Page: Strategy Selection
             <div>
