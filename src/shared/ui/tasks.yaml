@@ -1,0 +1,90 @@
+tasks:
+  - id: ui_001
+    title: "Create base Button component with Tailwind styling"
+    description: "Reusable button with variants (primary, secondary, outline)"
+    status: pending
+    priority: 1
+    dependencies: []
+    tests_required: false
+    tests_block: false
+
+  - id: ui_002
+    title: "Create Card component for layout"
+    description: "Reusable card wrapper with shadow and padding"
+    status: pending
+    priority: 1
+    dependencies: []
+    tests_required: false
+    tests_block: false
+
+  - id: ui_003
+    title: "Create Input and Select components"
+    description: "Form inputs with Tailwind styling"
+    status: pending
+    priority: 1
+    dependencies: []
+    tests_required: false
+    tests_block: false
+
+  - id: ui_004
+    title: "Create Grid and Layout components"
+    description: "Responsive grid (2x3 for lottery selection), flex containers"
+    status: pending
+    priority: 1
+    dependencies: []
+    tests_required: false
+    tests_block: false
+
+  - id: ui_005
+    title: "Create Slider component for parameters"
+    description: "Range input for budget, ticket count, risk level"
+    status: pending
+    priority: 2
+    dependencies: []
+    tests_required: false
+    tests_block: false
+
+  - id: ui_006
+    title: "Create ThemeToggle component (light/dark)"
+    description: "Toggle button for theme switching, uses Tailwind dark mode"
+    status: pending
+    priority: 2
+    dependencies: []
+    tests_required: false
+    tests_block: false
+
+  - id: ui_007
+    title: "Create Table component for prize tables"
+    description: "Editable table with inputs for prize amounts"
+    status: pending
+    priority: 2
+    dependencies: [ui_003]
+    tests_required: false
+    tests_block: false
+
+  - id: ui_008
+    title: "Create Modal/Dialog component"
+    description: "For strategy configuration and confirmations"
+    status: pending
+    priority: 2
+    dependencies: []
+    tests_required: false
+    tests_block: false
+
+  - id: ui_009
+    title: "Create Lottery ticket visual component"
+    description: "Render ticket layout (circles/grid) for each of 6 lottery types"
+    status: pending
+    priority: 3
+    dependencies: []
+    tests_required: true
+    tests_block: true
+
+  - id: ui_010
+    title: "Create Graph/Chart components (recharts wrapper)"
+    description: "LineChart (bankroll), BarChart (histogram), for simulation results"
+    status: pending
+    priority: 3
+    dependencies: []
+    tests_required: false
+    tests_block: false
