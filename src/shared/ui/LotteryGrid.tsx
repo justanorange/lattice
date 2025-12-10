@@ -24,6 +24,7 @@ interface FieldConfig {
 interface GridPattern {
   field1: FieldConfig;
   field2?: FieldConfig;
+  layout?: 'horizontal' | 'vertical';
 }
 
 // Grid patterns based on actual lottery configurations
@@ -32,11 +33,13 @@ const GRID_PATTERNS: Record<string, GridPattern> = {
     // 8 из 20 + 1 из 4
     field1: { from: 20, pick: 8, rows: 4, cols: 5 },
     field2: { from: 4, pick: 1, rows: 1, cols: 4 },
+    layout: 'vertical', // field2 below field1
   },
   lottery_4_20: {
     // 4 из 20 + 4 из 20
-    field1: { from: 20, pick: 4, rows: 4, cols: 5 },
-    field2: { from: 20, pick: 4, rows: 4, cols: 5 },
+    field1: { from: 20, pick: 4, rows: 5, cols: 4 },
+    field2: { from: 20, pick: 4, rows: 5, cols: 4 },
+    layout: 'horizontal',
   },
   lottery_12_24: {
     // 12 из 24
@@ -46,6 +49,7 @@ const GRID_PATTERNS: Record<string, GridPattern> = {
     // 5 из 36 + 1 из 4
     field1: { from: 36, pick: 5, rows: 6, cols: 6 },
     field2: { from: 4, pick: 1, rows: 1, cols: 4 },
+    layout: 'vertical', // field2 below field1
   },
   lottery_6_45: {
     // 6 из 45
@@ -132,7 +136,7 @@ const FieldGrid: React.FC<{
             'rounded-full transition-colors',
             isSelected
               ? isSecondField
-                ? 'bg-purple-500'
+                ? 'bg-violet-500'
                 : 'bg-amber-500'
               : 'bg-gray-300 dark:bg-gray-600'
           )}
@@ -168,9 +172,16 @@ export const LotteryGrid: React.FC<LotteryGridProps> = ({
   }
 
   const sizeClass = SIZE_CLASSES[size];
+  const isVertical = pattern.layout === 'vertical';
 
   return (
-    <div className={cn('flex', sizeClass.fieldGap, sizeClass.container, className)}>
+    <div className={cn(
+      'flex',
+      isVertical ? 'flex-col' : 'flex-row',
+      sizeClass.fieldGap,
+      sizeClass.container,
+      className
+    )}>
       <FieldGrid
         field={pattern.field1}
         seed={`${lotteryId}-field1`}
@@ -178,7 +189,11 @@ export const LotteryGrid: React.FC<LotteryGridProps> = ({
       />
       {pattern.field2 && (
         <>
-          <div className="w-px bg-gray-300 dark:bg-gray-600" />
+          {isVertical ? (
+            <div className="h-px w-full bg-gray-300 dark:bg-gray-600" />
+          ) : (
+            <div className="w-px bg-gray-300 dark:bg-gray-600" />
+          )}
           <FieldGrid
             field={pattern.field2}
             seed={`${lotteryId}-field2`}
