@@ -62,7 +62,7 @@ export const SimulationPage: React.FC = () => {
         <>
           <SimulationStats result={result} />
           <PrizeDistribution result={result} superprice={currentSuperprice} prizeTable={currentPrizeTable} />
-          <BankrollHistogram result={result} ticketCost={currentTicketCost} />
+          <BankrollHistogram result={result} ticketCost={currentTicketCost} prizeTable={currentPrizeTable} superprice={currentSuperprice} />
           <BankrollChart result={result} />
         </>
       )}

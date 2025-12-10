@@ -75,7 +75,8 @@ function formatAmount(amount: number): string {
 }
 
 /**
- * Generate chart data points - adapt range to include breakeven and current superprice
+ * Generate chart data points - show range around current superprice
+ * If breakeven is within 5x of current, include it. Otherwise focus on current.
  */
 function generateChartPoints(
   lottery: Lottery,
@@ -86,20 +87,19 @@ function generateChartPoints(
 ): { superprice: number; ev: number }[] {
   const points: { superprice: number; ev: number }[] = [];
   
-  // Determine range to show - include both current superprice and breakeven
-  const importantPoints = [currentSuperprice];
-  if (breakevenSuperprice && breakevenSuperprice > 0) {
-    importantPoints.push(breakevenSuperprice);
+  // Base range on current superprice
+  const current = Math.max(currentSuperprice, 1_000_000); // At least 1M for reasonable scale
+  
+  // Include breakeven only if it's within reasonable range (5x of current)
+  let maxSp = current * 3; // Default: show up to 3x current
+  if (breakevenSuperprice && breakevenSuperprice > 0 && breakevenSuperprice <= current * 5) {
+    maxSp = Math.max(maxSp, breakevenSuperprice * 1.5);
   }
   
-  const maxImportant = Math.max(...importantPoints);
-  const minImportant = Math.min(...importantPoints.filter(p => p > 0));
+  const minSp = Math.max(0, Math.floor(current * 0.1));
+  maxSp = Math.min(1_000_000_000, Math.ceil(maxSp));
   
-  // Show range that includes all important points with some margin
-  const minSp = Math.max(0, Math.floor(minImportant * 0.2));
-  const maxSp = Math.min(1_000_000_000, Math.ceil(maxImportant * 2));
-  
-  // Calculate step to get ~20-30 points
+  // Calculate step to get ~20-25 points
   const range = maxSp - minSp;
   const step = Math.max(100_000, Math.ceil(range / 25 / 100_000) * 100_000);
 
@@ -260,7 +260,7 @@ export const EVChart: React.FC<EVChartProps> = ({
                 return (
                   <div
                     key={index}
-                    className="group relative flex-1 cursor-pointer"
+                    className="group relative flex-1 mx-px cursor-pointer"
                     style={{ height: '100%' }}
                     title={`${formatAmount(point.superprice)}: ${point.ev >= 0 ? '+' : ''}${point.ev.toFixed(2)} ₽`}
                   >

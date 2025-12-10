@@ -3,13 +3,28 @@
  * Common layout wrapper with header and outlet for routes
  */
 
-import { Outlet } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Container } from '@/shared/ui';
 import { ThemeMode } from '@/widgets/theme-mode/ui/ThemeMode';
+
+/**
+ * Scroll to top on route change
+ */
+function ScrollToTop() {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+}
 
 export const AppLayout = () => {
   return (
     <div className="relative min-h-screen">
+      <ScrollToTop />
       {/* Header */}
       <header
         className="

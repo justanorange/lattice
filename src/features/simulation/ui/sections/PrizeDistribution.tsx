@@ -176,7 +176,7 @@ const PrizeCategoryRow: React.FC<PrizeCategoryRowProps> = ({
       <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
         <div
           className={`h-full rounded-full transition-all ${
-            isJackpot ? 'bg-amber-500' : 'bg-blue-500'
+            isJackpot ? 'bg-amber-500' : 'bg-orange-400 dark:bg-orange-500'
           }`}
           style={{ width: `${barWidth}%` }}
         />

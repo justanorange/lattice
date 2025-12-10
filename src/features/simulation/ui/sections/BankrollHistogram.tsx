@@ -5,72 +5,99 @@
 
 import { Card, CardHeader, CardBody } from '@/shared/ui';
 import { BarChart3 } from 'lucide-react';
-import type { SimulationResult } from '@/entities/lottery/types';
+import type { SimulationResult, PrizeTable } from '@/entities/lottery/types';
 
 interface BankrollHistogramProps {
   result: SimulationResult;
   ticketCost: number;
+  prizeTable: PrizeTable;
+  superprice: number;
 }
 
 /**
- * Create histogram buckets for prize amounts per round
- * Uses actual prize ranges rather than multiples of cost
+ * Create histogram buckets based on actual prize table values
  */
 function createHistogramBuckets(
   rounds: SimulationResult['rounds'],
-  _ticketCost: number,
-  _ticketCount: number
-): { label: string; count: number; color: string; range: string }[] {
-  // Define meaningful prize ranges
-  const buckets: { label: string; min: number; max: number; count: number; color: string }[] = [
-    { label: 'Ноль', min: 0, max: 0, count: 0, color: 'bg-gray-400' },
-    { label: '1-100', min: 1, max: 100, count: 0, color: 'bg-red-300' },
-    { label: '100-500', min: 100, max: 500, count: 0, color: 'bg-red-400' },
-    { label: '500-1к', min: 500, max: 1000, count: 0, color: 'bg-orange-400' },
-    { label: '1к-5к', min: 1000, max: 5000, count: 0, color: 'bg-yellow-400' },
-    { label: '5к-10к', min: 5000, max: 10000, count: 0, color: 'bg-lime-400' },
-    { label: '10к-50к', min: 10000, max: 50000, count: 0, color: 'bg-green-400' },
-    { label: '50к-100к', min: 50000, max: 100000, count: 0, color: 'bg-teal-400' },
-    { label: '100к-1млн', min: 100000, max: 1000000, count: 0, color: 'bg-blue-400' },
-    { label: '1млн+', min: 1000000, max: Infinity, count: 0, color: 'bg-purple-500' },
-  ];
-
+  prizeTable: PrizeTable,
+  superprice: number
+): { label: string; count: number; color: string }[] {
+  // Extract unique prize values from prize table
+  const prizeValues = new Set<number>();
+  prizeValues.add(0); // Always include zero
+  
+  for (const row of prizeTable.rows) {
+    if (typeof row.prize === 'number') {
+      prizeValues.add(row.prize);
+    } else if (row.prize === 'Суперприз') {
+      prizeValues.add(superprice);
+    }
+  }
+  
+  // Sort prize values ascending
+  const sortedPrizes = Array.from(prizeValues).sort((a, b) => a - b);
+  
+  // Create buckets for each prize value
+  const bucketMap = new Map<number, number>();
+  for (const prize of sortedPrizes) {
+    bucketMap.set(prize, 0);
+  }
+  
+  // Count prizes per bucket - find closest prize value
   for (const round of rounds) {
     const prize = round.totalPrizeThisRound;
     
-    for (const bucket of buckets) {
-      if (bucket.min === 0 && prize === 0) {
-        bucket.count++;
-        break;
-      } else if (prize > bucket.min && prize <= bucket.max) {
-        bucket.count++;
-        break;
+    // Find the bucket this prize belongs to
+    let closestPrize = 0;
+    for (const p of sortedPrizes) {
+      if (prize >= p) {
+        closestPrize = p;
       }
     }
+    
+    // If exact match exists, use it; otherwise use the lower bound
+    if (bucketMap.has(prize)) {
+      bucketMap.set(prize, (bucketMap.get(prize) || 0) + 1);
+    } else {
+      bucketMap.set(closestPrize, (bucketMap.get(closestPrize) || 0) + 1);
+    }
   }
-
-  // Return only non-empty buckets with range description
-  return buckets
-    .filter(b => b.count > 0)
-    .map(b => ({
-      label: b.label,
-      count: b.count,
-      color: b.color,
-      range: b.min === 0 ? 'без выигрыша' : 
-             b.max === Infinity ? `>${b.min.toLocaleString('ru-RU')}₽` :
-             `${b.min.toLocaleString('ru-RU')}-${b.max.toLocaleString('ru-RU')}₽`
-    }));
+  
+  // Color scale from gray (0) through orange to amber (jackpot)
+  const colors = [
+    'bg-gray-400',
+    'bg-orange-200',
+    'bg-orange-300', 
+    'bg-orange-400',
+    'bg-orange-500',
+    'bg-amber-400',
+    'bg-amber-500',
+    'bg-amber-600',
+  ];
+  
+  // Format label
+  const formatPrize = (value: number): string => {
+    if (value === 0) return 'Ноль';
+    if (value === superprice) return 'Суперприз';
+    if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(0)}млн`;
+    if (value >= 1000) return `${(value / 1000).toFixed(0)}к`;
+    return value.toString();
+  };
+  
+  return sortedPrizes.map((prize, index) => ({
+    label: formatPrize(prize),
+    count: bucketMap.get(prize) || 0,
+    color: colors[Math.min(index, colors.length - 1)],
+  })).filter(b => b.count > 0);
 }
 
 export const BankrollHistogram: React.FC<BankrollHistogramProps> = ({
   result,
-  ticketCost,
+  ticketCost: _ticketCost,
+  prizeTable,
+  superprice,
 }) => {
-  const buckets = createHistogramBuckets(
-    result.rounds,
-    ticketCost,
-    result.tickets.length
-  );
+  const buckets = createHistogramBuckets(result.rounds, prizeTable, superprice);
 
   const maxCount = Math.max(...buckets.map(b => b.count));
   const totalRounds = result.roundsCount;
@@ -97,16 +124,16 @@ export const BankrollHistogram: React.FC<BankrollHistogramProps> = ({
             return (
               <div key={index} className="space-y-0.5">
                 <div className="flex justify-between text-xs">
-                  <span className="text-gray-600 dark:text-gray-400" title={bucket.range}>
+                  <span className="text-gray-600 dark:text-gray-400">
                     {bucket.label}
                   </span>
                   <span className="font-medium text-gray-900 dark:text-white">
                     {bucket.count.toLocaleString('ru-RU')} ({percent.toFixed(1)}%)
                   </span>
                 </div>
-                <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                <div className="h-3 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
                   <div
-                    className={`h-full rounded-full transition-all ${bucket.color}`}
+                    className={`h-full transition-all ${bucket.color}`}
                     style={{ width: `${barWidth}%` }}
                   />
                 </div>
