@@ -3,8 +3,8 @@
  * Display lottery with visual grid and selection option
  */
 
-import React from "react";
-import { Card, CardHeader, CardBody, Button, LotteryGrid } from "../../shared/ui";
+import React from 'react';
+import { Card, CardHeader, CardBody, Button, LotteryGrid } from '@/shared/ui';
 
 export interface LotteryCardProps {
   id: string;
@@ -24,7 +24,7 @@ export const LotteryCard: React.FC<LotteryCardProps> = ({
   return (
     <Card
       className={`border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-card ${
-        !available ? "opacity-60" : ""
+        !available ? 'opacity-60' : ''
       }`}
     >
       <CardHeader className="flex items-start justify-between gap-3">
@@ -46,15 +46,15 @@ export const LotteryCard: React.FC<LotteryCardProps> = ({
 
         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
           <span className="inline-flex h-2 w-2 rounded-full bg-amber-500" />
-          <span>{available ? "Доступна для расчётов" : "Скоро станет доступна"}</span>
+          <span>{available ? 'Доступна для расчётов' : 'Скоро станет доступна'}</span>
         </div>
         <Button
-          variant={available ? "primary" : "ghost"}
+          variant={available ? 'primary' : 'ghost'}
           disabled={!available}
           onClick={() => available && onSelect(id)}
           className="w-full"
         >
-          {available ? "Выбрать" : "Ожидайте"}
+          {available ? 'Выбрать' : 'Ожидайте'}
         </Button>
       </CardBody>
     </Card>

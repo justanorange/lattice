@@ -3,12 +3,12 @@
  * Manages selected lottery, superprice, prize tables, and configuration
  */
 
-import { create } from "zustand";
-import type { Lottery, PrizeTable, PrizeRow } from "./types";
+import { create } from 'zustand';
+import type { Lottery, PrizeTable, PrizeRow } from './types';
 import {
   LOTTERY_8_PLUS_1,
   getLotteryById,
-} from "./config";
+} from './config';
 
 /**
  * State for lottery management
@@ -82,7 +82,7 @@ export const useLotteryStore = create<LotteryStoreState>((set, get) => ({
       ? structuredClone(lottery.prizeTable)
       : lottery.variants?.[0]?.prizeTable
         ? structuredClone(lottery.variants[0].prizeTable)
-        : { rows: [], currency: "₽" };
+        : { rows: [], currency: '₽' };
 
     set({
       selectedLotteryId: lotteryId,
@@ -112,7 +112,7 @@ export const useLotteryStore = create<LotteryStoreState>((set, get) => ({
 
   updateSuperprice: (amount: number) => {
     if (amount < 0) {
-      console.warn("Superprice cannot be negative");
+      console.warn('Superprice cannot be negative');
       return;
     }
     set({ currentSuperprice: amount });
@@ -120,7 +120,7 @@ export const useLotteryStore = create<LotteryStoreState>((set, get) => ({
 
   updateSecondaryPrize: (amount: number) => {
     if (amount < 0) {
-      console.warn("Secondary prize cannot be negative");
+      console.warn('Secondary prize cannot be negative');
       return;
     }
     set({ currentSecondaryPrize: amount });
@@ -128,7 +128,7 @@ export const useLotteryStore = create<LotteryStoreState>((set, get) => ({
 
   updateTicketCost: (cost: number) => {
     if (cost <= 0) {
-      console.warn("Ticket cost must be positive");
+      console.warn('Ticket cost must be positive');
       return;
     }
     set({ currentTicketCost: cost });
@@ -136,7 +136,7 @@ export const useLotteryStore = create<LotteryStoreState>((set, get) => ({
 
   updateAveragePool: (amount: number) => {
     if (amount < 0) {
-      console.warn("Average pool cannot be negative");
+      console.warn('Average pool cannot be negative');
       return;
     }
     set({ currentAveragePool: amount });
@@ -188,7 +188,7 @@ export const useLotteryStore = create<LotteryStoreState>((set, get) => ({
       ? structuredClone(lottery.prizeTable)
       : lottery.variants?.[0]?.prizeTable
         ? structuredClone(lottery.variants[0].prizeTable)
-        : { rows: [], currency: "₽" };
+        : { rows: [], currency: '₽' };
 
     set({
       currentPrizeTable: prizeTable,

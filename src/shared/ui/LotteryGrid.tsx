@@ -4,12 +4,12 @@
  * Shows colored circles in grid pattern matching lottery structure
  */
 
-import React from "react";
-import { cn } from "../lib/utils";
+import React from 'react';
+import { cn } from '@/shared/lib/utils';
 
 export interface LotteryGridProps {
   lotteryId: string;
-  size?: "sm" | "md" | "lg";
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
 }
 
@@ -68,19 +68,19 @@ const GRID_PATTERNS: Record<string, GridPattern> = {
 
 const SIZE_CLASSES = {
   sm: {
-    circle: "w-3 h-3",
-    gap: "gap-1",
-    container: "p-2",
+    circle: 'w-3 h-3',
+    gap: 'gap-1',
+    container: 'p-2',
   },
   md: {
-    circle: "w-4 h-4",
-    gap: "gap-1.5",
-    container: "p-3",
+    circle: 'w-4 h-4',
+    gap: 'gap-1.5',
+    container: 'p-3',
   },
   lg: {
-    circle: "w-5 h-5",
-    gap: "gap-2",
-    container: "p-4",
+    circle: 'w-5 h-5',
+    gap: 'gap-2',
+    container: 'p-4',
   },
 };
 
@@ -89,14 +89,14 @@ const SIZE_CLASSES = {
  */
 function getRandomColor(): string {
   const colors = [
-    "bg-red-400",
-    "bg-blue-400",
-    "bg-green-400",
-    "bg-yellow-400",
-    "bg-purple-400",
-    "bg-pink-400",
-    "bg-indigo-400",
-    "bg-cyan-400",
+    'bg-red-400',
+    'bg-blue-400',
+    'bg-green-400',
+    'bg-yellow-400',
+    'bg-purple-400',
+    'bg-pink-400',
+    'bg-indigo-400',
+    'bg-cyan-400',
   ];
   return colors[Math.floor(Math.random() * colors.length)];
 }
@@ -106,7 +106,7 @@ function getRandomColor(): string {
  */
 export const LotteryGrid: React.FC<LotteryGridProps> = ({
   lotteryId,
-  size = "md",
+  size = 'md',
   className,
 }) => {
   const pattern = GRID_PATTERNS[lotteryId];
@@ -118,18 +118,18 @@ export const LotteryGrid: React.FC<LotteryGridProps> = ({
 
   return (
     <div className={cn(sizeClass.container, className)}>
-      <div className={cn("flex flex-col", sizeClass.gap)}>
+      <div className={cn('flex flex-col', sizeClass.gap)}>
         {/* Field 1 */}
-        <div className={cn("flex flex-wrap", sizeClass.gap)}>
+        <div className={cn('flex flex-wrap', sizeClass.gap)}>
           {Array.from({ length: pattern.field1Count }).map((_, idx) => (
             <div
               key={`field1-${idx}`}
               className={cn(
                 sizeClass.circle,
-                "rounded-full",
+                'rounded-full',
                 idx < Math.ceil(pattern.field1Count * 0.4)
                   ? getRandomColor()
-                  : "bg-gray-300 dark:bg-gray-600"
+                  : 'bg-gray-300 dark:bg-gray-600'
               )}
             />
           ))}
@@ -137,16 +137,16 @@ export const LotteryGrid: React.FC<LotteryGridProps> = ({
 
         {/* Field 2 (if exists) */}
         {pattern.field2 && (
-          <div className={cn("flex flex-wrap", sizeClass.gap, "mt-1")}>
+          <div className={cn('flex flex-wrap', sizeClass.gap, 'mt-1')}>
             {Array.from({ length: pattern.field2.count }).map((_, idx) => (
               <div
                 key={`field2-${idx}`}
                 className={cn(
                   sizeClass.circle,
-                  "rounded-full",
+                  'rounded-full',
                   idx < Math.ceil(pattern.field2!.count * 0.25)
                     ? getRandomColor()
-                    : "bg-gray-300 dark:bg-gray-600"
+                    : 'bg-gray-300 dark:bg-gray-600'
                 )}
               />
             ))}

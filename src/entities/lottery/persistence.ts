@@ -3,11 +3,11 @@
  * Handles save/load operations with schema versioning and migration support
  */
 
-import type { LotteryState } from './types'
-import { useLotteryStore } from './store'
+import type { LotteryState } from './types';
+import { useLotteryStore } from './store';
 
-const STORAGE_KEY = 'lattice_lottery_state'
-const SCHEMA_VERSION = 1
+const STORAGE_KEY = 'lattice_lottery_state';
+const SCHEMA_VERSION = 1;
 
 /**
  * Persisted state with version tracking
@@ -26,8 +26,8 @@ function serializeState(state: LotteryState): string {
     version: SCHEMA_VERSION,
     timestamp: Date.now(),
     data: state,
-  }
-  return JSON.stringify(persisted)
+  };
+  return JSON.stringify(persisted);
 }
 
 /**
@@ -35,7 +35,7 @@ function serializeState(state: LotteryState): string {
  */
 function deserializeState(json: string): LotteryState | null {
   try {
-    const persisted = JSON.parse(json) as PersistedState
+    const persisted = JSON.parse(json) as PersistedState;
 
     // Validate structure
     if (
@@ -43,20 +43,20 @@ function deserializeState(json: string): LotteryState | null {
       typeof persisted !== 'object' ||
       typeof persisted.version !== 'number'
     ) {
-      console.warn('Invalid persisted state structure')
-      return null
+      console.warn('Invalid persisted state structure');
+      return null;
     }
 
     // Handle schema migration if needed
     if (persisted.version !== SCHEMA_VERSION) {
-      const migrated = migrateState(persisted.data, persisted.version)
-      return migrated
+      const migrated = migrateState(persisted.data, persisted.version);
+      return migrated;
     }
 
-    return persisted.data
+    return persisted.data;
   } catch (error) {
-    console.warn('Failed to parse persisted state:', error)
-    return null
+    console.warn('Failed to parse persisted state:', error);
+    return null;
   }
 }
 
@@ -68,21 +68,21 @@ function migrateState(state: unknown, fromVersion: number): LotteryState | null 
   // When version 2 released, add migration logic here
   if (fromVersion === 1) {
     try {
-      const migrated = state as LotteryState
+      const migrated = state as LotteryState;
       // Add validation of required fields
       if (
         migrated &&
         typeof migrated === 'object' &&
         'selectedLotteryId' in migrated
       ) {
-        return migrated
+        return migrated;
       }
     } catch (e) {
-      console.warn('Migration failed for v1 state')
+      console.warn('Migration failed for v1 state');
     }
   }
 
-  return null
+  return null;
 }
 
 /**
@@ -90,7 +90,7 @@ function migrateState(state: unknown, fromVersion: number): LotteryState | null 
  */
 export function saveLotteryState(): void {
   try {
-    const store = useLotteryStore.getState() as any
+    const store = useLotteryStore.getState() as any;
     // Create serializable state (exclude store methods)
     const stateToSave: LotteryState = {
       lottery: store.selectedLottery,
@@ -100,12 +100,12 @@ export function saveLotteryState(): void {
       ticketCost: store.currentTicketCost,
       prizeTable: store.currentPrizeTable,
       averagePool: store.currentAveragePool,
-    }
+    };
 
-    const serialized = serializeState(stateToSave)
-    localStorage.setItem(STORAGE_KEY, serialized)
+    const serialized = serializeState(stateToSave);
+    localStorage.setItem(STORAGE_KEY, serialized);
   } catch (error) {
-    console.warn('Failed to save lottery state:', error)
+    console.warn('Failed to save lottery state:', error);
   }
 }
 
@@ -114,16 +114,16 @@ export function saveLotteryState(): void {
  */
 export function loadLotteryState(): LotteryState | null {
   try {
-    const json = localStorage.getItem(STORAGE_KEY)
+    const json = localStorage.getItem(STORAGE_KEY);
     if (!json) {
-      return null
+      return null;
     }
 
-    const state = deserializeState(json)
-    return state
+    const state = deserializeState(json);
+    return state;
   } catch (error) {
-    console.warn('Failed to load lottery state:', error)
-    return null
+    console.warn('Failed to load lottery state:', error);
+    return null;
   }
 }
 
@@ -132,9 +132,9 @@ export function loadLotteryState(): LotteryState | null {
  */
 export function clearLotteryState(): void {
   try {
-    localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(STORAGE_KEY);
   } catch (error) {
-    console.warn('Failed to clear lottery state:', error)
+    console.warn('Failed to clear lottery state:', error);
   }
 }
 
@@ -143,50 +143,50 @@ export function clearLotteryState(): void {
  */
 export function restoreLotteryState(): void {
   try {
-    const persisted = loadLotteryState()
+    const persisted = loadLotteryState();
 
     if (!persisted) {
       // No saved state, ensure defaults are loaded
-      const store = useLotteryStore.getState() as any
-      store.resetAllToDefaults()
-      return
+      const store = useLotteryStore.getState() as any;
+      store.resetAllToDefaults();
+      return;
     }
 
-    const store = useLotteryStore.getState() as any
+    const store = useLotteryStore.getState() as any;
 
     // Restore state atomically
     if (persisted.lottery) {
-      store.selectLottery(persisted.lottery.id)
+      store.selectLottery(persisted.lottery.id);
     }
 
     if (persisted.variant) {
-      store.selectVariant(persisted.variant)
+      store.selectVariant(persisted.variant);
     }
 
     if (persisted.superprice !== undefined) {
-      store.updateSuperprice(persisted.superprice)
+      store.updateSuperprice(persisted.superprice);
     }
 
     if (persisted.secondaryPrize !== undefined) {
-      store.updateSecondaryPrize(persisted.secondaryPrize)
+      store.updateSecondaryPrize(persisted.secondaryPrize);
     }
 
     if (persisted.ticketCost !== undefined) {
-      store.updateTicketCost(persisted.ticketCost)
+      store.updateTicketCost(persisted.ticketCost);
     }
 
     if (persisted.averagePool !== undefined) {
-      store.updateAveragePool(persisted.averagePool)
+      store.updateAveragePool(persisted.averagePool);
     }
 
     if (persisted.prizeTable) {
-      store.updatePrizeTable(persisted.prizeTable)
+      store.updatePrizeTable(persisted.prizeTable);
     }
   } catch (error) {
-    console.warn('Failed to restore lottery state:', error)
+    console.warn('Failed to restore lottery state:', error);
     // Fall back to defaults
-    const store = useLotteryStore.getState() as any
-    store.resetAllToDefaults()
+    const store = useLotteryStore.getState() as any;
+    store.resetAllToDefaults();
   }
 }
 
@@ -200,22 +200,22 @@ export function getStorageInfo(): {
   timestamp?: Date
 } | null {
   try {
-    const json = localStorage.getItem(STORAGE_KEY)
+    const json = localStorage.getItem(STORAGE_KEY);
     if (!json) {
-      return null
+      return null;
     }
 
-    const persisted = JSON.parse(json) as PersistedState
+    const persisted = JSON.parse(json) as PersistedState;
 
     return {
       key: STORAGE_KEY,
       size: new Blob([json]).size,
       version: persisted.version,
       timestamp: new Date(persisted.timestamp),
-    }
+    };
   } catch (error) {
-    console.warn('Failed to get storage info:', error)
-    return null
+    console.warn('Failed to get storage info:', error);
+    return null;
   }
 }
 
@@ -232,10 +232,10 @@ export function setupAutoSave(): () => void {
       state.currentSecondaryPrize !== prevState.currentSecondaryPrize ||
       state.currentTicketCost !== prevState.currentTicketCost ||
       state.currentAveragePool !== prevState.currentAveragePool ||
-      state.currentPrizeTable !== prevState.currentPrizeTable
+      state.currentPrizeTable !== prevState.currentPrizeTable;
 
     if (shouldSave) {
-      saveLotteryState()
+      saveLotteryState();
     }
-  })
+  });
 }

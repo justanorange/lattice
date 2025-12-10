@@ -1,10 +1,11 @@
 /**
- * Alert Component
+ * Alert Component (shadcn/ui style)
  * Display notifications and messages
  */
 
-import React from 'react';
+import * as React from 'react';
 import { CheckCircle, AlertCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { cn } from '@/shared/lib/utils';
 
 type AlertType = 'success' | 'error' | 'warning' | 'info';
 
@@ -25,49 +26,47 @@ const typeClasses: Record<AlertType, string> = {
 };
 
 const iconMap: Record<AlertType, React.ReactNode> = {
-  success: <CheckCircle className="w-5 h-5" />,
-  error: <AlertCircle className="w-5 h-5" />,
-  warning: <AlertTriangle className="w-5 h-5" />,
-  info: <Info className="w-5 h-5" />,
+  success: <CheckCircle className="size-5" />,
+  error: <AlertCircle className="size-5" />,
+  warning: <AlertTriangle className="size-5" />,
+  info: <Info className="size-5" />,
 };
 
 /**
  * Alert component
  */
-export const Alert: React.FC<AlertProps> = ({
-  type = 'info',
-  title,
-  message,
-  onClose,
-  className,
-  ...props
-}) => {
-  return (
-    <div
-      className={`
-        border rounded-2xl p-4 flex items-start justify-between gap-3
-        ${typeClasses[type]}
-        ${className || ''}
-      `}
-      {...props}
-    >
-      <div className="flex items-start gap-3 flex-1">
-        <div className="shrink-0 mt-0.5">{iconMap[type]}</div>
-        <div className="flex-1">
-          {title && <h3 className="font-medium mb-1">{title}</h3>}
-          <p className="text-sm">{message}</p>
+export const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
+  ({ type = 'info', title, message, onClose, className, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'rounded-2xl p-4',
+          'flex items-start justify-between gap-3',
+          'border',
+          typeClasses[type],
+          className
+        )}
+        {...props}
+      >
+        <div className="flex flex-1 items-start gap-3">
+          <div className="mt-0.5 shrink-0">{iconMap[type]}</div>
+          <div className="flex-1">
+            {title && <h3 className="mb-1 font-medium">{title}</h3>}
+            <p className="text-sm">{message}</p>
+          </div>
         </div>
+        {onClose && (
+          <button
+            onClick={onClose}
+            className="shrink-0 text-current opacity-70 hover:opacity-100"
+          >
+            <X className="size-5" />
+          </button>
+        )}
       </div>
-      {onClose && (
-        <button
-          onClick={onClose}
-          className="shrink-0 text-current opacity-70 hover:opacity-100"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      )}
-    </div>
-  );
-};
+    );
+  }
+);
 
 Alert.displayName = 'Alert';

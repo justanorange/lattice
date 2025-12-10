@@ -3,7 +3,7 @@
  * Comprehensive types for lottery playing strategies
  */
 
-import type { Ticket, Lottery } from '../lottery/types';
+import type { Ticket, Lottery } from '@/entities/lottery/types';
 
 /**
  * Base strategy interface

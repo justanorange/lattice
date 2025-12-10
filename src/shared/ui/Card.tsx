@@ -1,9 +1,10 @@
 /**
- * Card Component
+ * Card Component (shadcn/ui style)
  * Container for content with consistent styling
  */
 
-import React from 'react';
+import * as React from 'react';
+import { cn } from '@/shared/lib/utils';
 
 interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
@@ -17,11 +18,12 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
     return (
       <div
         ref={ref}
-        className={`
-          bg-white dark:bg-gray-800 rounded-2xl p-5
-          border border-gray-200 dark:border-gray-700
-          ${className || ''}
-        `}
+        className={cn(
+          'rounded-2xl p-5',
+          'bg-white dark:bg-gray-800',
+          'border border-gray-200 dark:border-gray-700',
+          className
+        )}
         {...props}
       >
         {children}
@@ -32,29 +34,60 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
 
 Card.displayName = 'Card';
 
-interface CardHeaderProps {
+interface CardHeaderProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  className?: string;
 }
 
-export const CardHeader: React.FC<CardHeaderProps> = ({ children, className }) => (
-  <div className={`mb-2 pb-2 border-b border-gray-200 dark:border-gray-700 ${className || ''}`}>{children}</div>
+export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
+  ({ className, children, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        'mb-2 pb-2',
+        'border-b border-gray-200 dark:border-gray-700',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  )
 );
 
-interface CardBodyProps {
+CardHeader.displayName = 'CardHeader';
+
+interface CardBodyProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  className?: string;
 }
 
-export const CardBody: React.FC<CardBodyProps> = ({ children, className }) => (
-  <div className={`${className || ''}`}>{children}</div>
+export const CardBody = React.forwardRef<HTMLDivElement, CardBodyProps>(
+  ({ className, children, ...props }, ref) => (
+    <div ref={ref} className={cn(className)} {...props}>
+      {children}
+    </div>
+  )
 );
 
-interface CardFooterProps {
+CardBody.displayName = 'CardBody';
+
+interface CardFooterProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  className?: string;
 }
 
-export const CardFooter: React.FC<CardFooterProps> = ({ children, className }) => (
-  <div className={`mt-4 pt-4 border-t border-gray-200 ${className || ''}`}>{children}</div>
+export const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
+  ({ className, children, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn(
+        'mt-4 pt-4',
+        'border-t border-gray-200 dark:border-gray-700',
+        className
+      )}
+      {...props}
+    >
+      {children}
+    </div>
+  )
 );
+
+CardFooter.displayName = 'CardFooter';

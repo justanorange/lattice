@@ -3,9 +3,9 @@
  * Range slider using Radix UI - Controlled Component
  */
 
-import * as React from "react";
-import * as SliderPrimitive from "@radix-ui/react-slider";
-import { cn } from "../lib/utils";
+import * as React from 'react';
+import * as SliderPrimitive from '@radix-ui/react-slider';
+import { cn } from '@/shared/lib/utils';
 
 export interface SliderProps {
   value?: number | number[];
@@ -91,8 +91,8 @@ export const Slider = React.forwardRef<
             onValueChange={handleValueChange}
             disabled={disabled}
             className={cn(
-              "relative flex items-center w-full h-10 touch-none",
-              disabled && "opacity-50 cursor-not-allowed",
+              'relative flex items-center w-full h-10 touch-none',
+              disabled && 'opacity-50 cursor-not-allowed',
               className
             )}
             {...props}
@@ -102,11 +102,11 @@ export const Slider = React.forwardRef<
             </SliderPrimitive.Track>
             <SliderPrimitive.Thumb
               className={cn(
-                "block h-5 w-5 rounded-full border-2 border-amber-500 bg-white dark:bg-gray-800",
-                "shadow-md transition-shadow cursor-pointer hover:shadow-lg",
-                "focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2",
-                "dark:focus-visible:ring-offset-gray-950",
-                "disabled:pointer-events-none disabled:opacity-50"
+                'block h-5 w-5 rounded-full border-2 border-amber-500 bg-white dark:bg-gray-800',
+                'shadow-md transition-shadow cursor-pointer hover:shadow-lg',
+                'focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2',
+                'dark:focus-visible:ring-offset-gray-950',
+                'disabled:pointer-events-none disabled:opacity-50'
               )}
             />
           </SliderPrimitive.Root>
@@ -122,5 +122,5 @@ export const Slider = React.forwardRef<
   }
 );
 
-Slider.displayName = "Slider";
+Slider.displayName = 'Slider';
 

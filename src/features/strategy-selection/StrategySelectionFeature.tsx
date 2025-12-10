@@ -6,9 +6,9 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import { Card, CardHeader, CardBody, Button, Container, Input, Slider, Grid } from '../../shared/ui';
-import { useLotteryStore } from '../../entities/lottery/store';
-import { getStrategiesForLottery, calculateTicketCountForStrategy } from '../../entities/strategies/config';
+import { Card, CardHeader, CardBody, Button, Container, Input, Slider, Grid } from '@/shared/ui';
+import { useLotteryStore } from '@/entities/lottery/store';
+import { getStrategiesForLottery, calculateTicketCountForStrategy } from '@/entities/strategies/config';
 import { ChevronLeft } from 'lucide-react';
 
 export interface StrategySelectionPageProps {

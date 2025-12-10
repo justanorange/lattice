@@ -3,7 +3,7 @@
  */
 
 import { compareTwo, compareMultiple, getBestStrategy, analyzeStrategy } from './comparison';
-import type { Lottery } from '../lottery/types';
+import type { Lottery } from '@/entities/lottery/types';
 import type { StrategyParams } from './types';
 
 // Mock lottery

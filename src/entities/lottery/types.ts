@@ -41,7 +41,7 @@ export interface LotteryField {
  * Lottery variant (for lotteries with multiple prize table versions)
  */
 export interface LotteryVariant {
-  type: "fixed" | "pool_percentage";
+  type: 'fixed' | 'pool_percentage';
   label: string;
   prizeTable: PrizeTable;
   averagePool?: number; // For pool_percentage variant

@@ -12,14 +12,14 @@ import {
   getPrizeCategory,
   isValidMatchesForLottery,
   calculatePrizesForMatches,
-} from "./calculation";
+} from './calculation';
 import {
   LOTTERY_8_PLUS_1,
   LOTTERY_4_FROM_20,
   LOTTERY_12_FROM_24,
   LOTTERY_5_FROM_36_PLUS_1,
   LOTTERY_6_FROM_45,
-} from "./config";
+} from './config';
 
 /**
  * Test prize finding in 8+1 lottery
@@ -30,7 +30,7 @@ export function test8Plus1PrizeFinding(): boolean {
 
     // Superprice match
     const superprize = findPrizeByMatches(prizeTable, [8, 1]);
-    console.assert(superprize === "Суперприз");
+    console.assert(superprize === 'Суперприз');
 
     // Regular prize match
     const prize = findPrizeByMatches(prizeTable, [8, 0]);
@@ -42,7 +42,7 @@ export function test8Plus1PrizeFinding(): boolean {
 
     return true;
   } catch (e) {
-    console.error("8+1 prize finding failed:", e);
+    console.error('8+1 prize finding failed:', e);
     return false;
   }
 }
@@ -61,7 +61,7 @@ export function testPrizeAmountCalculation(): boolean {
       [8, 1],
       superprice
     );
-    console.assert(superprizeAmount === "Суперприз");
+    console.assert(superprizeAmount === 'Суперприз');
 
     // Regular prize
     const regularPrize = calculatePrizeAmount(
@@ -73,7 +73,7 @@ export function testPrizeAmountCalculation(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Prize amount calculation failed:", e);
+    console.error('Prize amount calculation failed:', e);
     return false;
   }
 }
@@ -91,16 +91,16 @@ export function testGetPrizeNumericValue(): boolean {
     console.assert(numeric === 10000);
 
     // Superprice conversion
-    const superValue = getPrizeNumericValue("Суперприз", superprice);
+    const superValue = getPrizeNumericValue('Суперприз', superprice);
     console.assert(superValue === superprice);
 
     // Secondary prize
-    const secondary = getPrizeNumericValue("Приз", superprice, secondaryPrize);
+    const secondary = getPrizeNumericValue('Приз', superprice, secondaryPrize);
     console.assert(secondary === secondaryPrize);
 
     return true;
   } catch (e) {
-    console.error("Get prize numeric value failed:", e);
+    console.error('Get prize numeric value failed:', e);
     return false;
   }
 }
@@ -122,7 +122,7 @@ export function testIsWinningCombination(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Winning combination test failed:", e);
+    console.error('Winning combination test failed:', e);
     return false;
   }
 }
@@ -133,17 +133,17 @@ export function testIsWinningCombination(): boolean {
 export function testGetPrizeCategory(): boolean {
   try {
     const category1 = getPrizeCategory([8, 1]);
-    console.assert(category1 === "8+1");
+    console.assert(category1 === '8+1');
 
     const category2 = getPrizeCategory([3, 0]);
-    console.assert(category2 === "3+0");
+    console.assert(category2 === '3+0');
 
     const category3 = getPrizeCategory([6]);
-    console.assert(category3 === "6");
+    console.assert(category3 === '6');
 
     return true;
   } catch (e) {
-    console.error("Prize category test failed:", e);
+    console.error('Prize category test failed:', e);
     return false;
   }
 }
@@ -178,7 +178,7 @@ export function testIsValidMatchesForLottery(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Valid matches test failed:", e);
+    console.error('Valid matches test failed:', e);
     return false;
   }
 }
@@ -202,14 +202,14 @@ export function testCalculatePrizesForMatches(): boolean {
     );
 
     console.assert(prizes.length === 4);
-    console.assert(prizes[0] === "Суперприз");
+    console.assert(prizes[0] === 'Суперприз');
     console.assert(prizes[1] === 300000);
     console.assert(prizes[2] === 75000);
     console.assert(prizes[3] === 0);
 
     return true;
   } catch (e) {
-    console.error("Batch prize calculation failed:", e);
+    console.error('Batch prize calculation failed:', e);
     return false;
   }
 }
@@ -227,9 +227,9 @@ export function testCalculateEV(): boolean {
     );
 
     // EV should exist
-    console.assert(typeof ev.expectedValue === "number");
-    console.assert(typeof ev.evPercent === "number");
-    console.assert(typeof ev.isProfitable === "boolean");
+    console.assert(typeof ev.expectedValue === 'number');
+    console.assert(typeof ev.evPercent === 'number');
+    console.assert(typeof ev.isProfitable === 'boolean');
 
     // For most lotteries, simple EV will be negative (house edge)
     // unless superprice is very high
@@ -237,7 +237,7 @@ export function testCalculateEV(): boolean {
 
     return true;
   } catch (e) {
-    console.error("EV calculation failed:", e);
+    console.error('EV calculation failed:', e);
     return false;
   }
 }
@@ -253,12 +253,12 @@ export function test12From24SymmetricPrizes(): boolean {
     const prize12 = findPrizeByMatches(prizeTable, [12]);
     const prize0 = findPrizeByMatches(prizeTable, [0]);
 
-    console.assert(prize12 === "Суперприз");
-    console.assert(prize0 === "Суперприз");
+    console.assert(prize12 === 'Суперприз');
+    console.assert(prize0 === 'Суперприз');
 
     return true;
   } catch (e) {
-    console.error("12/24 symmetric prizes test failed:", e);
+    console.error('12/24 symmetric prizes test failed:', e);
     return false;
   }
 }
@@ -272,15 +272,15 @@ export function test5From36PlusSecondaryPrize(): boolean {
 
     // [5, 1] should be superprice
     const superPrize = findPrizeByMatches(prizeTable, [5, 1]);
-    console.assert(superPrize === "Суперприз");
+    console.assert(superPrize === 'Суперприз');
 
     // [5, 0] should be secondary prize marker
     const secondaryPrize = findPrizeByMatches(prizeTable, [5, 0]);
-    console.assert(secondaryPrize === "Приз");
+    console.assert(secondaryPrize === 'Приз');
 
     return true;
   } catch (e) {
-    console.error("5из36+1 secondary prize test failed:", e);
+    console.error('5из36+1 secondary prize test failed:', e);
     return false;
   }
 }
@@ -304,11 +304,11 @@ export function test4From20PercentagePrizes(): boolean {
     );
 
     // Since [4,4] has prizeNote="Суперприз", it returns the marker
-    console.assert(prize === "Суперприз");
+    console.assert(prize === 'Суперприз');
 
     return true;
   } catch (e) {
-    console.error("4из20 percentage test failed:", e);
+    console.error('4из20 percentage test failed:', e);
     return false;
   }
 }
@@ -317,20 +317,20 @@ export function test4From20PercentagePrizes(): boolean {
  * Run all tests
  */
 export function runAllCalculationTests(): boolean {
-  console.log("\n=== Running Prize Calculation Tests ===\n");
+  console.log('\n=== Running Prize Calculation Tests ===\n');
 
   const tests = [
-    { name: "8+1 Prize Finding", fn: test8Plus1PrizeFinding },
-    { name: "Prize Amount Calculation", fn: testPrizeAmountCalculation },
-    { name: "Get Prize Numeric Value", fn: testGetPrizeNumericValue },
-    { name: "Is Winning Combination", fn: testIsWinningCombination },
-    { name: "Prize Category", fn: testGetPrizeCategory },
-    { name: "Valid Matches", fn: testIsValidMatchesForLottery },
-    { name: "Batch Prize Calculation", fn: testCalculatePrizesForMatches },
-    { name: "EV Calculation", fn: testCalculateEV },
-    { name: "12/24 Symmetric Prizes", fn: test12From24SymmetricPrizes },
-    { name: "5из36+1 Secondary Prize", fn: test5From36PlusSecondaryPrize },
-    { name: "4из20 Percentage Prizes", fn: test4From20PercentagePrizes },
+    { name: '8+1 Prize Finding', fn: test8Plus1PrizeFinding },
+    { name: 'Prize Amount Calculation', fn: testPrizeAmountCalculation },
+    { name: 'Get Prize Numeric Value', fn: testGetPrizeNumericValue },
+    { name: 'Is Winning Combination', fn: testIsWinningCombination },
+    { name: 'Prize Category', fn: testGetPrizeCategory },
+    { name: 'Valid Matches', fn: testIsValidMatchesForLottery },
+    { name: 'Batch Prize Calculation', fn: testCalculatePrizesForMatches },
+    { name: 'EV Calculation', fn: testCalculateEV },
+    { name: '12/24 Symmetric Prizes', fn: test12From24SymmetricPrizes },
+    { name: '5из36+1 Secondary Prize', fn: test5From36PlusSecondaryPrize },
+    { name: '4из20 Percentage Prizes', fn: test4From20PercentagePrizes },
   ];
 
   let passed = 0;

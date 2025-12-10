@@ -3,14 +3,14 @@
  * Display lottery details, editable superprice, prize table, EV calculation
  */
 
-import React from "react";
-import { useLotteryStore } from "../../entities/lottery/store";
-import { calculateEV } from "../../entities/lottery/calculation";
-import { Card, CardHeader, CardBody, Input, Button, Container } from "../../shared/ui";
-import type { PrizeRow } from "../../entities/lottery/types";
-import { STRINGS } from "../../shared/constants";
-import { probabilityOfMatch } from "../../entities/calculations/probability";
-import { Undo2, ChevronLeft } from "lucide-react";
+import React from 'react';
+import { useLotteryStore } from '@/entities/lottery/store';
+import { calculateEV } from '@/entities/lottery/calculation';
+import { Card, CardHeader, CardBody, Input, Button, Container } from '@/shared/ui';
+import type { PrizeRow } from '@/entities/lottery/types';
+import { STRINGS } from '@/shared/constants';
+import { probabilityOfMatch } from '@/entities/calculations/probability';
+import { Undo2, ChevronLeft } from 'lucide-react';
 
 export interface LotteryDetailPageProps {
   lotteryId: string;
@@ -165,9 +165,9 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
               <tbody>
                 {currentPrizeTable.rows.map((row, index) => {
                   const isEditable =
-                    typeof row.prize === "number" && row.prize >= 0;
-                  const isSuperprice = row.prize === "Суперприз";
-                  const isSecondaryPrize = row.prize === "Приз";
+                    typeof row.prize === 'number' && row.prize >= 0;
+                  const isSuperprice = row.prize === 'Суперприз';
+                  const isSecondaryPrize = row.prize === 'Приз';
 
                   // Calculate probability for this row
                   let probability = 0;
@@ -212,7 +212,7 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
                       className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                     >
                       <td className="py-2 px-3 text-sm text-gray-900 dark:text-white">
-                        {row.matches.join(" + ")}
+                        {row.matches.join(' + ')}
                       </td>
                       <td className="py-2 px-3 text-sm text-center text-gray-600 dark:text-gray-400">
                         {probOneIn ? (
@@ -263,7 +263,7 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
                           </span>
                         ) : (
                           <span className="font-medium text-gray-900 dark:text-white">
-                            {typeof row.prize === "number"
+                            {typeof row.prize === 'number'
                               ? `${row.prize.toLocaleString()} ₽`
                               : row.prize}
                           </span>
@@ -310,11 +310,11 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
               <span
                 className={`text-lg font-semibold ${
                   evCalculation.isProfitable
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
                 }`}
               >
-                {evCalculation.expectedValue >= 0 ? "+" : ""}
+                {evCalculation.expectedValue >= 0 ? '+' : ''}
                 {evCalculation.expectedValue.toFixed(2)} ₽
               </span>
             </div>
@@ -325,11 +325,11 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
               <span
                 className={`text-lg font-semibold ${
                   evCalculation.isProfitable
-                    ? "text-green-600 dark:text-green-400"
-                    : "text-red-600 dark:text-red-400"
+                    ? 'text-green-600 dark:text-green-400'
+                    : 'text-red-600 dark:text-red-400'
                 }`}
               >
-                {evCalculation.evPercent >= 0 ? "+" : ""}
+                {evCalculation.evPercent >= 0 ? '+' : ''}
                 {evCalculation.evPercent.toFixed(2)}%
               </span>
             </div>
@@ -338,36 +338,36 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
             <div
               className={`mt-4 p-4 rounded-lg border ${
                 evCalculation.isProfitable
-                  ? "bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800"
-                  : "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
+                  ? 'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800'
+                  : 'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800'
               }`}
             >
               <div className="flex items-start gap-2">
                 <span className="text-lg">
-                  {evCalculation.isProfitable ? "✅" : "❌"}
+                  {evCalculation.isProfitable ? '✅' : '❌'}
                 </span>
                 <div>
                   <p
                     className={`text-sm font-medium ${
                       evCalculation.isProfitable
-                        ? "text-green-800 dark:text-green-200"
-                        : "text-red-800 dark:text-red-200"
+                        ? 'text-green-800 dark:text-green-200'
+                        : 'text-red-800 dark:text-red-200'
                     }`}
                   >
                     {evCalculation.isProfitable
-                      ? "Лотерея прибыльна"
-                      : "Лотерея убыточна"}
+                      ? 'Лотерея прибыльна'
+                      : 'Лотерея убыточна'}
                   </p>
                   <p
                     className={`text-xs mt-1 ${
                       evCalculation.isProfitable
-                        ? "text-green-700 dark:text-green-300"
-                        : "text-red-700 dark:text-red-300"
+                        ? 'text-green-700 dark:text-green-300'
+                        : 'text-red-700 dark:text-red-300'
                     }`}
                   >
                     {evCalculation.isProfitable
-                      ? "При текущих параметрах математическое ожидание положительное"
-                      : "При текущих параметрах математическое ожидание отрицательное"}
+                      ? 'При текущих параметрах математическое ожидание положительное'
+                      : 'При текущих параметрах математическое ожидание отрицательное'}
                   </p>
                 </div>
               </div>

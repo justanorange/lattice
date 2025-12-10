@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
-import { STORAGE_KEYS } from '../constants';
+import { STORAGE_KEYS } from '@/shared/constants';
 import { useLocalStorage } from './useLocalStorage';
 
 type ThemeType = 'light' | 'dark';

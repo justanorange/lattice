@@ -7,7 +7,7 @@
  */
 
 import type { Strategy, StrategyParams } from './types';
-import type { Lottery } from '../lottery/types';
+import type { Lottery } from '@/entities/lottery/types';
 
 /**
  * Strategy 1: Min Risk

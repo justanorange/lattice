@@ -7,12 +7,12 @@ import {
   useLotteryStore,
   getLotteryStoreSnapshot,
   subscribeLotteryStore,
-} from "./store";
+} from './store';
 import {
   LOTTERY_8_PLUS_1,
   LOTTERY_4_FROM_20,
   LOTTERY_6_FROM_45,
-} from "./config";
+} from './config';
 
 /**
  * Test initial state
@@ -29,7 +29,7 @@ export function testInitialState(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Initial state test failed:", e);
+    console.error('Initial state test failed:', e);
     return false;
   }
 }
@@ -59,7 +59,7 @@ export function testSelectLottery(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Select lottery test failed:", e);
+    console.error('Select lottery test failed:', e);
     return false;
   }
 }
@@ -77,20 +77,20 @@ export function testSelectVariant(): boolean {
 
     console.assert(
       state.selectedLotteryId === LOTTERY_4_FROM_20.id,
-      "Should select 4из20"
+      'Should select 4из20'
     );
 
     // Select pool_percentage variant
-    store.selectVariant("pool_percentage");
+    store.selectVariant('pool_percentage');
     state = useLotteryStore.getState();
 
     console.assert(
-      state.selectedVariant === "pool_percentage",
-      "Should select pool_percentage variant"
+      state.selectedVariant === 'pool_percentage',
+      'Should select pool_percentage variant'
     );
     console.assert(
       state.currentAveragePool === 5000000,
-      "Should set average pool"
+      'Should set average pool'
     );
 
     // Reset
@@ -98,7 +98,7 @@ export function testSelectVariant(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Select variant test failed:", e);
+    console.error('Select variant test failed:', e);
     return false;
   }
 }
@@ -124,7 +124,7 @@ export function testUpdateSuperprice(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Update superprice test failed:", e);
+    console.error('Update superprice test failed:', e);
     return false;
   }
 }
@@ -143,7 +143,7 @@ export function testUpdateSecondaryPrize(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Update secondary prize test failed:", e);
+    console.error('Update secondary prize test failed:', e);
     return false;
   }
 }
@@ -169,7 +169,7 @@ export function testUpdateTicketCost(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Update ticket cost test failed:", e);
+    console.error('Update ticket cost test failed:', e);
     return false;
   }
 }
@@ -201,7 +201,7 @@ export function testUpdatePrizeTable(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Update prize table test failed:", e);
+    console.error('Update prize table test failed:', e);
     return false;
   }
 }
@@ -225,7 +225,7 @@ export function testUpdatePrizeRow(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Update prize row test failed:", e);
+    console.error('Update prize row test failed:', e);
     return false;
   }
 }
@@ -255,7 +255,7 @@ export function testResetPrizeTableToDefaults(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Reset prize table test failed:", e);
+    console.error('Reset prize table test failed:', e);
     return false;
   }
 }
@@ -286,7 +286,7 @@ export function testResetAllToDefaults(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Reset all test failed:", e);
+    console.error('Reset all test failed:', e);
     return false;
   }
 }
@@ -309,7 +309,7 @@ export function testGetters(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Getters test failed:", e);
+    console.error('Getters test failed:', e);
     return false;
   }
 }
@@ -326,7 +326,7 @@ export function testGetStoreSnapshot(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Get store snapshot test failed:", e);
+    console.error('Get store snapshot test failed:', e);
     return false;
   }
 }
@@ -351,10 +351,10 @@ export function testStoreSubscription(): boolean {
 
     // Wait a tick for subscription to fire
     setTimeout(() => {
-      console.assert(callCount > 0, "Subscription should have fired");
+      console.assert(callCount > 0, 'Subscription should have fired');
       console.assert(
         lastState.currentSuperprice === 123456789,
-        "State should be updated"
+        'State should be updated'
       );
 
       unsubscribe();
@@ -363,7 +363,7 @@ export function testStoreSubscription(): boolean {
 
     return true;
   } catch (e) {
-    console.error("Store subscription test failed:", e);
+    console.error('Store subscription test failed:', e);
     return false;
   }
 }
@@ -372,22 +372,22 @@ export function testStoreSubscription(): boolean {
  * Run all store tests
  */
 export function runAllStoreTests(): boolean {
-  console.log("\n=== Running Lottery Store Tests ===\n");
+  console.log('\n=== Running Lottery Store Tests ===\n');
 
   const tests = [
-    { name: "Initial State", fn: testInitialState },
-    { name: "Select Lottery", fn: testSelectLottery },
-    { name: "Select Variant", fn: testSelectVariant },
-    { name: "Update Superprice", fn: testUpdateSuperprice },
-    { name: "Update Secondary Prize", fn: testUpdateSecondaryPrize },
-    { name: "Update Ticket Cost", fn: testUpdateTicketCost },
-    { name: "Update Prize Table", fn: testUpdatePrizeTable },
-    { name: "Update Prize Row", fn: testUpdatePrizeRow },
-    { name: "Reset Prize Table", fn: testResetPrizeTableToDefaults },
-    { name: "Reset All to Defaults", fn: testResetAllToDefaults },
-    { name: "Getters", fn: testGetters },
-    { name: "Get Store Snapshot", fn: testGetStoreSnapshot },
-    { name: "Store Subscription", fn: testStoreSubscription },
+    { name: 'Initial State', fn: testInitialState },
+    { name: 'Select Lottery', fn: testSelectLottery },
+    { name: 'Select Variant', fn: testSelectVariant },
+    { name: 'Update Superprice', fn: testUpdateSuperprice },
+    { name: 'Update Secondary Prize', fn: testUpdateSecondaryPrize },
+    { name: 'Update Ticket Cost', fn: testUpdateTicketCost },
+    { name: 'Update Prize Table', fn: testUpdatePrizeTable },
+    { name: 'Update Prize Row', fn: testUpdatePrizeRow },
+    { name: 'Reset Prize Table', fn: testResetPrizeTableToDefaults },
+    { name: 'Reset All to Defaults', fn: testResetAllToDefaults },
+    { name: 'Getters', fn: testGetters },
+    { name: 'Get Store Snapshot', fn: testGetStoreSnapshot },
+    { name: 'Store Subscription', fn: testStoreSubscription },
   ];
 
   let passed = 0;

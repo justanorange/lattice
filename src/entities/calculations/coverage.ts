@@ -3,7 +3,7 @@
  * Analyze how lottery strategies cover combinations
  */
 
-import type { Ticket } from '../lottery/types';
+import type { Ticket } from '@/entities/lottery/types';
 import { binomial } from './probability';
 
 /**

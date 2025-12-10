@@ -12,10 +12,10 @@ import type {
   SimulationResult,
 
   PrizeTable,
-} from "./types";
-import { calculatePrizeAmount } from "./calculation";
-import { calculateSimulationStats } from "../calculations/statistics";
-import { uniqueRandomNumbers } from "../calculations/combinatorics";
+} from './types';
+import { calculatePrizeAmount } from './calculation';
+import { calculateSimulationStats } from '@/entities/calculations/statistics';
+import { uniqueRandomNumbers } from '@/entities/calculations/combinatorics';
 
 /**
  * Generate random draw for lottery
@@ -104,14 +104,14 @@ export function simulateLottery(
       );
 
       const prizeValue =
-        typeof prize === "number" ? prize : prize === "Суперприз" ? superprice : secondaryPrize || 0;
+        typeof prize === 'number' ? prize : prize === 'Суперприз' ? superprice : secondaryPrize || 0;
 
       matchResults.push({
         ticketIndex: tickets.indexOf(ticket),
         field1Matches: matches[0] || 0,
         field2Matches: matches[1],
         prizeWon: prizeValue,
-        prizeCategory: matches.join("+"),
+        prizeCategory: matches.join('+'),
       });
 
       totalPrizeThisRound += prizeValue;

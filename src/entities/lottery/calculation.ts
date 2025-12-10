@@ -9,10 +9,10 @@ import type {
   PrizeRow,
 
   EVCalculation,
-} from "./types";
+} from './types';
 
 
-import { probabilityOfMatch } from "../calculations/probability";
+import { probabilityOfMatch } from '@/entities/calculations/probability';
 
 /**
  * Find prize amount for given matches
@@ -58,7 +58,7 @@ export function calculatePrizeAmount(
   _superprice: number,
   _secondaryPrize?: number,
   poolAmount: number = 0
-): number | "Суперприз" | "Приз" {
+): number | 'Суперприз' | 'Приз' {
   // Find the row for these matches
   const sortedMatches = [...matches].sort((a, b) => b - a);
   let matchedRow: PrizeRow | undefined;
@@ -79,17 +79,17 @@ export function calculatePrizeAmount(
   }
 
   // Handle superprice marker
-  if (matchedRow.prize === "Суперприз") {
-    return "Суперприз";
+  if (matchedRow.prize === 'Суперприз') {
+    return 'Суперприз';
   }
 
   // Handle secondary prize marker (5из36+1)
-  if (matchedRow.prize === "Приз") {
-    return "Приз";
+  if (matchedRow.prize === 'Приз') {
+    return 'Приз';
   }
 
   // Handle numeric prize
-  if (typeof matchedRow.prize === "number") {
+  if (typeof matchedRow.prize === 'number') {
     return matchedRow.prize;
   }
 
@@ -110,19 +110,19 @@ export function calculatePrizeAmount(
  * @returns Numeric prize value
  */
 export function getPrizeNumericValue(
-  prize: number | string | "Суперприз" | "Приз",
+  prize: number | string | 'Суперприз' | 'Приз',
   superprice: number,
   secondaryPrize?: number
 ): number {
-  if (typeof prize === "number") {
+  if (typeof prize === 'number') {
     return prize;
   }
 
-  if (prize === "Суперприз") {
+  if (prize === 'Суперприз') {
     return superprice;
   }
 
-  if (prize === "Приз" && secondaryPrize) {
+  if (prize === 'Приз' && secondaryPrize) {
     return secondaryPrize;
   }
 
@@ -172,11 +172,11 @@ export function calculateEV(
     let prizeValue = 0;
     
     // Get prize value
-    if (row.prize === "Суперприз") {
+    if (row.prize === 'Суперприз') {
       prizeValue = superprice;
-    } else if (row.prize === "Приз" && secondaryPrize) {
+    } else if (row.prize === 'Приз' && secondaryPrize) {
       prizeValue = secondaryPrize;
-    } else if (typeof row.prize === "number") {
+    } else if (typeof row.prize === 'number') {
       prizeValue = row.prize;
     } else if (row.prizePercent !== undefined && poolAmount > 0) {
       prizeValue = (row.prizePercent / 100) * poolAmount;
@@ -243,7 +243,7 @@ export function calculateEV(
  * @returns Category label (e.g., "4+1", "3+0", etc.)
  */
 export function getPrizeCategory(matches: number[]): string {
-  return matches.map((m) => m.toString()).join("+");
+  return matches.map((m) => m.toString()).join('+');
 }
 
 /**

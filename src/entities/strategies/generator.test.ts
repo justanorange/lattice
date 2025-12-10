@@ -3,7 +3,7 @@
  */
 
 import { executeStrategy } from './generator';
-import type { Lottery, Ticket } from '../lottery/types';
+import type { Lottery, Ticket } from '@/entities/lottery/types';
 import type { StrategyParams } from './types';
 
 // Mock lottery

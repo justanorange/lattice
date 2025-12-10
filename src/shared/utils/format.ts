@@ -3,7 +3,7 @@
  * Number, currency, date formatting
  */
 
-import { CURRENCY } from '../constants';
+import { CURRENCY } from '@/shared/constants';
 
 /**
  * Format number as currency

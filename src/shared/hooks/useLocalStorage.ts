@@ -4,7 +4,7 @@
  */
 
 import { useState, useCallback } from 'react';
-import { safeJsonParse } from '../utils';
+import { safeJsonParse } from '@/shared/utils';
 
 /**
  * Hook to sync state with localStorage

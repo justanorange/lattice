@@ -3,13 +3,13 @@
  * Display generated tickets from strategy execution
  */
 
-import React, { useState, useEffect } from "react";
-import { useLotteryStore } from "../../entities/lottery/store";
-import { executeStrategy } from "../../entities/strategies/generator";
-import type { StrategyResult } from "../../entities/strategies/types";
-import { Card, CardHeader, CardBody, Container, Spinner, TicketVisualization } from "../../shared/ui";
-import { STRINGS } from "../../shared/constants";
-import { ChevronLeft } from "lucide-react";
+import React, { useState, useEffect } from 'react';
+import { useLotteryStore } from '@/entities/lottery/store';
+import { executeStrategy } from '@/entities/strategies/generator';
+import type { StrategyResult } from '@/entities/strategies/types';
+import { Card, CardHeader, CardBody, Container, Spinner, TicketVisualization } from '@/shared/ui';
+import { STRINGS } from '@/shared/constants';
+import { ChevronLeft } from 'lucide-react';
 
 export interface GenerationPageProps {
   strategyId?: string;
@@ -23,7 +23,7 @@ export interface GenerationPageProps {
  * Shows generated tickets from strategy execution
  */
 export const GenerationPage: React.FC<GenerationPageProps> = ({
-  strategyId = "max_coverage",
+  strategyId = 'max_coverage',
   strategyParams = { budget: 1000 },
   ticketCount = 10,
   onBack,
@@ -55,7 +55,7 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
         );
         setResult(strategyResult);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Ошибка генерации");
+        setError(err instanceof Error ? err.message : 'Ошибка генерации');
       } finally {
         setIsGenerating(false);
       }

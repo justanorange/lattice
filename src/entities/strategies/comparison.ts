@@ -4,7 +4,7 @@
  */
 
 import type { StrategyParams, StrategyResult, StrategyComparison } from './types';
-import type { Lottery } from '../lottery/types';
+import type { Lottery } from '@/entities/lottery/types';
 import { executeStrategy } from './generator';
 import { ALL_STRATEGIES } from './config';
 

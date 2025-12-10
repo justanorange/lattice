@@ -3,7 +3,7 @@
  * Analysis functions for lottery results
  */
 
-import type { SimulationRound, SimulationStatistics } from '../lottery/types';
+import type { SimulationRound, SimulationStatistics } from '@/entities/lottery/types';
 
 /**
  * Calculate basic statistics for array of numbers

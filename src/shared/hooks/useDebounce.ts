@@ -4,7 +4,7 @@
  */
 
 import { useState, useEffect } from 'react';
-import { debounce as debounceUtil } from '../utils';
+import { debounce as debounceUtil } from '@/shared/utils';
 
 /**
  * Hook to debounce a value

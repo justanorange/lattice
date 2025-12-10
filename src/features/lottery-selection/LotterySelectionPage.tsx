@@ -4,9 +4,9 @@
  */
 
 import React from 'react';
-import { ALL_LOTTERIES } from '../../entities/lottery/config';
-import { STRINGS } from '../../shared/constants';
-import { Grid, Container } from '../../shared/ui';
+import { ALL_LOTTERIES } from '@/entities/lottery/config';
+import { STRINGS } from '@/shared/constants';
+import { Grid, Container } from '@/shared/ui';
 import { LotteryCard } from './LotteryCard';
 
 export interface LotterySelectionPageProps {

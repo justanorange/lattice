@@ -4,9 +4,9 @@
  * Numbers are highlighted in different colors based on their selection
  */
 
-import React from "react";
-import type { Ticket, Lottery } from "../../entities/lottery/types";
-import { cn } from "../lib/utils";
+import React from 'react';
+import type { Ticket, Lottery } from '@/entities/lottery/types';
+import { cn } from '@/shared/lib/utils';
 
 export interface TicketVisualizationProps {
   ticket: Ticket;
@@ -62,7 +62,7 @@ export const TicketVisualization: React.FC<TicketVisualizationProps> = ({
   }
 
   return (
-    <div className={cn("p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700", className)}>
+    <div className={cn('p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700', className)}>
       <div className="space-y-4">
         {/* Field 1 */}
         {layouts[0] && (
@@ -83,10 +83,10 @@ export const TicketVisualization: React.FC<TicketVisualizationProps> = ({
                   <div
                     key={`f1-${i}`}
                     className={cn(
-                      "flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold border",
+                      'flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold border',
                       isSelected
-                        ? "bg-amber-500 dark:bg-amber-600 text-white border-amber-600 dark:border-amber-700"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600"
+                        ? 'bg-amber-500 dark:bg-amber-600 text-white border-amber-600 dark:border-amber-700'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600'
                     )}
                   >
                     {num}
@@ -116,10 +116,10 @@ export const TicketVisualization: React.FC<TicketVisualizationProps> = ({
                   <div
                     key={`f2-${i}`}
                     className={cn(
-                      "flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold border",
+                      'flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold border',
                       isSelected
-                        ? "bg-amber-500 dark:bg-amber-600 text-white border-amber-600 dark:border-amber-700"
-                        : "bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600"
+                        ? 'bg-amber-500 dark:bg-amber-600 text-white border-amber-600 dark:border-amber-700'
+                        : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600'
                     )}
                   >
                     {num}

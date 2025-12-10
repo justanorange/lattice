@@ -1,24 +1,33 @@
 /**
- * Layout Components
+ * Layout Components (shadcn/ui style)
  * Grid, container, flexbox helpers
  */
 
-import React from 'react';
+import * as React from 'react';
+import { cn } from '@/shared/lib/utils';
 
-interface ContainerProps {
+interface ContainerProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
-  className?: string;
 }
 
-export const Container: React.FC<ContainerProps> = ({ children, className }) => (
-  <div className={`mx-auto px-4 max-w-6xl ${className || ''}`}>{children}</div>
+export const Container = React.forwardRef<HTMLDivElement, ContainerProps>(
+  ({ children, className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn('mx-auto max-w-6xl px-4', className)}
+      {...props}
+    >
+      {children}
+    </div>
+  )
 );
 
-interface GridProps {
+Container.displayName = 'Container';
+
+interface GridProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   cols?: 1 | 2 | 3 | 4;
   gap?: 'sm' | 'md' | 'lg';
-  className?: string;
 }
 
 const colsClasses = {
@@ -34,17 +43,24 @@ const gapClasses = {
   lg: 'gap-6',
 };
 
-export const Grid: React.FC<GridProps> = ({ children, cols = 2, gap = 'md', className }) => (
-  <div className={`grid ${colsClasses[cols]} ${gapClasses[gap]} ${className || ''}`}>
-    {children}
-  </div>
+export const Grid = React.forwardRef<HTMLDivElement, GridProps>(
+  ({ children, cols = 2, gap = 'md', className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn('grid', colsClasses[cols], gapClasses[gap], className)}
+      {...props}
+    >
+      {children}
+    </div>
+  )
 );
 
-interface StackProps {
+Grid.displayName = 'Grid';
+
+interface StackProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   direction?: 'row' | 'col';
   gap?: 'sm' | 'md' | 'lg';
-  className?: string;
 }
 
 const dirClasses = {
@@ -52,13 +68,16 @@ const dirClasses = {
   col: 'flex-col',
 };
 
-export const Stack: React.FC<StackProps> = ({
-  children,
-  direction = 'col',
-  gap = 'md',
-  className,
-}) => (
-  <div className={`flex ${dirClasses[direction]} ${gapClasses[gap]} ${className || ''}`}>
-    {children}
-  </div>
+export const Stack = React.forwardRef<HTMLDivElement, StackProps>(
+  ({ children, direction = 'col', gap = 'md', className, ...props }, ref) => (
+    <div
+      ref={ref}
+      className={cn('flex', dirClasses[direction], gapClasses[gap], className)}
+      {...props}
+    >
+      {children}
+    </div>
+  )
 );
+
+Stack.displayName = 'Stack';

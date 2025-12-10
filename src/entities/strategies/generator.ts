@@ -4,9 +4,9 @@
  */
 
 import type { StrategyParams, StrategyResult } from './types';
-import type { Ticket, Lottery } from '../lottery/types';
+import type { Ticket, Lottery } from '@/entities/lottery/types';
 import { getStrategyById, validateStrategyParams, calculateCombinations } from './config';
-import { uniqueRandomNumbers } from '../calculations/combinatorics';
+import { uniqueRandomNumbers } from '@/entities/calculations/combinatorics';
 
 /**
  * Helper: Parse numbers from string (supports both comma and space separators)

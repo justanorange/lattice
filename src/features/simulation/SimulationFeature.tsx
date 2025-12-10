@@ -3,13 +3,13 @@
  * Run lottery simulations and display results
  */
 
-import React, { useState } from "react";
-import { useLotteryStore } from "../../entities/lottery/store";
-import { simulateLottery } from "../../entities/lottery/simulation";
-import type { SimulationResult, Ticket } from "../../entities/lottery/types";
-import { Card, CardHeader, CardBody, Button, Container, Input, Slider } from "../../shared/ui";
-import { STRINGS } from "../../shared/constants";
-import { ChevronLeft } from "lucide-react";
+import React, { useState } from 'react';
+import { useLotteryStore } from '@/entities/lottery/store';
+import { simulateLottery } from '@/entities/lottery/simulation';
+import type { SimulationResult, Ticket } from '@/entities/lottery/types';
+import { Card, CardHeader, CardBody, Button, Container, Input, Slider } from '@/shared/ui';
+import { STRINGS } from '@/shared/constants';
+import { ChevronLeft } from 'lucide-react';
 
 export interface SimulationPageProps {
   tickets?: Ticket[];
@@ -37,7 +37,7 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
 
   const handleRunSimulation = () => {
     if (tickets.length === 0) {
-      alert("Нет билетов для симуляции");
+      alert('Нет билетов для симуляции');
       return;
     }
 
@@ -57,8 +57,8 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
         );
         setResult(simulationResult);
       } catch (err) {
-        console.error("Simulation error:", err);
-        alert("Ошибка симуляции: " + (err instanceof Error ? err.message : String(err)));
+        console.error('Simulation error:', err);
+        alert('Ошибка симуляции: ' + (err instanceof Error ? err.message : String(err)));
       } finally {
         setIsRunning(false);
       }
@@ -133,7 +133,7 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
             disabled={isRunning || tickets.length === 0}
             className="w-full"
           >
-            {isRunning ? "Запуск симуляции..." : "Запустить симуляцию"}
+            {isRunning ? 'Запуск симуляции...' : 'Запустить симуляцию'}
           </Button>
         </CardBody>
       </Card>
@@ -173,11 +173,11 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
                   <p
                     className={`text-2xl font-semibold ${
                       result.statistics.netReturn >= 0
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-red-600 dark:text-red-400"
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-red-600 dark:text-red-400'
                     }`}
                   >
-                    {result.statistics.netReturn >= 0 ? "+" : ""}
+                    {result.statistics.netReturn >= 0 ? '+' : ''}
                     {result.statistics.netReturn.toLocaleString()} ₽
                   </p>
                 </div>
@@ -186,11 +186,11 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
                   <p
                     className={`text-2xl font-semibold ${
                       result.statistics.roi >= 0
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-red-600 dark:text-red-400"
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-red-600 dark:text-red-400'
                     }`}
                   >
-                    {result.statistics.roi >= 0 ? "+" : ""}
+                    {result.statistics.roi >= 0 ? '+' : ''}
                     {result.statistics.roi.toFixed(2)}%
                   </p>
                 </div>
@@ -239,11 +239,11 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
                   <span
                     className={`font-medium ${
                       result.rounds[result.rounds.length - 1]?.bankroll >= 0
-                        ? "text-green-600 dark:text-green-400"
-                        : "text-red-600 dark:text-red-400"
+                        ? 'text-green-600 dark:text-green-400'
+                        : 'text-red-600 dark:text-red-400'
                     }`}
                   >
-                    {result.rounds[result.rounds.length - 1]?.bankroll.toLocaleString()}{" "}
+                    {result.rounds[result.rounds.length - 1]?.bankroll.toLocaleString()}{' '}
                     ₽
                   </span>
                 </div>

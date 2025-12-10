@@ -1,37 +1,42 @@
 /**
- * Loading Spinner Component
+ * Loading Spinner Component (shadcn/ui style)
  * Display loading state
  */
 
-import React from 'react';
+import * as React from 'react';
+import { cn } from '@/shared/lib/utils';
 
-interface SpinnerProps {
+interface SpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: 'sm' | 'md' | 'lg';
-  className?: string;
 }
 
 export type { SpinnerProps };
 
 const sizeClasses = {
-  sm: 'w-4 h-4',
-  md: 'w-8 h-8',
-  lg: 'w-12 h-12',
+  sm: 'size-4',
+  md: 'size-8',
+  lg: 'size-12',
 };
 
 /**
  * Loading spinner component
  */
-export const Spinner: React.FC<SpinnerProps> = ({ size = 'md', className }) => {
-  return (
-    <div
-      className={`
-        animate-spin rounded-full border-2 border-gray-300 dark:border-gray-600
-        border-t-amber-500 dark:border-t-amber-600
-        ${sizeClasses[size]}
-        ${className || ''}
-      `}
-    />
-  );
-};
+export const Spinner = React.forwardRef<HTMLDivElement, SpinnerProps>(
+  ({ size = 'md', className, ...props }, ref) => {
+    return (
+      <div
+        ref={ref}
+        className={cn(
+          'animate-spin rounded-full border-2',
+          'border-gray-300 dark:border-gray-600',
+          'border-t-amber-500 dark:border-t-amber-600',
+          sizeClasses[size],
+          className
+        )}
+        {...props}
+      />
+    );
+  }
+);
 
 Spinner.displayName = 'Spinner';
