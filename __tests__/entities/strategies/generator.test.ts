@@ -2,9 +2,9 @@
  * Strategy Generator Tests
  */
 
-import { executeStrategy } from './generator';
+import { executeStrategy } from '@/entities/strategies/generator';
 import type { Lottery, Ticket } from '@/entities/lottery/types';
-import type { StrategyParams } from './types';
+import type { StrategyParams } from '@/entities/strategies/types';
 
 // Mock lottery
 const mockLottery: Lottery = {

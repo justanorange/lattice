@@ -2,7 +2,7 @@
  * Combinatorics Tests
  */
 
-import { combinations, unique, intersection } from './combinatorics';
+import { combinations, unique, intersection } from '@/entities/calculations/combinatorics';
 
 export function testCombinations(): void {
   console.log('Testing: Combinations');

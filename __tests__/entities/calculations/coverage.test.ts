@@ -2,7 +2,7 @@
  * Coverage Tests
  */
 
-import { combinationsCovered, ticketOverlap } from './coverage';
+import { combinationsCovered, ticketOverlap } from '@/entities/calculations/coverage';
 
 export function testCombinationsCovered(): void {
   console.log('Testing: Combinations covered');

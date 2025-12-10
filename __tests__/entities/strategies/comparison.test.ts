@@ -2,9 +2,9 @@
  * Strategy Comparison Tests
  */
 
-import { compareTwo, compareMultiple, getBestStrategy, analyzeStrategy } from './comparison';
+import { compareTwo, compareMultiple, getBestStrategy, analyzeStrategy } from '@/entities/strategies/comparison';
 import type { Lottery } from '@/entities/lottery/types';
-import type { StrategyParams } from './types';
+import type { StrategyParams } from '@/entities/strategies/types';
 
 // Mock lottery
 const mockLottery: Lottery = {

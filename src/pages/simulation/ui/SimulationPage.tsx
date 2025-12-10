@@ -3,18 +3,29 @@
  * FSD Page layer - composes features
  */
 
+import { useParams, useNavigate } from 'react-router-dom';
 import { SimulationFeature } from '@/features/simulation';
+import { useStrategyStore } from '@/entities/strategies/store';
+import { buildRoute } from '@/app/router';
 
-export interface SimulationPageProps {
-  onBack?: () => void;
-}
+export const SimulationPage: React.FC = () => {
+  const { lotteryId } = useParams<{ lotteryId: string }>();
+  const navigate = useNavigate();
+  const { generatedTickets } = useStrategyStore();
 
-export const SimulationPage: React.FC<SimulationPageProps> = ({
-  onBack,
-}) => {
+  if (!lotteryId) {
+    navigate('/');
+    return null;
+  }
+
+  const handleBack = () => {
+    navigate(buildRoute.generation(lotteryId));
+  };
+
   return (
     <SimulationFeature
-      onBack={onBack}
+      tickets={generatedTickets}
+      onBack={handleBack}
     />
   );
 };

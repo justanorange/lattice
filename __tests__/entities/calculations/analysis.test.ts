@@ -2,7 +2,7 @@
  * Analysis Tests
  */
 
-import { compareEV, analyzeProfitability } from './analysis';
+import { compareEV, analyzeProfitability } from '@/entities/calculations/analysis';
 
 export function testCompareEV(): void {
   console.log('Testing: EV comparison');

@@ -1,7 +1,9 @@
+import { useNavigate } from 'react-router-dom';
 import { STRINGS } from '@/shared/constants';
 import { Container, Grid, Card, CardHeader, CardBody, Button } from '@/shared/ui';
 import { LOTTERIES_ARRAY } from '@/entities/lottery/config';
 import { useLotteryStore } from '@/entities/lottery/store';
+import { buildRoute } from '@/app/router';
 
 /**
  * MVP: Only first lottery (8+1) is available
@@ -15,13 +17,8 @@ const LOTTERY_AVAILABILITY: Record<string, boolean> = {
   lottery_7_49: false,
 };
 
-interface LotterySelectionPageProps {
-  onSelectLottery: (lotteryId: string) => void;
-}
-
-export const LotterySelectionPage: React.FC<LotterySelectionPageProps> = ({
-  onSelectLottery,
-}) => {
+export const LotterySelectionPage: React.FC = () => {
+  const navigate = useNavigate();
   const { selectLottery } = useLotteryStore();
 
   const lotteries = LOTTERIES_ARRAY.map((lottery) => ({
@@ -33,7 +30,7 @@ export const LotterySelectionPage: React.FC<LotterySelectionPageProps> = ({
 
   const handleSelectLottery = (lotteryId: string) => {
     selectLottery(lotteryId);
-    onSelectLottery(lotteryId);
+    navigate(buildRoute.lotteryDetail(lotteryId));
   };
 
   return (

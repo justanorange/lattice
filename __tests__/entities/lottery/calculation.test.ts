@@ -12,14 +12,14 @@ import {
   getPrizeCategory,
   isValidMatchesForLottery,
   calculatePrizesForMatches,
-} from './calculation';
+} from '@/entities/lottery/calculation';
 import {
   LOTTERY_8_PLUS_1,
   LOTTERY_4_FROM_20,
   LOTTERY_12_FROM_24,
   LOTTERY_5_FROM_36_PLUS_1,
   LOTTERY_6_FROM_45,
-} from './config';
+} from '@/entities/lottery/config';
 
 /**
  * Test prize finding in 8+1 lottery

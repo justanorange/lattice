@@ -2,7 +2,7 @@
  * Statistics Tests
  */
 
-import { calculateBasicStats, percentile } from './statistics';
+import { calculateBasicStats, percentile } from '@/entities/calculations/statistics';
 
 export function testBasicStats(): void {
   console.log('Testing: Basic statistics');

@@ -7,12 +7,12 @@ import {
   useLotteryStore,
   getLotteryStoreSnapshot,
   subscribeLotteryStore,
-} from './store';
+} from '@/entities/lottery/store';
 import {
   LOTTERY_8_PLUS_1,
   LOTTERY_4_FROM_20,
   LOTTERY_6_FROM_45,
-} from './config';
+} from '@/entities/lottery/config';
 
 /**
  * Test initial state

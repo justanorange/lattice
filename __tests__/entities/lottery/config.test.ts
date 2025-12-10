@@ -16,7 +16,7 @@ import {
   getTwoFieldLotteries,
   getLotteriesWithSecondaryPrize,
   getLotteriesWithVariants,
-} from './config';
+} from '@/entities/lottery/config';
 
 /**
  * Validate 8 + 1 Lottery configuration

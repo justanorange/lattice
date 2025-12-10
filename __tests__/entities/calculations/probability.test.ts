@@ -15,7 +15,7 @@ import {
   probabilityDistribution,
   multiTicketProbability,
   ticketsForProbability,
-} from './probability';
+} from '@/entities/calculations/probability';
 
 /**
  * Test binomial coefficient calculation

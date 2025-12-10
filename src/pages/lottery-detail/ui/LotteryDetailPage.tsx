@@ -3,24 +3,32 @@
  * FSD Page layer - composes features and widgets
  */
 
+import { useParams, useNavigate } from 'react-router-dom';
 import { LotteryDetailFeature } from '@/features/lottery-detail';
+import { buildRoute } from '@/app/router';
 
-export interface LotteryDetailPageProps {
-  lotteryId: string;
-  onNext?: () => void;
-  onBack?: () => void;
-}
+export const LotteryDetailPage: React.FC = () => {
+  const { lotteryId } = useParams<{ lotteryId: string }>();
+  const navigate = useNavigate();
 
-export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
-  lotteryId,
-  onNext,
-  onBack,
-}) => {
+  if (!lotteryId) {
+    navigate('/');
+    return null;
+  }
+
+  const handleNext = () => {
+    navigate(buildRoute.strategy(lotteryId));
+  };
+
+  const handleBack = () => {
+    navigate('/');
+  };
+
   return (
     <LotteryDetailFeature
       lotteryId={lotteryId}
-      onNext={onNext}
-      onBack={onBack}
+      onNext={handleNext}
+      onBack={handleBack}
     />
   );
 };

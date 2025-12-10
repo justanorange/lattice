@@ -9,9 +9,9 @@ import {
   restoreLotteryState,
   getStorageInfo,
   setupAutoSave,
-} from './persistence';
-import { useLotteryStore } from './store';
-import { LOTTERY_4_FROM_20, LOTTERY_5_FROM_36_PLUS_1 } from './config';
+} from '@/entities/lottery/persistence';
+import { useLotteryStore } from '@/entities/lottery/store';
+import { LOTTERY_4_FROM_20, LOTTERY_5_FROM_36_PLUS_1 } from '@/entities/lottery/config';
 
 /**
  * Test initial state is saved correctly
