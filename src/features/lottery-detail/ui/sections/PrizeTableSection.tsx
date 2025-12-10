@@ -3,7 +3,7 @@
  * Editable prize table with probabilities
  */
 
-import { Undo2 } from 'lucide-react';
+import { RotateCcw } from 'lucide-react';
 import { Card, CardHeader, CardBody, Button, Input } from '@/shared/ui';
 import { STRINGS } from '@/shared/constants';
 import { probabilityOfMatch } from '@/entities/calculations/probability';
@@ -65,7 +65,7 @@ export const PrizeTableSection: React.FC<PrizeTableSectionProps> = ({
             onClick={onReset}
             aria-label="Сбросить к умолчаниям"
           >
-            <Undo2 />
+            <RotateCcw className="size-4" />
           </Button>
         </div>
       </CardHeader>
@@ -73,7 +73,7 @@ export const PrizeTableSection: React.FC<PrizeTableSectionProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
+              <tr className="border-b border-gray-200 dark:border-gray-800">
                 <th className="px-3 py-2 text-left text-xs font-semibold uppercase tracking-tighter text-gray-700 dark:text-gray-300">
                   Совп.
                 </th>
@@ -138,7 +138,7 @@ const PrizeTableRow: React.FC<PrizeTableRowProps> = ({ row, index, lottery, onUp
   };
 
   return (
-    <tr className="border-b border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-800/50">
+    <tr className="border-b border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900/50">
       <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">
         {row.matches.join(' + ')}
       </td>

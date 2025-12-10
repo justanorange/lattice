@@ -62,7 +62,7 @@ export const TicketVisualization: React.FC<TicketVisualizationProps> = ({
   }
 
   return (
-    <div className={cn('p-4 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700', className)}>
+    <div className={cn('p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800', className)}>
       <div className="space-y-4">
         {/* Field 1 */}
         {layouts[0] && (

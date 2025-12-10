@@ -1,19 +1,39 @@
 import { useEffect, useState } from 'react';
 import { Sun, Moon, SunMoon } from 'lucide-react';
-type ThemeMode = 'light' | 'dark' | 'system';
+
+type ThemeModeValue = 'light' | 'dark' | 'system';
+
+interface LatticeSettings {
+  themeMode: ThemeModeValue;
+}
+
+const STORAGE_KEY = 'lattice_settings';
+
+function loadSettings(): LatticeSettings {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      const parsed = JSON.parse(stored) as Partial<LatticeSettings>;
+      if (parsed.themeMode === 'light' || parsed.themeMode === 'dark' || parsed.themeMode === 'system') {
+        return { themeMode: parsed.themeMode };
+      }
+    }
+  } catch {
+    // Ignore parse errors
+  }
+  return { themeMode: 'system' };
+}
+
+function saveSettings(settings: LatticeSettings): void {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(settings));
+  } catch {
+    // Ignore storage errors
+  }
+}
 
 export const ThemeMode = () => {
-  const [themeMode, setThemeMode] = useState<ThemeMode>(() => {
-    try {
-      const storedMode = localStorage.getItem('themeMode') as ThemeMode | null;
-      if (storedMode === 'light' || storedMode === 'dark' || storedMode === 'system') {
-        return storedMode;
-      }
-      return 'system';
-    } catch {
-      return 'system';
-    }
-  });
+  const [themeMode, setThemeMode] = useState<ThemeModeValue>(() => loadSettings().themeMode);
   
   // Применение темы и подписка на изменения системной темы в режиме "system"
   useEffect(() => {
@@ -45,7 +65,7 @@ export const ThemeMode = () => {
     }
 
     try {
-      localStorage.setItem('themeMode', themeMode);
+      saveSettings({ themeMode });
     } catch {}
 
     return () => {
@@ -66,7 +86,7 @@ export const ThemeMode = () => {
 
   const handleThemeToggle = () => {
     // hapticFeedback();
-    const order: ThemeMode[] = ['system', 'light', 'dark'];
+    const order: ThemeModeValue[] = ['system', 'light', 'dark'];
     setThemeMode((prev) => {
       const idx = order.indexOf(prev);
       const next = (idx + 1) % order.length;

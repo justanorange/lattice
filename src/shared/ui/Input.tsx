@@ -33,7 +33,7 @@ export const Input = React.forwardRef<HTMLInputElement, InputProps>(
             'w-full px-3 py-2',
             'rounded-xl border border-gray-300 dark:border-gray-600',
             // background → text
-            'bg-white dark:bg-gray-800',
+            'bg-white dark:bg-gray-900',
             'text-gray-900 dark:text-white',
             // hover → focus → disabled
             'hover:border-gray-400 dark:hover:border-gray-500',

@@ -29,8 +29,8 @@ export const LotteryCard: React.FC<LotteryCardProps> = ({
       disabled={!available}
       className={cn(
         'w-full rounded-2xl p-5 text-left transition-all',
-        'border border-gray-200 dark:border-gray-700',
-        'bg-white dark:bg-gray-800 shadow-card',
+        'border border-gray-200 dark:border-gray-800',
+        'bg-white dark:bg-gray-900 shadow-card',
         available && 'hover:border-amber-400 hover:shadow-lg active:scale-[0.98] cursor-pointer',
         !available && 'opacity-60 cursor-not-allowed'
       )}
@@ -49,7 +49,7 @@ export const LotteryCard: React.FC<LotteryCardProps> = ({
       </div>
 
       {/* Visual grid representation */}
-      <div className="flex justify-center py-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg mb-4">
+      <div className="flex justify-center py-3 bg-gray-50 dark:bg-gray-950/50 rounded-lg mb-4">
         <LotteryGrid lotteryId={id} size="sm" />
       </div>
 

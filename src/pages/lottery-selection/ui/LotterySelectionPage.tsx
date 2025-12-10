@@ -63,15 +63,15 @@ export const LotterySelectionPage: React.FC = () => {
               className={cn(
                 'relative w-full rounded-2xl overflow-hidden text-left transition-all',
                 'flex flex-col items-stretch justify-start',
-                'border border-gray-200 dark:border-gray-700',
-                'bg-white dark:bg-gray-800 shadow-card',
+                'border border-gray-200 dark:border-gray-800',
+                'bg-white dark:bg-gray-900 shadow-card',
                 lottery.available && 'hover:border-amber-400 hover:shadow-lg active:scale-[0.98] cursor-pointer',
                 !lottery.available && 'grayscale'
               )}
             >
               {/* Coming soon badge - absolute overlay */}
               {!lottery.available && (
-                <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-900/40">
+                <div className="absolute inset-0 z-10 flex items-center justify-center bg-gray-950/40">
                   <span className="rounded-full bg-amber-500 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-white shadow-lg">
                     {STRINGS.lottery_coming_soon}
                   </span>
@@ -79,12 +79,12 @@ export const LotterySelectionPage: React.FC = () => {
               )}
 
               {/* Top: Visual grid area - fixed height */}
-              <div className="flex items-center justify-center h-28 bg-gray-50 dark:bg-gray-900/50 overflow-hidden">
+              <div className="flex items-center justify-center h-28 bg-gray-50 dark:bg-gray-950/50 overflow-hidden">
                 <LotteryGrid lotteryId={lottery.id} size="sm" randomize />
               </div>
 
               {/* Bottom: Text area */}
-              <div className="p-4 border-t border-gray-100 dark:border-gray-700">
+              <div className="p-4 border-t border-gray-100 dark:border-gray-800">
                 <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
                   {lottery.name}
                 </h3>

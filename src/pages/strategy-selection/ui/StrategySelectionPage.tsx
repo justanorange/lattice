@@ -3,6 +3,7 @@
  * FSD Page layer - owns layout, header, navigation
  */
 
+import { useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Container, PageHeader, Button } from '@/shared/ui';
 import { useStrategySelection } from '@/features/strategy-selection/model';
@@ -21,6 +22,7 @@ export const StrategySelectionPage: React.FC = () => {
   const navigate = useNavigate();
   const { setStrategy } = useStrategyStore();
   const { selectedLottery } = useLotteryStore();
+  const parametersRef = useRef<HTMLDivElement>(null);
 
   if (!lotteryId) {
     navigate('/');
@@ -55,6 +57,14 @@ export const StrategySelectionPage: React.FC = () => {
     }
   };
 
+  const handleStrategySelect = (strategyId: string) => {
+    selectStrategy(strategyId);
+    // Scroll to parameters section after selection
+    setTimeout(() => {
+      parametersRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
   return (
     <Container>
       <PageHeader
@@ -66,16 +76,18 @@ export const StrategySelectionPage: React.FC = () => {
       <StrategyList
         strategies={strategies}
         selectedId={selectedStrategyId}
-        onSelect={selectStrategy}
+        onSelect={handleStrategySelect}
       />
 
       {selectedStrategy && (
         <>
-          <StrategyParameters
-            strategy={selectedStrategy}
-            params={params}
-            onParamChange={updateParam}
-          />
+          <div ref={parametersRef}>
+            <StrategyParameters
+              strategy={selectedStrategy}
+              params={params}
+              onParamChange={updateParam}
+            />
+          </div>
 
           <CalculationResult
             calculatedTicketCount={calculatedTicketCount}

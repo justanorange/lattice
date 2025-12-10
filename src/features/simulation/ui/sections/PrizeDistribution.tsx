@@ -174,7 +174,7 @@ const PrizeCategoryRow: React.FC<PrizeCategoryRowProps> = ({
       className={`rounded-lg p-3 ${
         isJackpot
           ? 'bg-amber-100 dark:bg-amber-900/30'
-          : 'bg-gray-50 dark:bg-gray-800'
+          : 'bg-gray-50 dark:bg-gray-900'
       }`}
     >
       <div className="flex items-center justify-between">

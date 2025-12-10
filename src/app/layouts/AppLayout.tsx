@@ -31,7 +31,7 @@ export const AppLayout = () => {
           fixed inset-x-0 top-0 z-10
           flex items-center justify-end
           p-4
-          bg-white/70 dark:bg-gray-900/70
+          bg-white/70 dark:bg-gray-950/70
           backdrop-blur-md
         "
       >

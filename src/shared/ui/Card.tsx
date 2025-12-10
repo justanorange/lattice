@@ -20,8 +20,8 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         ref={ref}
         className={cn(
           'rounded-2xl p-5',
-          'bg-white dark:bg-gray-800',
-          'border border-gray-200 dark:border-gray-700',
+          'bg-white dark:bg-gray-900',
+          'border border-gray-200 dark:border-gray-800',
           className
         )}
         {...props}
@@ -44,7 +44,7 @@ export const CardHeader = React.forwardRef<HTMLDivElement, CardHeaderProps>(
       ref={ref}
       className={cn(
         'mb-2 pb-2',
-        'border-b border-gray-200 dark:border-gray-700',
+        'border-b border-gray-200 dark:border-gray-800',
         className
       )}
       {...props}
@@ -80,7 +80,7 @@ export const CardFooter = React.forwardRef<HTMLDivElement, CardFooterProps>(
       ref={ref}
       className={cn(
         'mt-4 pt-4',
-        'border-t border-gray-200 dark:border-gray-700',
+        'border-t border-gray-200 dark:border-gray-800',
         className
       )}
       {...props}

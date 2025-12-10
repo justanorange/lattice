@@ -25,7 +25,7 @@ export const EVDisplay: React.FC<EVDisplayProps> = ({ ticketCost, evCalculation 
       <CardBody>
         <div className="space-y-4">
           {/* Ticket Cost */}
-          <div className="flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-700">
+          <div className="flex items-center justify-between border-b border-gray-200 pb-2 dark:border-gray-800">
             <span className="text-sm text-gray-600 dark:text-gray-400">
               Стоимость билета:
             </span>

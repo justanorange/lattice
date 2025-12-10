@@ -131,7 +131,7 @@ export const ProbabilityTable: React.FC<ProbabilityTableProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-700">
+              <tr className="border-b border-gray-200 dark:border-gray-800">
                 <th className="pb-2 text-left font-medium text-gray-600 dark:text-gray-400">
                   Совп.
                 </th>

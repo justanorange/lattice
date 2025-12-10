@@ -3,6 +3,7 @@
  * Ticket cost and superprice inputs with reset buttons
  */
 
+import { useState, useEffect } from 'react';
 import { RotateCcw } from 'lucide-react';
 import { Card, CardBody, Input, Button } from '@/shared/ui';
 
@@ -31,15 +32,43 @@ export const TicketSettings: React.FC<TicketSettingsProps> = ({
   onResetTicketCost,
   onResetSuperprice,
 }) => {
+  // Local state to allow empty input while typing
+  const [ticketCostInput, setTicketCostInput] = useState(ticketCost.toString());
+  const [superpriceInput, setSuperpriceInput] = useState(superprice.toString());
+
+  // Sync local state when external value changes
+  useEffect(() => {
+    setTicketCostInput(ticketCost.toString());
+  }, [ticketCost]);
+
+  useEffect(() => {
+    setSuperpriceInput(superprice.toString());
+  }, [superprice]);
+
   const handleTicketCostChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number.parseFloat(e.target.value);
+    const inputValue = e.target.value;
+    setTicketCostInput(inputValue);
+    
+    const value = Number.parseFloat(inputValue);
     if (!Number.isNaN(value) && value > 0) {
       onTicketCostChange(value);
     }
   };
 
+  const handleTicketCostBlur = () => {
+    const value = Number.parseFloat(ticketCostInput);
+    if (Number.isNaN(value) || value <= 0) {
+      // Reset to default if empty or invalid
+      setTicketCostInput(defaultTicketCost.toString());
+      onTicketCostChange(defaultTicketCost);
+    }
+  };
+
   const handleSuperpriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number.parseFloat(e.target.value) || 0;
+    const inputValue = e.target.value;
+    setSuperpriceInput(inputValue);
+    
+    const value = Number.parseFloat(inputValue) || 0;
     const clampedValue = Math.max(SUPERPRICE_MIN, Math.min(SUPERPRICE_MAX, value));
     onSuperpriceChange(clampedValue);
   };
@@ -55,8 +84,9 @@ export const TicketSettings: React.FC<TicketSettingsProps> = ({
             <Input
               type="text"
               label="Цена (₽)"
-              value={ticketCost.toString()}
+              value={ticketCostInput}
               onChange={handleTicketCostChange}
+              onBlur={handleTicketCostBlur}
               helper={`По умолчанию: ${defaultTicketCost} ₽`}
               className="pr-10"
             />
@@ -66,7 +96,7 @@ export const TicketSettings: React.FC<TicketSettingsProps> = ({
                 size="sm"
                 onClick={onResetTicketCost}
                 title="Сбросить к значению по умолчанию"
-                className="absolute right-1 top-7"
+                className="absolute right-1 top-8"
               >
                 <RotateCcw className="size-4" />
               </Button>
@@ -76,7 +106,7 @@ export const TicketSettings: React.FC<TicketSettingsProps> = ({
             <Input
               type="text"
               label="Суперприз (₽)"
-              value={superprice.toString()}
+              value={superpriceInput}
               onChange={handleSuperpriceChange}
               min={SUPERPRICE_MIN}
               max={SUPERPRICE_MAX}
@@ -90,7 +120,7 @@ export const TicketSettings: React.FC<TicketSettingsProps> = ({
                 size="sm"
                 onClick={onResetSuperprice}
                 title="Сбросить к значению по умолчанию"
-                className="absolute right-1 top-7"
+                className="absolute right-1 top-8"
               >
                 <RotateCcw className="size-4" />
               </Button>

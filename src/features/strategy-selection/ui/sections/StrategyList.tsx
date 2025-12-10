@@ -34,7 +34,7 @@ export const StrategyList: React.FC<StrategyListProps> = ({
   return (
     <Card className="mb-6">
       <CardHeader 
-        className="cursor-pointer select-none"
+        className="cursor-pointer select-none border-b-0 pb-0"
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center justify-between">
@@ -92,7 +92,7 @@ const StrategyCard: React.FC<StrategyCardProps> = ({
       className={`rounded-lg border-2 p-4 text-left transition ${
         isSelected
           ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
-          : 'border-gray-200 hover:border-amber-300 dark:border-gray-700'
+          : 'border-gray-200 hover:border-amber-300 dark:border-gray-800'
       }`}
     >
       <h3 className="font-semibold text-gray-900 dark:text-white">

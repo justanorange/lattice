@@ -219,7 +219,7 @@ export const EVChart: React.FC<EVChartProps> = ({
 
         {/* Simple visual chart */}
         <div className="mb-4">
-          <div className="relative h-40 w-full overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+          <div className="relative h-40 w-full overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900">
             {/* Y-axis label */}
             <div className="absolute left-1 top-1 text-xs text-gray-500 dark:text-gray-400">
               EV
@@ -355,7 +355,7 @@ export const EVChart: React.FC<EVChartProps> = ({
         </div>
 
         {/* Current position */}
-        <div className="border-t border-gray-200 pt-4 dark:border-gray-700">
+        <div className="border-t border-gray-200 pt-4 dark:border-gray-800">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs text-gray-500 dark:text-gray-400">

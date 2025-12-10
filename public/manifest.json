@@ -1,7 +1,7 @@
 {
   "name": "Lattice - Lottery Calculator",
   "short_name": "Lattice",
-  "description": "Russian lottery probability calculator and simulator",
+  "description": "Lottery probability calculator and simulator",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

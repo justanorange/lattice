@@ -77,7 +77,7 @@ export const BankrollChart: React.FC<BankrollChartProps> = ({ result }) => {
               {maxBankroll.toLocaleString('ru-RU')} ₽
             </span>
           </div>
-          <div className="border-t border-gray-200 pt-3 dark:border-gray-700">
+          <div className="border-t border-gray-200 pt-3 dark:border-gray-800">
             <div className="flex justify-between">
               <span className="text-gray-600 dark:text-gray-400">
                 Финальный баланс:
