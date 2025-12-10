@@ -329,6 +329,16 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
                                   } as PrizeRow);
                                 }
                               }}
+                              onBlur={(e) => {
+                                // Prevent empty values - set to 0 if empty
+                                const value = e.target.value.trim();
+                                if (value === '' || value === '0') {
+                                  updatePrizeRow(index, {
+                                    ...row,
+                                    prize: 0,
+                                  } as PrizeRow);
+                                }
+                              }}
                               min={0}
                               step={100}
                               className="w-32 text-right"

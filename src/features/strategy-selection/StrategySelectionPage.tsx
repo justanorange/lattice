@@ -20,10 +20,8 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
   onBack,
 }) => {
   const { selectedLottery, currentTicketCost } = useLotteryStore();
-  const [selectedStrategy, setSelectedStrategy] = useState<string>('max_coverage');
-  const [params, setParams] = useState<Record<string, unknown>>({
-    targetCoverage: 80,
-  });
+  const [selectedStrategy, setSelectedStrategy] = useState<string>('');
+  const [params, setParams] = useState<Record<string, unknown>>({});
 
   const availableStrategies = getStrategiesForLottery(selectedLottery.id);
   const strategy = availableStrategies.find((s) => s.id === selectedStrategy);
@@ -154,9 +152,15 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
                       type="text"
                       label={param.label}
                       value={(params[param.key] as string) || (param.defaultValue as string) || ''}
-                      onChange={(e) => handleParamChange(param.key, e.target.value)}
+                      onChange={(e) => {
+                        // Allow only digits, commas, spaces
+                        const value = e.target.value;
+                        if (/^[0-9,\s]*$/.test(value) || value === '') {
+                          handleParamChange(param.key, value);
+                        }
+                      }}
                       placeholder={param.defaultValue?.toString() || ''}
-                      helper={param.description}
+                      helper={param.description + ' (только числа и запятые)'}
                     />
                   )}
                 </div>

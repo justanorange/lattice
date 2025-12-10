@@ -18,8 +18,8 @@ export const LOTTERY_8_PLUS_1: Lottery = {
     { count: 8, from: 20 },
     { count: 1, from: 4 },
   ],
-  defaultTicketCost: 100,
-  defaultSuperprice: 100000000,
+  defaultTicketCost: 300,
+  defaultSuperprice: 5000000,
   prizeTable: {
     rows: [
       { matches: [8, 1], prize: "Суперприз" },

@@ -205,6 +205,38 @@ export function validateStrategyParams(
 }
 
 /**
+ * Calculate total combinations for lottery
+ */
+function getTotalCombinations(lottery: Lottery): number {
+  let total = calculateCombinations(lottery.fields[0].from, lottery.fields[0].count);
+  
+  if (lottery.fieldCount === 2) {
+    total *= calculateCombinations(lottery.fields[1].from, lottery.fields[1].count);
+  }
+  
+  return total;
+}
+
+/**
+ * Calculate win probability for single ticket in lottery
+ */
+function getWinProbabilityForTicket(lottery: Lottery): number {
+  // This is approximate - probability of winning ANY prize (not just jackpot)
+  // For 8+1 lottery: roughly 5-10% of tickets win something
+  // For simplicity, using a lookup table per lottery
+  
+  const probabilities: Record<string, number> = {
+    'lottery_8_1': 0.08, // ~8% win probability
+    'lottery_6_45': 0.027, // ~2.7%
+    'lottery_7_49': 0.022, // ~2.2%
+    'lottery_5_36_1': 0.018, // ~1.8%
+    'lottery_4_20': 0.03, // ~3%
+  };
+  
+  return probabilities[lottery.id] || 0.05; // Default 5%
+}
+
+/**
  * Calculate ticket count for a strategy
  * This is the CORE calculation that all strategies must do
  */
@@ -216,54 +248,98 @@ export function calculateTicketCountForStrategy(
 ): number {
   switch (strategyId) {
     case 'min_risk': {
-      // For now: simple heuristic
-      // Guaranteed winning tickets = roughly tickets * single_ticket_win_prob
-      // This should be calculated based on lottery math
+      // Guarantee N winning tickets
+      // Expected: if each ticket has prob p of winning
+      // To guarantee k wins, need k/p tickets on average
       const guaranteed = (params['guaranteedWinningTickets'] as number) || 1;
-      return guaranteed * 10; // Placeholder - would need proper math
+      const winProb = getWinProbabilityForTicket(lottery);
+      
+      // Safety factor: multiply by 1.5 to increase odds
+      return Math.ceil((guaranteed / winProb) * 1.5);
     }
 
     case 'max_coverage': {
+      // Use Coupon Collector Problem formula
+      // Expected tickets for P% coverage: -N * ln(1 - P)
       const coverage = (params['targetCoverage'] as number) || 80;
-      // Simple: more coverage = more tickets
-      return Math.ceil((coverage / 100) * 100); // Placeholder
+      const totalCombos = getTotalCombinations(lottery);
+      const targetFraction = coverage / 100;
+      
+      if (targetFraction <= 0) return 1;
+      if (targetFraction >= 0.99) return totalCombos;
+      
+      // Formula: tickets = -totalCombos * ln(1 - targetFraction)
+      const tickets = Math.ceil(-totalCombos * Math.log(1 - targetFraction));
+      
+      // Cap at total combinations (can't exceed all possible tickets)
+      return Math.min(tickets, totalCombos);
     }
 
     case 'full_wheel': {
       // Calculate combinations C(n, k) for all selected numbers
       const wheelnumbersStr = (params['wheelnumbers'] as string) || '';
-      const numbers = wheelnumbersStr.split(',').map((n) => parseInt(n.trim())).filter((n) => !isNaN(n));
+      const numbers = wheelnumbersStr
+        .split(',')
+        .map((n) => parseInt(n.trim()))
+        .filter((n) => !isNaN(n) && n > 0);
+      
       const selectionCount = lottery.fields[0].count;
 
       if (numbers.length < selectionCount) {
-        return 1; // Can't wheel
+        return 0; // Can't make wheel with fewer numbers than needed
       }
 
       // C(n, k) = n! / (k! * (n-k)!)
       const combinations = calculateCombinations(numbers.length, selectionCount);
-      return combinations;
+      return Math.max(1, combinations);
     }
 
     case 'key_wheel': {
       const keyStr = (params['keyNumbers'] as string) || '';
       const additionalStr = (params['additionalNumbers'] as string) || '';
-      const additional = additionalStr.split(',').map((n) => parseInt(n.trim())).filter((n) => !isNaN(n));
+      
+      const keyNumbers = keyStr
+        .split(',')
+        .map((n) => parseInt(n.trim()))
+        .filter((n) => !isNaN(n) && n > 0);
+      
+      const additionalNumbers = additionalStr
+        .split(',')
+        .map((n) => parseInt(n.trim()))
+        .filter((n) => !isNaN(n) && n > 0);
+      
       const selectionCount = lottery.fields[0].count;
-      const keyCount = keyStr.split(',').filter((s) => s.trim()).length;
+      const keyCount = keyNumbers.length;
 
       // Need to select (selectionCount - keyCount) from additional numbers
       const needed = Math.max(0, selectionCount - keyCount);
-      const combinations = calculateCombinations(additional.length, needed);
-      return combinations;
+      
+      if (additionalNumbers.length < needed) {
+        return 0; // Can't make wheel
+      }
+      
+      const combinations = calculateCombinations(additionalNumbers.length, needed);
+      return Math.max(1, combinations);
     }
 
     case 'risk_strategy': {
+      // Risk-based strategy
+      // High risk (90%+) = few tickets
+      // Low risk (1-10%) = many tickets
       const risk = (params['riskLevel'] as number) || 30;
-      // Risk formula: more risk = fewer tickets
-      // 1-10% risk = 9 tickets
-      // 50% risk = 5 tickets
-      // 99% risk = 1 ticket
-      return Math.ceil((100 - risk) / 10);
+      const totalCombos = getTotalCombinations(lottery);
+      
+      // Convert risk % to coverage %
+      // Risk 1% = want 99% coverage (very safe)
+      // Risk 99% = want 1% coverage (very risky)
+      const targetCoverage = 100 - risk;
+      
+      if (targetCoverage < 1) return 1;
+      if (targetCoverage >= 99) return totalCombos;
+      
+      // Use same formula as coverage strategy
+      const tickets = Math.ceil(-totalCombos * Math.log(1 - targetCoverage / 100));
+      return Math.min(tickets, totalCombos);
     }
 
     default:
@@ -274,7 +350,7 @@ export function calculateTicketCountForStrategy(
 /**
  * Helper: Calculate binomial coefficient C(n, k)
  */
-function calculateCombinations(n: number, k: number): number {
+export function calculateCombinations(n: number, k: number): number {
   if (k < 0 || k > n) return 0;
   if (k === 0 || k === n) return 1;
   if (k > n - k) k = n - k;
