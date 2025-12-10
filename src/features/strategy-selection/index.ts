@@ -1,2 +1,2 @@
-export { StrategySelectionPage as StrategySelectionFeature } from './StrategySelectionFeature';
-export type { StrategySelectionPageProps as StrategySelectionFeatureProps } from './StrategySelectionFeature';
+export { StrategySelectionFeature } from './ui/StrategySelectionFeature';
+export type { StrategySelectionFeatureProps } from './ui/StrategySelectionFeature';

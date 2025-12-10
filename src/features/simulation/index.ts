@@ -1,2 +1,2 @@
-export { SimulationPage as SimulationFeature } from './SimulationFeature';
-export type { SimulationPageProps as SimulationFeatureProps } from './SimulationFeature';
+export { SimulationFeature } from './ui/SimulationFeature';
+export type { SimulationFeatureProps } from './ui/SimulationFeature';

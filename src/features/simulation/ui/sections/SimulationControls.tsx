@@ -1,0 +1,66 @@
+/**
+ * Simulation Controls Section
+ * Round count slider and run button
+ */
+
+import { Card, CardHeader, CardBody, Button, Input, Slider } from '@/shared/ui';
+
+interface SimulationControlsProps {
+  roundsCount: number;
+  onRoundsChange: (count: number) => void;
+  onRun: () => void;
+  isRunning: boolean;
+  hasTickets: boolean;
+}
+
+export const SimulationControls: React.FC<SimulationControlsProps> = ({
+  roundsCount,
+  onRoundsChange,
+  onRun,
+  isRunning,
+  hasTickets,
+}) => {
+  return (
+    <Card className="mb-6">
+      <CardHeader>
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          Параметры симуляции
+        </h2>
+      </CardHeader>
+      <CardBody className="space-y-4">
+        <Slider
+          label="Количество тиражей"
+          value={roundsCount}
+          onValueChange={(value) => onRoundsChange(value[0])}
+          min={10}
+          max={10000}
+          step={10}
+          helper="Выберите количество тиражей для симуляции (10-10000)"
+        />
+        <div className="flex items-center gap-2">
+          <Input
+            type="text"
+            value={roundsCount.toString()}
+            onChange={(e) => {
+              const value = Number.parseInt(e.target.value) || 100;
+              onRoundsChange(Math.max(10, Math.min(10000, value)));
+            }}
+            min={10}
+            max={10000}
+            className="w-32"
+          />
+          <span className="text-sm text-gray-600 dark:text-gray-400">
+            тиражей
+          </span>
+        </div>
+        <Button
+          onClick={onRun}
+          disabled={isRunning || !hasTickets}
+          className="w-full"
+        >
+          {isRunning ? 'Запуск симуляции...' : 'Запустить симуляцию'}
+        </Button>
+      </CardBody>
+    </Card>
+  );
+};

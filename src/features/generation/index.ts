@@ -1,2 +1,2 @@
-export { GenerationPage as GenerationFeature } from './GenerationFeature';
-export type { GenerationPageProps as GenerationFeatureProps } from './GenerationFeature';
+export { GenerationFeature } from './ui/GenerationFeature';
+export type { GenerationFeatureProps } from './ui/GenerationFeature';

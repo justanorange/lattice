@@ -1,2 +1,2 @@
-export { LotteryDetailPage as LotteryDetailFeature } from './LotteryDetailFeature';
-export type { LotteryDetailPageProps as LotteryDetailFeatureProps } from './LotteryDetailFeature';
+export { LotteryDetailFeature } from './ui/LotteryDetailFeature';
+export type { LotteryDetailFeatureProps } from './ui/LotteryDetailFeature';
