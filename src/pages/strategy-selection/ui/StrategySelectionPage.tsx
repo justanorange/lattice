@@ -1,40 +1,95 @@
 /**
  * Strategy Selection Page
- * FSD Page layer - composes features
+ * FSD Page layer - owns layout, header, navigation
  */
 
 import { useParams, useNavigate } from 'react-router-dom';
-import { StrategySelectionFeature } from '@/features/strategy-selection';
+import { Container, PageHeader, Button } from '@/shared/ui';
+import { useStrategySelection } from '@/features/strategy-selection/model';
+import {
+  StrategyList,
+  StrategyParameters,
+  CalculationResult,
+} from '@/features/strategy-selection/ui/sections';
 import { useStrategyStore } from '@/entities/strategies/store';
+import { useLotteryStore } from '@/entities/lottery/store';
 import { buildRoute } from '@/app/router';
 
 export const StrategySelectionPage: React.FC = () => {
   const { lotteryId } = useParams<{ lotteryId: string }>();
   const navigate = useNavigate();
   const { setStrategy } = useStrategyStore();
+  const { selectedLottery } = useLotteryStore();
 
   if (!lotteryId) {
     navigate('/');
     return null;
   }
 
-  const handleNext = (
-    strategyId: string,
-    params: Record<string, unknown>,
-    ticketCount: number
-  ) => {
-    setStrategy(strategyId, params, ticketCount);
-    navigate(buildRoute.generation(lotteryId));
-  };
+  const {
+    ticketCost,
+    strategies,
+    selectedStrategy,
+    selectedStrategyId,
+    params,
+    calculatedTicketCount,
+    customTicketCount,
+    effectiveTicketCount,
+    effectiveBudget,
+    selectStrategy,
+    updateParam,
+    setCustomTicketCount,
+    setBudget,
+  } = useStrategySelection();
 
-  const handleBack = () => {
-    navigate(buildRoute.lotteryDetail(lotteryId));
+  const handleBack = () => navigate(buildRoute.lotteryDetail(lotteryId));
+
+  const handleGenerate = () => {
+    if (selectedStrategy) {
+      setStrategy(selectedStrategy.id, params, effectiveTicketCount);
+      navigate(buildRoute.generation(lotteryId));
+    }
   };
 
   return (
-    <StrategySelectionFeature
-      onNext={handleNext}
-      onBack={handleBack}
-    />
+    <Container>
+      <PageHeader
+        title="Выберите стратегию"
+        subtitle={`для ${selectedLottery.name}`}
+        onBack={handleBack}
+      />
+
+      <StrategyList
+        strategies={strategies}
+        selectedId={selectedStrategyId}
+        onSelect={selectStrategy}
+      />
+
+      {selectedStrategy && (
+        <>
+          <StrategyParameters
+            strategy={selectedStrategy}
+            params={params}
+            onParamChange={updateParam}
+          />
+
+          <CalculationResult
+            calculatedTicketCount={calculatedTicketCount}
+            effectiveTicketCount={effectiveTicketCount}
+            effectiveBudget={effectiveBudget}
+            ticketCost={ticketCost}
+            customTicketCount={customTicketCount}
+            onTicketCountChange={setCustomTicketCount}
+            onBudgetChange={setBudget}
+          />
+
+          <div className="mb-6">
+            <Button onClick={handleGenerate} variant="primary" className="w-full">
+              Сгенерировать билеты
+            </Button>
+          </div>
+        </>
+      )}
+    </Container>
   );
 };

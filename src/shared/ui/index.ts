@@ -11,5 +11,6 @@ export { Select, type SelectProps } from './Select';
 export { Alert, type AlertProps } from './Alert';
 export { Spinner, type SpinnerProps } from './Spinner';
 export { Container, Grid, Stack } from './Layout';
+export { PageHeader, type PageHeaderProps } from './PageHeader';
 export { LotteryGrid, type LotteryGridProps } from './LotteryGrid';
 export { TicketVisualization, type TicketVisualizationProps } from './TicketVisualization';
