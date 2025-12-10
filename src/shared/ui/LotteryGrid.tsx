@@ -33,12 +33,7 @@ const GRID_PATTERNS: Record<string, GridPattern> = {
     field1: { from: 20, pick: 8, rows: 4, cols: 5 },
     field2: { from: 4, pick: 1, rows: 1, cols: 4 },
   },
-  lottery_4_20_fixed: {
-    // 4 из 20 + 4 из 20
-    field1: { from: 20, pick: 4, rows: 4, cols: 5 },
-    field2: { from: 20, pick: 4, rows: 4, cols: 5 },
-  },
-  lottery_4_20_percent: {
+  lottery_4_20: {
     // 4 из 20 + 4 из 20
     field1: { from: 20, pick: 4, rows: 4, cols: 5 },
     field2: { from: 20, pick: 4, rows: 4, cols: 5 },

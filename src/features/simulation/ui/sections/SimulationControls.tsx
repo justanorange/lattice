@@ -90,7 +90,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
         </CardBody>
       )}
       
-      <CardBody className="pt-0">
+      <CardBody className={isExpanded ? 'pt-4' : 'pt-0'}>
         <Button
           onClick={onRun}
           disabled={isRunning || !hasTickets}

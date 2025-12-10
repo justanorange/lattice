@@ -5,7 +5,6 @@
 
 import { useParams, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { Play } from 'lucide-react';
 import { Container, PageHeader, Button, Spinner, Card, CardBody } from '@/shared/ui';
 import { useGeneration } from '@/features/generation/model';
 import {
@@ -80,7 +79,6 @@ export const GenerationPage: React.FC = () => {
 
           <div className="mb-6 flex gap-3">
             <Button onClick={handleSimulate} variant="primary" className="flex-1">
-              <Play className="mr-2 size-4" />
               Симулировать тиражи
             </Button>
           </div>
