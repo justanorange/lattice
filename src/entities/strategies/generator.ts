@@ -43,32 +43,58 @@ export async function executeStrategy(
   }
 
   let tickets: Ticket[] = [];
+  let effectiveTicketCount: number = 0;
 
   // Route to strategy implementation
   switch (strategyId) {
     case 'min_risk':
       tickets = generateMinRiskStrategy(lottery, filledParams);
+      effectiveTicketCount = tickets.length;
       break;
-    case 'coverage':
+    case 'max_coverage':
       tickets = generateCoverageStrategy(lottery, filledParams, ticketCost);
+      // Override with explicit ticketCount if provided
+      if (filledParams['ticketCount'] !== undefined) {
+        effectiveTicketCount = filledParams['ticketCount'] as number;
+        tickets = tickets.slice(0, effectiveTicketCount);
+        // If need more, generate more
+        while (tickets.length < effectiveTicketCount) {
+          const field1 = uniqueRandomNumbers(1, lottery.fields[0].from, lottery.fields[0].count);
+          const ticket: Ticket = { lotteryId: lottery.id, field1 };
+          if (lottery.fieldCount === 2) {
+            ticket.field2 = uniqueRandomNumbers(1, lottery.fields[1].from, lottery.fields[1].count);
+          }
+          tickets.push(ticket);
+        }
+      } else {
+        effectiveTicketCount = tickets.length;
+      }
       break;
     case 'full_wheel':
       tickets = generateFullWheelStrategy(lottery, filledParams);
+      effectiveTicketCount = tickets.length;
       break;
     case 'key_wheel':
       tickets = generateKeyWheelStrategy(lottery, filledParams);
+      effectiveTicketCount = tickets.length;
       break;
     case 'guaranteed_win':
       tickets = generateGuaranteedWinStrategy(lottery, filledParams);
+      effectiveTicketCount = tickets.length;
       break;
     case 'budget_optimizer':
       tickets = generateBudgetOptimizerStrategy(lottery, filledParams, ticketCost);
+      effectiveTicketCount = tickets.length;
+      break;
+    case 'risk_strategy':
+      tickets = generateRiskStrategy(lottery, filledParams);
+      effectiveTicketCount = tickets.length;
       break;
     default:
       throw new Error(`Unknown strategy: ${strategyId}`);
   }
 
-  const totalCost = tickets.length * ticketCost;
+  const totalCost = effectiveTicketCount * ticketCost;
 
   // Calculate coverage estimate
   const field = lottery.fields[0];
@@ -78,18 +104,18 @@ export async function executeStrategy(
 
   return {
     tickets,
-    ticketCount: tickets.length,
+    ticketCount: effectiveTicketCount,
     totalCost,
     coverage: totalCombinations > 0 ? {
-      covered: Math.min(tickets.length * 10, totalCombinations), // Rough estimate
+      covered: Math.min(effectiveTicketCount * 10, totalCombinations), // Rough estimate
       total: totalCombinations,
-      percent: (Math.min(tickets.length * 10, totalCombinations) / totalCombinations) * 100,
+      percent: (Math.min(effectiveTicketCount * 10, totalCombinations) / totalCombinations) * 100,
     } : undefined,
     metadata: {
       strategy: strategyId,
       parameters: filledParams,
       generatedAt: new Date(),
-      notes: `Generated ${tickets.length} tickets`,
+      notes: `Generated ${effectiveTicketCount} tickets`,
     },
   };
 }
@@ -285,6 +311,46 @@ function generateBudgetOptimizerStrategy(
         lottery.fields[0].count
       );
     }
+
+    const ticket: Ticket = {
+      lotteryId: lottery.id,
+      field1,
+    };
+
+    if (lottery.fieldCount === 2) {
+      ticket.field2 = uniqueRandomNumbers(
+        1,
+        lottery.fields[1].from,
+        lottery.fields[1].count
+      );
+    }
+
+    tickets.push(ticket);
+  }
+
+  return tickets;
+}
+
+/**
+ * Generate risk strategy tickets
+ * Control probability of win with risk slider
+ */
+function generateRiskStrategy(
+  lottery: Lottery,
+  params: StrategyParams
+): Ticket[] {
+  // targetMatches and budget are available in params but not used in ticket generation
+  // They affect the recommendation, not the actual ticket generation
+  const riskLevel = (params['riskLevel'] as number) || 30; // 1-50%, higher = more tickets
+  
+  // Risk level determines ticket count
+  // Lower risk = more tickets
+  // Higher risk = fewer tickets
+  const ticketCount = Math.ceil((100 - riskLevel) / 10);
+  const tickets: Ticket[] = [];
+
+  for (let i = 0; i < ticketCount; i++) {
+    const field1 = uniqueRandomNumbers(1, lottery.fields[0].from, lottery.fields[0].count);
 
     const ticket: Ticket = {
       lotteryId: lottery.id,

@@ -1,15 +1,17 @@
 /**
  * Strategy Selection Page
- * Allow users to choose lottery strategy
+ * Allow users to choose lottery strategy and configure parameters
+ * Each strategy shows minimum ticket requirements and expected value
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, CardBody, Button, Container, Input, Slider, Select, Grid } from '../../shared/ui';
 import { useLotteryStore } from '../../entities/lottery/store';
-import { getStrategiesForLottery } from '../../entities/strategies/config';
+import { getStrategiesForLottery, getStrategyGuarantee } from '../../entities/strategies/config';
+import { calculateEV } from '../../entities/lottery/calculation';
 
 export interface StrategySelectionPageProps {
-  onNext?: (strategyId: string, params: Record<string, unknown>) => void;
+  onNext?: (strategyId: string, params: Record<string, unknown>, ticketCount: number) => void;
   onBack?: () => void;
 }
 
@@ -20,11 +22,12 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
   onNext,
   onBack,
 }) => {
-  const { selectedLottery, currentTicketCost } = useLotteryStore();
-  const [selectedStrategy, setSelectedStrategy] = useState<string>('coverage');
+  const { selectedLottery, currentTicketCost, currentSuperprice, currentPrizeTable } = useLotteryStore();
+  const [selectedStrategy, setSelectedStrategy] = useState<string>('max_coverage');
   const [params, setParams] = useState<Record<string, unknown>>({
-    budget: 500,
+    budget: 1000,
   });
+  const [customTicketCount, setCustomTicketCount] = useState<number | null>(null);
 
   const availableStrategies = getStrategiesForLottery(selectedLottery.id);
   const strategy = availableStrategies.find((s) => s.id === selectedStrategy);
@@ -36,9 +39,32 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
     }));
   };
 
+  // Calculate guarantee for current strategy
+  const guarantee = useMemo(() => {
+    if (!strategy) return null;
+    return getStrategyGuarantee(strategy, selectedLottery, params);
+  }, [strategy, selectedLottery, params]);
+
+  // Calculate expected value
+  const evInfo = useMemo(() => {
+    const ticketCount = customTicketCount ?? guarantee?.ticketCount ?? 1;
+    const ev = calculateEV(
+      selectedLottery,
+      currentSuperprice,
+      currentPrizeTable,
+      currentTicketCost
+    );
+    return {
+      ...ev,
+      totalCost: ticketCount * currentTicketCost,
+      evTotal: ev.expectedValue * ticketCount,
+    };
+  }, [guarantee?.ticketCount, customTicketCount, selectedLottery, currentSuperprice, currentPrizeTable, currentTicketCost]);
+
   const handleNext = () => {
-    if (onNext && strategy) {
-      onNext(strategy.id, params);
+    if (onNext && strategy && guarantee) {
+      const ticketCount = customTicketCount ?? guarantee.ticketCount;
+      onNext(strategy.id, params, ticketCount);
     }
   };
 
@@ -65,7 +91,10 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
             {availableStrategies.map((strat) => (
               <div
                 key={strat.id}
-                onClick={() => setSelectedStrategy(strat.id)}
+                onClick={() => {
+                  setSelectedStrategy(strat.id);
+                  setCustomTicketCount(null);
+                }}
                 className={`p-4 rounded-xl border-2 cursor-pointer transition ${
                   selectedStrategy === strat.id
                     ? 'border-amber-500 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20'
@@ -165,42 +194,97 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
         </Card>
       )}
 
-      {/* Summary */}
-      <Card className="mb-6">
-        <CardHeader>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Расчет
-          </h2>
-        </CardHeader>
-        <CardBody>
-          <div className="space-y-2">
-            <div className="flex justify-between">
-              <span className="text-gray-600 dark:text-gray-400">Стоимость билета:</span>
-              <span className="font-medium text-gray-900 dark:text-white">
-                {currentTicketCost} ₽
-              </span>
+      {/* Strategy Guarantee & EV */}
+      {strategy && guarantee && (
+        <Card className="mb-6 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
+          <CardHeader>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Расчет стратегии
+            </h2>
+          </CardHeader>
+          <CardBody>
+            <div className="space-y-4">
+              {/* Minimum Requirements */}
+              <div className="pb-4 border-b border-amber-200 dark:border-amber-800">
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Минимально для выполнения:
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Билетов</p>
+                    <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
+                      {guarantee.ticketCount}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">Стоимость</p>
+                    <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
+                      {guarantee.ticketCount * currentTicketCost} ₽
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Expected Value */}
+              <div>
+                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  Ожидаемый возврат:
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">EV на билет</p>
+                    <p className={`text-lg font-bold ${evInfo.expectedValue >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {evInfo.expectedValue >= 0 ? '+' : ''}{evInfo.expectedValue.toFixed(0)} ₽
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">EV%</p>
+                    <p className={`text-lg font-bold ${evInfo.evPercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
+                      {evInfo.evPercent >= 0 ? '+' : ''}{evInfo.evPercent.toFixed(1)}%
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            {params.budget ? (
-              <>
-                <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Бюджет:</span>
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    {String(params.budget)} ₽
-                  </span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
-                  <span className="text-gray-900 dark:text-white font-semibold">
-                    Приблизительно билетов:
-                  </span>
-                  <span className="font-bold text-amber-600 dark:text-amber-400">
-                    {Math.floor(Number(params.budget) / currentTicketCost)}
-                  </span>
-                </div>
-              </>
-            ) : null}
-          </div>
-        </CardBody>
-      </Card>
+          </CardBody>
+        </Card>
+      )}
+
+      {/* Custom Ticket Count */}
+      {guarantee && (
+        <Card className="mb-6">
+          <CardHeader>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              Количество билетов (опционально)
+            </h2>
+          </CardHeader>
+          <CardBody>
+            <div className="space-y-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                По умолчанию: {guarantee.ticketCount} (по расчету стратегии)
+              </p>
+              <Input
+                type="number"
+                label="Сгенерировать билетов"
+                value={customTicketCount?.toString() || ''}
+                onChange={(e) => {
+                  const val = e.target.value ? parseInt(e.target.value) : null;
+                  setCustomTicketCount(val);
+                }}
+                min={1}
+                max={1000}
+                placeholder={guarantee.ticketCount.toString()}
+                helper="Оставьте пусто для использования рекомендуемого количества"
+              />
+              {customTicketCount && customTicketCount !== guarantee.ticketCount && (
+                <p className="text-xs text-amber-600 dark:text-amber-400">
+                  ⚠️ Вы изменили количество билетов. Это может повлиять на гарантию стратегии.
+                </p>
+              )}
+            </div>
+          </CardBody>
+        </Card>
+      )}
 
       {/* Navigation */}
       <div className="flex gap-3 mb-6">

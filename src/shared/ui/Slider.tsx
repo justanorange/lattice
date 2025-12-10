@@ -91,8 +91,8 @@ export const Slider = React.forwardRef<
             onValueChange={handleValueChange}
             disabled={disabled}
             className={cn(
-              "relative flex items-center w-full h-10 touch-none select-none",
-              disabled && "opacity-50",
+              "relative flex items-center w-full h-10 touch-none",
+              disabled && "opacity-50 cursor-not-allowed",
               className
             )}
             {...props}

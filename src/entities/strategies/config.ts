@@ -1,6 +1,13 @@
 /**
  * Strategy Implementations
  * Complete implementations of lottery strategies
+ *
+ * Strategy Types:
+ * 1. Min Risk - Минимизация риска (гарантия минимального выигрыша)
+ * 2. Max Coverage - Максимальное покрытие (охватить все возможные комбинации)
+ * 3. Full Wheel - Полное колесо (все комбинации выбранных чисел)
+ * 4. Key Wheel - Колесо с ключевыми числами (фиксированные числа + варианты)
+ * 5. Risk Strategy - Стратегия с риском (контролируемая вероятность выигрыша)
  */
 
 import type {
@@ -12,13 +19,14 @@ import type { Lottery } from '../lottery/types';
 
 /**
  * Strategy 1: Minimum Risk
- * Maximize probability of at least minimum prize
+ * Guaranteed minimum win - ensures P(at least N matches) >= target probability
+ * Result: Number of tickets needed + expected value
  */
 export const MIN_RISK_STRATEGY: Strategy = {
   id: 'min_risk',
-  name: 'Минимизация риска',
+  name: 'Гарантия минимального выигрыша',
   description:
-    'Максимизирует вероятность хотя бы минимального приза (2-3 совпадения)',
+    'Гарантирует минимальное количество выигрышных билетов с заданной вероятностью',
   supportedLotteries: ['lottery_6_45', 'lottery_7_49', 'lottery_5_36_1', 'lottery_8_1'],
   parameters: [
     {
@@ -31,26 +39,28 @@ export const MIN_RISK_STRATEGY: Strategy = {
       description: 'Минимальное количество совпадений для победы',
     },
     {
-      key: 'ticketCount',
-      label: 'Количество билетов',
+      key: 'targetProbability',
+      label: 'Вероятность гарантии (%)',
       type: 'number',
-      defaultValue: 5,
-      min: 1,
+      defaultValue: 99,
+      min: 50,
       max: 100,
-      description: 'Сколько билетов сгенерировать',
+      step: 5,
+      description: 'Вероятность получить хотя бы один выигрыш',
     },
   ],
 };
 
 /**
- * Strategy 2: Coverage
- * Maximum coverage with fixed budget
+ * Strategy 2: Maximum Coverage
+ * Cover all possible combinations with given budget
+ * Result: Number of tickets that fit budget + coverage % + expected value
  */
 export const COVERAGE_STRATEGY: Strategy = {
-  id: 'coverage',
+  id: 'max_coverage',
   name: 'Максимальное покрытие',
   description:
-    'Максимизирует количество покрытых комбинаций при фиксированном бюджете',
+    'Максимизирует покрытие всех комбинаций при фиксированном бюджете',
   supportedLotteries: [
     'lottery_4_20',
     'lottery_6_45',
@@ -67,7 +77,7 @@ export const COVERAGE_STRATEGY: Strategy = {
       min: 100,
       max: 100000,
       step: 100,
-      description: 'Сколько денег потратить на билеты',
+      description: 'Максимально денег на билеты',
     },
   ],
 };
@@ -75,22 +85,23 @@ export const COVERAGE_STRATEGY: Strategy = {
 /**
  * Strategy 3: Full Wheel
  * Play all combinations of selected numbers
+ * Result: Exact number of tickets for full coverage + 100% expected value
  */
 export const FULL_WHEEL_STRATEGY: Strategy = {
   id: 'full_wheel',
   name: 'Полное колесо',
   description:
-    'Играет все возможные комбинации выбранных чисел - гарантирует выигрыш если все числа совпадут',
+    'Играет все возможные комбинации выбранных чисел - гарантированный выигрыш если совпадут все числа',
   supportedLotteries: ['lottery_6_45', 'lottery_7_49', 'lottery_5_36_1', 'lottery_8_1'],
   parameters: [
     {
       key: 'selectedNumbers',
-      label: 'Выбранные числа',
+      label: 'Количество чисел в колесе',
       type: 'number',
       defaultValue: 10,
       min: 6,
       max: 20,
-      description: 'Количество чисел для колеса (больше числа выборок)',
+      description: 'Количество чисел (должно быть > требуемому выбору)',
     },
     {
       key: 'useRandomNumbers',
@@ -198,6 +209,54 @@ export const BUDGET_OPTIMIZER_STRATEGY: Strategy = {
 };
 
 /**
+ * Strategy 5B: Risk Strategy
+ * Controlled probability of win - with risk slider
+ * Risk% = probability of losing the potential win
+ */
+export const RISK_STRATEGY: Strategy = {
+  id: 'risk_strategy',
+  name: 'Стратегия с контролируемым риском',
+  description:
+    'Определяет количество билетов для достижения целевой вероятности выигрыша с учетом приемлемого риска потери',
+  supportedLotteries: [
+    'lottery_6_45',
+    'lottery_7_49',
+    'lottery_5_36_1',
+    'lottery_8_1',
+  ],
+  parameters: [
+    {
+      key: 'targetMatches',
+      label: 'Целевое количество совпадений',
+      type: 'number',
+      defaultValue: 3,
+      min: 2,
+      max: 5,
+      description: 'Минимум совпадений для выигрыша',
+    },
+    {
+      key: 'riskLevel',
+      label: 'Уровень приемлемого риска (%)',
+      type: 'range',
+      defaultValue: 30,
+      min: 1,
+      max: 50,
+      description: 'Вероятность потерять потенциальный выигрыш (чем выше - больше билетов)',
+    },
+    {
+      key: 'budget',
+      label: 'Максимальный бюджет (₽)',
+      type: 'number',
+      defaultValue: 5000,
+      min: 100,
+      max: 100000,
+      step: 100,
+      description: 'Максимум денег на билеты',
+    },
+  ],
+};
+
+/**
  * All available strategies
  */
 export const ALL_STRATEGIES: Record<string, Strategy> = {
@@ -207,6 +266,7 @@ export const ALL_STRATEGIES: Record<string, Strategy> = {
   [KEY_WHEEL_STRATEGY.id]: KEY_WHEEL_STRATEGY,
   [GUARANTEED_WIN_STRATEGY.id]: GUARANTEED_WIN_STRATEGY,
   [BUDGET_OPTIMIZER_STRATEGY.id]: BUDGET_OPTIMIZER_STRATEGY,
+  [RISK_STRATEGY.id]: RISK_STRATEGY,
 };
 
 /**

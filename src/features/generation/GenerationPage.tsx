@@ -13,6 +13,7 @@ import { STRINGS } from "../../shared/constants";
 export interface GenerationPageProps {
   strategyId?: string;
   strategyParams?: Record<string, unknown>;
+  ticketCount?: number;
   onBack?: () => void;
 }
 
@@ -21,8 +22,9 @@ export interface GenerationPageProps {
  * Shows generated tickets from strategy execution
  */
 export const GenerationPage: React.FC<GenerationPageProps> = ({
-  strategyId = "coverage",
-  strategyParams = { budget: 500 },
+  strategyId = "max_coverage",
+  strategyParams = { budget: 1000 },
+  ticketCount = 10,
   onBack,
 }) => {
   const {
@@ -39,10 +41,15 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
       setIsGenerating(true);
       setError(null);
       try {
+        // Pass ticketCount as part of params if not already there
+        const params = {
+          ...strategyParams,
+          ticketCount,
+        };
         const strategyResult = await executeStrategy(
           strategyId,
           selectedLottery,
-          strategyParams,
+          params,
           currentTicketCost
         );
         setResult(strategyResult);
@@ -54,7 +61,7 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
     };
 
     generateTickets();
-  }, [strategyId, strategyParams, selectedLottery.id, currentTicketCost]);
+  }, [strategyId, strategyParams, ticketCount, selectedLottery.id, currentTicketCost]);
 
   return (
     <Container>
