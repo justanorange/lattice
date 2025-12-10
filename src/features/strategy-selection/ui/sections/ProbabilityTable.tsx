@@ -122,7 +122,7 @@ export const ProbabilityTable: React.FC<ProbabilityTableProps> = ({
             <thead>
               <tr className="border-b border-gray-200 dark:border-gray-700">
                 <th className="pb-2 text-left font-medium text-gray-600 dark:text-gray-400">
-                  Совпадения
+                  Совп.
                 </th>
                 <th className="pb-2 text-right font-medium text-gray-600 dark:text-gray-400">
                   Приз

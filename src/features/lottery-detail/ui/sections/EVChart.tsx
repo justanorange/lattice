@@ -160,48 +160,109 @@ export const EVChart: React.FC<EVChartProps> = ({
 
         {/* Simple visual chart */}
         <div className="mb-4">
-          <div className="relative h-32 w-full overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
-            {/* Zero line */}
-            <div
-              className="absolute left-0 right-0 border-t-2 border-dashed border-gray-400 dark:border-gray-500"
-              style={{
-                top: `${((maxEV - 0) / evRange) * 100}%`,
-              }}
-            />
+          <div className="relative h-40 w-full overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+            {/* Y-axis label */}
+            <div className="absolute left-1 top-1 text-xs text-gray-500 dark:text-gray-400">
+              EV
+            </div>
+            
+            {/* Zero line with label */}
+            {minEV < 0 && maxEV > 0 && (
+              <>
+                <div
+                  className="absolute left-0 right-0 z-10 border-t-2 border-gray-500 dark:border-gray-400"
+                  style={{
+                    top: `${(maxEV / evRange) * 100}%`,
+                  }}
+                />
+                <span 
+                  className="absolute left-1 z-10 -translate-y-1/2 rounded bg-gray-500 px-1 text-xs text-white"
+                  style={{ top: `${(maxEV / evRange) * 100}%` }}
+                >
+                  0
+                </span>
+              </>
+            )}
+
+            {/* Breakeven marker */}
+            {breakevenSuperprice && chartPoints.length > 0 && (
+              (() => {
+                const minSp = chartPoints[0].superprice;
+                const maxSp = chartPoints[chartPoints.length - 1].superprice;
+                if (breakevenSuperprice >= minSp && breakevenSuperprice <= maxSp) {
+                  const position = ((breakevenSuperprice - minSp) / (maxSp - minSp)) * 100;
+                  return (
+                    <div
+                      className="absolute top-0 bottom-0 z-20 w-0.5 bg-amber-500"
+                      style={{ left: `${position}%` }}
+                    >
+                      <div className="absolute top-0 left-1 whitespace-nowrap rounded bg-amber-500 px-1 text-xs text-white">
+                        BE
+                      </div>
+                    </div>
+                  );
+                }
+                return null;
+              })()
+            )}
 
             {/* Chart bars */}
-            <div className="flex h-full items-end justify-between gap-0.5 px-1">
+            <div className="flex h-full items-end px-1 pt-4">
               {chartPoints.map((point, index) => {
                 const isAboveZero = point.ev >= 0;
-                const height = Math.abs(point.ev) / evRange;
+                // Calculate height relative to max absolute value
+                const maxAbsEV = Math.max(Math.abs(maxEV), Math.abs(minEV));
+                const normalizedHeight = Math.abs(point.ev) / maxAbsEV;
+                const heightPercent = normalizedHeight * 45; // 45% max height each direction
+                
                 const isCurrent =
-                  Math.abs(point.superprice - currentSuperprice) < 15_000_000;
+                  Math.abs(point.superprice - currentSuperprice) < 
+                  (chartPoints[1]?.superprice - chartPoints[0]?.superprice || 10_000_000) / 2;
+
+                // Zero position in the chart (where negative bars start from)
+                const zeroPosition = maxEV >= 0 && minEV < 0 
+                  ? (maxEV / evRange) * 100 
+                  : (maxEV >= 0 ? 100 : 0);
 
                 return (
                   <div
                     key={index}
-                    className="relative flex-1"
-                    title={`${(point.superprice / 1_000_000).toFixed(0)} млн: ${point.ev.toFixed(2)} ₽`}
+                    className="group relative flex-1 cursor-pointer"
+                    style={{ height: '100%' }}
+                    title={`${formatAmount(point.superprice)}: ${point.ev >= 0 ? '+' : ''}${point.ev.toFixed(2)} ₽`}
                   >
                     {isAboveZero ? (
                       <div
-                        className={`absolute bottom-1/2 w-full rounded-t ${
+                        className={`absolute w-full rounded-t transition-all ${
                           isCurrent
-                            ? 'bg-amber-500'
-                            : 'bg-green-400 dark:bg-green-500'
+                            ? 'bg-amber-500 ring-2 ring-amber-300'
+                            : 'bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-400'
                         }`}
-                        style={{ height: `${height * 50}%` }}
+                        style={{ 
+                          bottom: `${100 - zeroPosition}%`,
+                          height: `${heightPercent}%`,
+                          minHeight: '2px'
+                        }}
                       />
                     ) : (
                       <div
-                        className={`absolute top-1/2 w-full rounded-b ${
+                        className={`absolute w-full rounded-b transition-all ${
                           isCurrent
-                            ? 'bg-amber-500'
-                            : 'bg-red-400 dark:bg-red-500'
+                            ? 'bg-amber-500 ring-2 ring-amber-300'
+                            : 'bg-red-400 hover:bg-red-500 dark:bg-red-500 dark:hover:bg-red-400'
                         }`}
-                        style={{ height: `${height * 50}%` }}
+                        style={{ 
+                          top: `${zeroPosition}%`,
+                          height: `${heightPercent}%`,
+                          minHeight: '2px'
+                        }}
                       />
                     )}
+                    
+                    {/* Tooltip on hover */}
+                    <div className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white group-hover:block dark:bg-gray-700">
+                      {formatAmount(point.superprice)}: {point.ev >= 0 ? '+' : ''}{point.ev.toFixed(2)}
+                    </div>
                   </div>
                 );
               })}

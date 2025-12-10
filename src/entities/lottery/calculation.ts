@@ -24,16 +24,11 @@ export function findPrizeByMatches(
   prizeTable: PrizeTable,
   matches: number[]
 ): number | string {
-  // Sort matches for comparison
-  const sortedMatches = [...matches].sort((a, b) => b - a);
-
+  // Compare matches arrays directly - order matters (field1, field2)
   for (const row of prizeTable.rows) {
-    const sortedRowMatches = [...row.matches].sort((a, b) => b - a);
-
-    // Check if matches arrays are equal
     if (
-      sortedMatches.length === sortedRowMatches.length &&
-      sortedMatches.every((val, idx) => val === sortedRowMatches[idx])
+      matches.length === row.matches.length &&
+      matches.every((val, idx) => val === row.matches[idx])
     ) {
       return row.prize ?? 0;
     }
@@ -59,15 +54,13 @@ export function calculatePrizeAmount(
   _secondaryPrize?: number,
   poolAmount: number = 0
 ): number | 'Суперприз' | 'Приз' {
-  // Find the row for these matches
-  const sortedMatches = [...matches].sort((a, b) => b - a);
+  // Find the row for these matches - compare directly, order matters
   let matchedRow: PrizeRow | undefined;
 
   for (const row of prizeTable.rows) {
-    const sortedRowMatches = [...row.matches].sort((a, b) => b - a);
     if (
-      sortedMatches.length === sortedRowMatches.length &&
-      sortedMatches.every((val, idx) => val === sortedRowMatches[idx])
+      matches.length === row.matches.length &&
+      matches.every((val, idx) => val === row.matches[idx])
     ) {
       matchedRow = row;
       break;
