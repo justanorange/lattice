@@ -80,7 +80,7 @@ export const LotterySelectionPage: React.FC = () => {
 
               {/* Top: Visual grid area - fixed height */}
               <div className="flex items-center justify-center h-28 bg-gray-50 dark:bg-gray-900/50 overflow-hidden">
-                <LotteryGrid lotteryId={lottery.id} size="sm" />
+                <LotteryGrid lotteryId={lottery.id} size="sm" randomize />
               </div>
 
               {/* Bottom: Text area */}

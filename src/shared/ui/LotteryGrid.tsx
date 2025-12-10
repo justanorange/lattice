@@ -12,6 +12,8 @@ export interface LotteryGridProps {
   lotteryId: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  /** If true, show random combination on each render */
+  randomize?: boolean;
 }
 
 interface FieldConfig {
@@ -108,17 +110,38 @@ function generateSelectedIndices(seed: string, total: number, pick: number): Set
 }
 
 /**
+ * Generate truly random selected indices (different on each call)
+ */
+function generateRandomIndices(total: number, pick: number): Set<number> {
+  const selected = new Set<number>();
+  const indices = Array.from({ length: total }, (_, i) => i);
+  
+  for (let i = 0; i < pick && indices.length > 0; i++) {
+    const idx = Math.floor(Math.random() * indices.length);
+    selected.add(indices[idx]);
+    indices.splice(idx, 1);
+  }
+  
+  return selected;
+}
+
+/**
  * Render a single field grid
  */
 const FieldGrid: React.FC<{
   field: FieldConfig;
   seed: string;
   sizeClass: typeof SIZE_CLASSES['sm'];
-}> = ({ field, seed, sizeClass }) => {
-  const selectedIndices = useMemo(
-    () => generateSelectedIndices(seed, field.from, field.pick),
-    [seed, field.from, field.pick]
-  );
+  randomize?: boolean;
+}> = ({ field, seed, sizeClass, randomize }) => {
+  // For randomize mode, generate new indices on each render (no useMemo)
+  // For deterministic mode, use seed-based generation with memoization
+  const selectedIndices = randomize
+    ? generateRandomIndices(field.from, field.pick)
+    : useMemo(
+        () => generateSelectedIndices(seed, field.from, field.pick),
+        [seed, field.from, field.pick]
+      );
 
   const circles = [];
   let idx = 0;
@@ -162,6 +185,7 @@ export const LotteryGrid: React.FC<LotteryGridProps> = ({
   lotteryId,
   size = 'md',
   className,
+  randomize = false,
 }) => {
   const pattern = GRID_PATTERNS[lotteryId];
   if (!pattern) {
@@ -183,6 +207,7 @@ export const LotteryGrid: React.FC<LotteryGridProps> = ({
         field={pattern.field1}
         seed={`${lotteryId}-field1`}
         sizeClass={sizeClass}
+        randomize={randomize}
       />
       {pattern.field2 && (
         <>
@@ -195,6 +220,7 @@ export const LotteryGrid: React.FC<LotteryGridProps> = ({
             field={pattern.field2}
             seed={`${lotteryId}-field2`}
             sizeClass={sizeClass}
+            randomize={randomize}
           />
         </>
       )}
