@@ -51,46 +51,46 @@ export const TicketSettings: React.FC<TicketSettingsProps> = ({
     <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
       <Card>
         <CardBody className="space-y-4">
-          <div className="flex items-end gap-2">
-            <div className="flex-1">
-              <Input
-                type="text"
-                label="Цена (₽)"
-                value={ticketCost.toString()}
-                onChange={handleTicketCostChange}
-                helper={`По умолчанию: ${defaultTicketCost} ₽`}
-              />
-            </div>
+          <div className="relative">
+            <Input
+              type="text"
+              label="Цена (₽)"
+              value={ticketCost.toString()}
+              onChange={handleTicketCostChange}
+              helper={`По умолчанию: ${defaultTicketCost} ₽`}
+              className="pr-10"
+            />
             {isTicketCostModified && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onResetTicketCost}
                 title="Сбросить к значению по умолчанию"
+                className="absolute right-1 top-7"
               >
                 <RotateCcw className="size-4" />
               </Button>
             )}
           </div>
-          <div className="flex items-end gap-2">
-            <div className="flex-1">
-              <Input
-                type="text"
-                label="Суперприз (₽)"
-                value={superprice.toString()}
-                onChange={handleSuperpriceChange}
-                min={SUPERPRICE_MIN}
-                max={SUPERPRICE_MAX}
-                step={SUPERPRICE_STEP}
-                helper={`По умолчанию: ${defaultSuperprice.toLocaleString()} ₽`}
-              />
-            </div>
+          <div className="relative">
+            <Input
+              type="text"
+              label="Суперприз (₽)"
+              value={superprice.toString()}
+              onChange={handleSuperpriceChange}
+              min={SUPERPRICE_MIN}
+              max={SUPERPRICE_MAX}
+              step={SUPERPRICE_STEP}
+              helper={`По умолчанию: ${defaultSuperprice.toLocaleString()} ₽`}
+              className="pr-10"
+            />
             {isSuperpriceModified && (
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={onResetSuperprice}
                 title="Сбросить к значению по умолчанию"
+                className="absolute right-1 top-7"
               >
                 <RotateCcw className="size-4" />
               </Button>

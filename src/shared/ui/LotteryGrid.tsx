@@ -2,9 +2,10 @@
  * LotteryGrid Component
  * Visual representation of lottery grid layout
  * Shows colored circles in grid pattern matching lottery structure
+ * Each lottery has its own deterministic pattern based on field configuration
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { cn } from '@/shared/lib/utils';
 
 export interface LotteryGridProps {
@@ -13,93 +14,150 @@ export interface LotteryGridProps {
   className?: string;
 }
 
-interface GridPattern {
-  rows: number;
-  cols: number;
-  field1Count: number;
-  field2?: {
-    rows: number;
-    cols: number;
-    count: number;
-  };
+interface FieldConfig {
+  from: number;      // Total numbers in field
+  pick: number;      // Numbers to pick
+  rows: number;      // Display rows
+  cols: number;      // Display cols
 }
 
+interface GridPattern {
+  field1: FieldConfig;
+  field2?: FieldConfig;
+}
+
+// Grid patterns based on actual lottery configurations
 const GRID_PATTERNS: Record<string, GridPattern> = {
   lottery_8_1: {
-    rows: 5,
-    cols: 5,
-    field1Count: 20, // 8 из 20
-    field2: { rows: 1, cols: 4, count: 4 }, // 1 из 4
+    // 8 из 20 + 1 из 4
+    field1: { from: 20, pick: 8, rows: 4, cols: 5 },
+    field2: { from: 4, pick: 1, rows: 1, cols: 4 },
   },
   lottery_4_20_fixed: {
-    rows: 5,
-    cols: 8,
-    field1Count: 20, // 4 из 20 в первом поле
-    field2: { rows: 5, cols: 4, count: 20 }, // и 4 из 20 во втором поле
+    // 4 из 20 + 4 из 20
+    field1: { from: 20, pick: 4, rows: 4, cols: 5 },
+    field2: { from: 20, pick: 4, rows: 4, cols: 5 },
   },
   lottery_4_20_percent: {
-    rows: 5,
-    cols: 8,
-    field1Count: 20,
-    field2: { rows: 5, cols: 4, count: 20 },
+    // 4 из 20 + 4 из 20
+    field1: { from: 20, pick: 4, rows: 4, cols: 5 },
+    field2: { from: 20, pick: 4, rows: 4, cols: 5 },
   },
   lottery_12_24: {
-    rows: 4,
-    cols: 6,
-    field1Count: 24, // 12 из 24
+    // 12 из 24
+    field1: { from: 24, pick: 12, rows: 4, cols: 6 },
   },
   lottery_5_36_1: {
-    rows: 6,
-    cols: 6,
-    field1Count: 36, // 5 из 36
-    field2: { rows: 1, cols: 4, count: 4 }, // 1 из 4
+    // 5 из 36 + 1 из 4
+    field1: { from: 36, pick: 5, rows: 6, cols: 6 },
+    field2: { from: 4, pick: 1, rows: 1, cols: 4 },
   },
   lottery_6_45: {
-    rows: 5,
-    cols: 9,
-    field1Count: 45, // 6 из 45
+    // 6 из 45
+    field1: { from: 45, pick: 6, rows: 5, cols: 9 },
   },
   lottery_7_49: {
-    rows: 7,
-    cols: 7,
-    field1Count: 49, // 7 из 49
+    // 7 из 49
+    field1: { from: 49, pick: 7, rows: 7, cols: 7 },
   },
 };
 
 const SIZE_CLASSES = {
   sm: {
-    circle: 'w-3 h-3',
-    gap: 'gap-1',
+    circle: 'w-2.5 h-2.5',
+    gap: 'gap-0.5',
+    fieldGap: 'gap-2',
     container: 'p-2',
   },
   md: {
-    circle: 'w-4 h-4',
-    gap: 'gap-1.5',
+    circle: 'w-3.5 h-3.5',
+    gap: 'gap-1',
+    fieldGap: 'gap-3',
     container: 'p-3',
   },
   lg: {
     circle: 'w-5 h-5',
-    gap: 'gap-2',
+    gap: 'gap-1.5',
+    fieldGap: 'gap-4',
     container: 'p-4',
   },
 };
 
 /**
- * Get random color for visual variety
+ * Generate deterministic "random" selected indices based on seed
+ * Uses simple hash-based selection for consistent display
  */
-function getRandomColor(): string {
-  const colors = [
-    'bg-red-400',
-    'bg-blue-400',
-    'bg-green-400',
-    'bg-yellow-400',
-    'bg-purple-400',
-    'bg-pink-400',
-    'bg-indigo-400',
-    'bg-cyan-400',
-  ];
-  return colors[Math.floor(Math.random() * colors.length)];
+function generateSelectedIndices(seed: string, total: number, pick: number): Set<number> {
+  const selected = new Set<number>();
+  let hash = 0;
+  
+  // Simple hash from seed
+  for (let i = 0; i < seed.length; i++) {
+    hash = ((hash << 5) - hash) + seed.charCodeAt(i);
+    hash = hash & hash;
+  }
+  
+  // Select indices using hash
+  const indices = Array.from({ length: total }, (_, i) => i);
+  for (let i = 0; i < pick && i < total; i++) {
+    const idx = Math.abs(hash + i * 7919) % (total - i);
+    selected.add(indices[idx]);
+    indices.splice(idx, 1);
+  }
+  
+  return selected;
 }
+
+/**
+ * Render a single field grid
+ */
+const FieldGrid: React.FC<{
+  field: FieldConfig;
+  seed: string;
+  sizeClass: typeof SIZE_CLASSES['sm'];
+  isSecondField?: boolean;
+}> = ({ field, seed, sizeClass, isSecondField }) => {
+  const selectedIndices = useMemo(
+    () => generateSelectedIndices(seed, field.from, field.pick),
+    [seed, field.from, field.pick]
+  );
+
+  const circles = [];
+  let idx = 0;
+  
+  for (let row = 0; row < field.rows; row++) {
+    const rowCircles = [];
+    for (let col = 0; col < field.cols && idx < field.from; col++) {
+      const isSelected = selectedIndices.has(idx);
+      rowCircles.push(
+        <div
+          key={idx}
+          className={cn(
+            sizeClass.circle,
+            'rounded-full transition-colors',
+            isSelected
+              ? isSecondField
+                ? 'bg-purple-500'
+                : 'bg-amber-500'
+              : 'bg-gray-300 dark:bg-gray-600'
+          )}
+        />
+      );
+      idx++;
+    }
+    circles.push(
+      <div key={`row-${row}`} className={cn('flex', sizeClass.gap)}>
+        {rowCircles}
+      </div>
+    );
+  }
+
+  return (
+    <div className={cn('flex flex-col', sizeClass.gap)}>
+      {circles}
+    </div>
+  );
+};
 
 /**
  * Grid component showing lottery layout
@@ -117,42 +175,23 @@ export const LotteryGrid: React.FC<LotteryGridProps> = ({
   const sizeClass = SIZE_CLASSES[size];
 
   return (
-    <div className={cn(sizeClass.container, className)}>
-      <div className={cn('flex flex-col', sizeClass.gap)}>
-        {/* Field 1 */}
-        <div className={cn('flex flex-wrap', sizeClass.gap)}>
-          {Array.from({ length: pattern.field1Count }).map((_, idx) => (
-            <div
-              key={`field1-${idx}`}
-              className={cn(
-                sizeClass.circle,
-                'rounded-full',
-                idx < Math.ceil(pattern.field1Count * 0.4)
-                  ? getRandomColor()
-                  : 'bg-gray-300 dark:bg-gray-600'
-              )}
-            />
-          ))}
-        </div>
-
-        {/* Field 2 (if exists) */}
-        {pattern.field2 && (
-          <div className={cn('flex flex-wrap', sizeClass.gap, 'mt-1')}>
-            {Array.from({ length: pattern.field2.count }).map((_, idx) => (
-              <div
-                key={`field2-${idx}`}
-                className={cn(
-                  sizeClass.circle,
-                  'rounded-full',
-                  idx < Math.ceil(pattern.field2!.count * 0.25)
-                    ? getRandomColor()
-                    : 'bg-gray-300 dark:bg-gray-600'
-                )}
-              />
-            ))}
-          </div>
-        )}
-      </div>
+    <div className={cn('flex', sizeClass.fieldGap, sizeClass.container, className)}>
+      <FieldGrid
+        field={pattern.field1}
+        seed={`${lotteryId}-field1`}
+        sizeClass={sizeClass}
+      />
+      {pattern.field2 && (
+        <>
+          <div className="w-px bg-gray-300 dark:bg-gray-600" />
+          <FieldGrid
+            field={pattern.field2}
+            seed={`${lotteryId}-field2`}
+            sizeClass={sizeClass}
+            isSecondField
+          />
+        </>
+      )}
     </div>
   );
 };

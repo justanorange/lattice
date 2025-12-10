@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { Card, CardHeader, CardBody, Button, LotteryGrid } from '@/shared/ui';
+import { LotteryGrid } from '@/shared/ui';
+import { cn } from '@/shared/lib/utils';
 
 export interface LotteryCardProps {
   id: string;
@@ -22,12 +23,20 @@ export const LotteryCard: React.FC<LotteryCardProps> = ({
   onSelect,
 }) => {
   return (
-    <Card
-      className={`border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 shadow-card ${
-        !available ? 'opacity-60' : ''
-      }`}
+    <button
+      type="button"
+      onClick={() => available && onSelect(id)}
+      disabled={!available}
+      className={cn(
+        'w-full rounded-2xl p-5 text-left transition-all',
+        'border border-gray-200 dark:border-gray-700',
+        'bg-white dark:bg-gray-800 shadow-card',
+        available && 'hover:border-amber-400 hover:shadow-lg active:scale-[0.98] cursor-pointer',
+        !available && 'opacity-60 cursor-not-allowed'
+      )}
     >
-      <CardHeader className="flex items-start justify-between gap-3">
+      {/* Header */}
+      <div className="flex items-start justify-between gap-3 mb-4">
         <div>
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{name}</h3>
           <p className="text-xs text-gray-500 dark:text-gray-400">{description}</p>
@@ -37,26 +46,21 @@ export const LotteryCard: React.FC<LotteryCardProps> = ({
             Скоро
           </span>
         )}
-      </CardHeader>
-      <CardBody className="flex flex-col gap-4">
-        {/* Visual grid representation */}
-        <div className="flex justify-center py-2 bg-gray-50 dark:bg-gray-900/50 rounded-lg">
-          <LotteryGrid lotteryId={id} size="sm" />
-        </div>
+      </div>
 
-        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-          <span className="inline-flex h-2 w-2 rounded-full bg-amber-500" />
-          <span>{available ? 'Доступна для расчётов' : 'Скоро станет доступна'}</span>
-        </div>
-        <Button
-          variant={available ? 'primary' : 'ghost'}
-          disabled={!available}
-          onClick={() => available && onSelect(id)}
-          className="w-full"
-        >
-          {available ? 'Выбрать' : 'Ожидайте'}
-        </Button>
-      </CardBody>
-    </Card>
+      {/* Visual grid representation */}
+      <div className="flex justify-center py-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg mb-4">
+        <LotteryGrid lotteryId={id} size="sm" />
+      </div>
+
+      {/* Status indicator */}
+      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+        <span className={cn(
+          'inline-flex h-2 w-2 rounded-full',
+          available ? 'bg-amber-500' : 'bg-gray-400'
+        )} />
+        <span>{available ? 'Доступна для расчётов' : 'Скоро станет доступна'}</span>
+      </div>
+    </button>
   );
 };

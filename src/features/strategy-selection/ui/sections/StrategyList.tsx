@@ -1,9 +1,12 @@
 /**
  * Strategy List Section
- * Available strategies for selection
+ * Available strategies for selection with collapsible behavior
  */
 
+import { useState, useEffect } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { Card, CardHeader, CardBody, Grid } from '@/shared/ui';
+import { cn } from '@/shared/lib/utils';
 import type { Strategy } from '@/entities/strategies/types';
 
 interface StrategyListProps {
@@ -17,25 +20,57 @@ export const StrategyList: React.FC<StrategyListProps> = ({
   selectedId,
   onSelect,
 }) => {
+  // Auto-collapse when a strategy is selected
+  const [isExpanded, setIsExpanded] = useState(true);
+  const selectedStrategy = strategies.find(s => s.id === selectedId);
+
+  // Collapse after first selection
+  useEffect(() => {
+    if (selectedId) {
+      setIsExpanded(false);
+    }
+  }, [selectedId]);
+
   return (
     <Card className="mb-6">
-      <CardHeader>
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
-          Доступные стратегии
-        </h2>
+      <CardHeader 
+        className="cursor-pointer select-none"
+        onClick={() => setIsExpanded(!isExpanded)}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              {selectedStrategy ? selectedStrategy.name : 'Выберите стратегию'}
+            </h2>
+            {selectedStrategy && !isExpanded && (
+              <p className="text-sm text-gray-500 dark:text-gray-400 mt-0.5">
+                {selectedStrategy.description}
+              </p>
+            )}
+          </div>
+          <ChevronDown 
+            className={cn(
+              'w-5 h-5 text-gray-500 transition-transform',
+              isExpanded && 'rotate-180'
+            )} 
+          />
+        </div>
       </CardHeader>
-      <CardBody>
-        <Grid cols={1} gap="md">
-          {strategies.map((strategy) => (
-            <StrategyCard
-              key={strategy.id}
-              strategy={strategy}
-              isSelected={selectedId === strategy.id}
-              onSelect={() => onSelect(strategy.id)}
-            />
-          ))}
-        </Grid>
-      </CardBody>
+      
+      {isExpanded && (
+        <CardBody>
+          <Grid cols={1} gap="md">
+            {strategies.map((strategy) => (
+              <StrategyCard
+                key={strategy.id}
+                strategy={strategy}
+                isSelected={selectedId === strategy.id}
+                onSelect={() => onSelect(strategy.id)}
+              />
+            ))}
+          </Grid>
+        </CardBody>
+      )}
     </Card>
   );
 };

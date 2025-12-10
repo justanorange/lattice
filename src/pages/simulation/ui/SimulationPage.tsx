@@ -56,6 +56,7 @@ export const SimulationPage: React.FC = () => {
         onRun={handleRunSimulation}
         isRunning={isRunning}
         hasTickets={generatedTickets.length > 0}
+        hasResult={!!result}
       />
 
       {result && !isRunning && (
