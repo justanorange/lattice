@@ -1,14 +1,17 @@
 /**
  * Lottery State Store (Zustand)
  * Manages selected lottery, superprice, prize tables, and configuration
+ * Persists to localStorage
  */
 
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import type { Lottery, PrizeTable, PrizeRow } from './types';
 import {
   LOTTERY_8_PLUS_1,
   getLotteryById,
 } from './config';
+import { STORAGE_KEYS } from '@/shared/constants';
 
 /**
  * State for lottery management
@@ -46,6 +49,8 @@ export interface LotteryStoreState {
   updatePrizeTable: (prizeTable: PrizeTable) => void;
   updatePrizeRow: (index: number, row: PrizeRow) => void;
   resetPrizeTableToDefaults: () => void;
+  resetSuperpriceToDefault: () => void;
+  resetTicketCostToDefault: () => void;
   resetAllToDefaults: () => void;
 
   // Getters
@@ -57,9 +62,11 @@ export interface LotteryStoreState {
 
 /**
  * Create Zustand store for lottery state
- * Persists to localStorage (via middleware in lottery-store.ts)
+ * Persists to localStorage
  */
-export const useLotteryStore = create<LotteryStoreState>((set, get) => ({
+export const useLotteryStore = create<LotteryStoreState>()(
+  persist(
+    (set, get) => ({
   // Initial state
   selectedLotteryId: LOTTERY_8_PLUS_1.id,
   selectedLottery: LOTTERY_8_PLUS_1,
@@ -199,12 +206,46 @@ export const useLotteryStore = create<LotteryStoreState>((set, get) => ({
     });
   },
 
+  resetSuperpriceToDefault: () => {
+    const lottery = get().selectedLottery;
+    set({ currentSuperprice: lottery.defaultSuperprice });
+  },
+
+  resetTicketCostToDefault: () => {
+    const lottery = get().selectedLottery;
+    set({ currentTicketCost: lottery.defaultTicketCost });
+  },
+
   // Getters
   getSelectedLottery: () => get().selectedLottery,
   getPrizeTable: () => get().currentPrizeTable,
   getSuperprice: () => get().currentSuperprice,
   getSecondaryPrize: () => get().currentSecondaryPrize,
-}));
+}),
+    {
+      name: STORAGE_KEYS.lottery_state,
+      partialize: (state) => ({
+        // Only persist user-editable values, not derived state
+        selectedLotteryId: state.selectedLotteryId,
+        selectedVariant: state.selectedVariant,
+        currentSuperprice: state.currentSuperprice,
+        currentSecondaryPrize: state.currentSecondaryPrize,
+        currentTicketCost: state.currentTicketCost,
+        currentPrizeTable: state.currentPrizeTable,
+        currentAveragePool: state.currentAveragePool,
+      }),
+      onRehydrateStorage: () => (state) => {
+        // After rehydration, restore selectedLottery from ID
+        if (state) {
+          const lottery = getLotteryById(state.selectedLotteryId);
+          if (lottery) {
+            state.selectedLottery = lottery;
+          }
+        }
+      },
+    }
+  )
+);
 
 /**
  * Custom hook to use lottery store with proper TypeScript inference

@@ -29,10 +29,14 @@ export const LotteryDetailPage: React.FC = () => {
     superprice,
     prizeTable,
     evCalculation,
+    defaultTicketCost,
+    defaultSuperprice,
     updateTicketCost,
     updateSuperprice,
     updatePrizeRow,
     resetPrizeTable,
+    resetTicketCost,
+    resetSuperprice,
   } = useLotteryDetail(lotteryId);
 
   const handleBack = () => navigate('/');
@@ -57,8 +61,12 @@ export const LotteryDetailPage: React.FC = () => {
       <TicketSettings
         ticketCost={ticketCost}
         superprice={superprice}
+        defaultTicketCost={defaultTicketCost}
+        defaultSuperprice={defaultSuperprice}
         onTicketCostChange={handleTicketCostChange}
         onSuperpriceChange={handleSuperpriceChange}
+        onResetTicketCost={resetTicketCost}
+        onResetSuperprice={resetSuperprice}
       />
 
       <PrizeTableSection
