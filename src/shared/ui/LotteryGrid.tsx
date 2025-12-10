@@ -136,7 +136,7 @@ const FieldGrid: React.FC<{
             'rounded-full transition-colors',
             isSelected
               ? isSecondField
-                ? 'bg-violet-500'
+                ? 'bg-blue-500'
                 : 'bg-amber-500'
               : 'bg-gray-300 dark:bg-gray-600'
           )}

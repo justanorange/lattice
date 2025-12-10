@@ -77,9 +77,11 @@ export const LotterySelectionPage: React.FC = () => {
                 </div>
               )}
 
-              {/* Top: Visual grid area */}
-              <div className="flex items-center justify-center p-4 bg-gray-50 dark:bg-gray-900/50 min-h-[100px]">
-                <LotteryGrid lotteryId={lottery.id} size="sm" />
+              {/* Top: Visual grid area - fixed height */}
+              <div className="flex items-center justify-center h-32 p-3 bg-gray-50 dark:bg-gray-900/50">
+                <div className="scale-90">
+                  <LotteryGrid lotteryId={lottery.id} size="sm" />
+                </div>
               </div>
 
               {/* Bottom: Text area */}
