@@ -1,0 +1,19 @@
+{
+  "name": "Lattice - Lottery Calculator",
+  "short_name": "Lattice",
+  "description": "Russian lottery probability calculator and simulator",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f59e0b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
