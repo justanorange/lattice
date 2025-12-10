@@ -53,7 +53,7 @@ export const LotterySelectionPage: React.FC = () => {
         </h1>
       </header>
       <Container>
-        <Grid cols={2} gap="md">
+        <Grid cols={2} gap="md" className="mb-6">
           {lotteries.map((lottery) => (
             <button
               key={lottery.id}
@@ -62,6 +62,7 @@ export const LotterySelectionPage: React.FC = () => {
               disabled={!lottery.available}
               className={cn(
                 'relative w-full rounded-2xl overflow-hidden text-left transition-all',
+                'flex flex-col items-stretch justify-start',
                 'border border-gray-200 dark:border-gray-700',
                 'bg-white dark:bg-gray-800 shadow-card',
                 lottery.available && 'hover:border-amber-400 hover:shadow-lg active:scale-[0.98] cursor-pointer',
