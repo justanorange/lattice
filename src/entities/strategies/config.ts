@@ -269,9 +269,9 @@ export function calculateTicketCountForStrategy(
       const numbers = parseNumbers(wheelnumbersStr);
       const selectionCount = lottery.fields[0].count;
 
-      if (numbers.length === 0) return 1;
+      if (numbers.length === 0) return 0; // Can't generate wheel without numbers
       if (numbers.length < selectionCount) {
-        return 0;
+        return 0; // Not enough numbers
       }
 
       const combinations = calculateCombinations(numbers.length, selectionCount);
@@ -284,6 +284,8 @@ export function calculateTicketCountForStrategy(
       const selectionCount = lottery.fields[0].count;
       const keyCount = keyNumbers.length;
 
+      if (keyCount === 0) return 0; // Can't generate wheel without key numbers
+      
       // Need to select (selectionCount - keyCount) from lottery range
       // Generate combinations from remaining pool
       const needed = Math.max(0, selectionCount - keyCount);
