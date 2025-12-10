@@ -1,9 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { STRINGS } from '@/shared/constants';
-import { Container, Grid, Card, CardHeader, CardBody, Button } from '@/shared/ui';
+import { Container, Grid, LotteryGrid } from '@/shared/ui';
 import { LOTTERIES_ARRAY } from '@/entities/lottery/config';
 import { useLotteryStore } from '@/entities/lottery/store';
 import { buildRoute } from '@/app/router';
+import { cn } from '@/shared/lib/utils';
 
 /**
  * MVP: Only first lottery (8+1) is available
@@ -54,54 +55,50 @@ export const LotterySelectionPage: React.FC = () => {
       <Container>
         <Grid cols={2} gap="md">
           {lotteries.map((lottery) => (
-            <Card
+            <button
               key={lottery.id}
-              className={`
-                cursor-pointer transition-all
-                ${!lottery.available ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-lg'}
-              `}
+              type="button"
+              onClick={() => lottery.available && handleSelectLottery(lottery.id)}
+              disabled={!lottery.available}
+              className={cn(
+                'w-full rounded-2xl p-5 text-left transition-all',
+                'border border-gray-200 dark:border-gray-700',
+                'bg-white dark:bg-gray-800 shadow-card',
+                lottery.available && 'hover:border-amber-400 hover:shadow-lg active:scale-[0.98] cursor-pointer',
+                !lottery.available && 'opacity-60 cursor-not-allowed'
+              )}
             >
-              <CardHeader>
-                <h3
-                  className="
-                    text-xl font-semibold
-                    text-gray-900 dark:text-white
-                  "
-                >
-                  {lottery.name}
-                </h3>
+              {/* Header */}
+              <div className="flex items-start justify-between gap-3 mb-4">
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                    {lottery.name}
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400">
+                    {lottery.description}
+                  </p>
+                </div>
                 {!lottery.available && (
-                  <span
-                    className="
-                      px-2 py-1
-                      bg-amber-100 dark:bg-amber-900
-                      text-xs text-amber-800 dark:text-amber-200
-                      rounded
-                    "
-                  >
+                  <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-800 dark:bg-amber-900 dark:text-amber-100">
                     {STRINGS.lottery_coming_soon}
                   </span>
                 )}
-              </CardHeader>
-              <CardBody>
-                <p
-                  className="
-                    mb-4
-                    text-sm text-gray-600 dark:text-gray-400
-                  "
-                >
-                  {lottery.description || 'Russian lottery'}
-                </p>
-                <Button
-                  variant={lottery.available ? 'primary' : 'ghost'}
-                  disabled={!lottery.available}
-                  onClick={() => handleSelectLottery(lottery.id)}
-                  className="w-full"
-                >
-                  {STRINGS.lottery_details}
-                </Button>
-              </CardBody>
-            </Card>
+              </div>
+
+              {/* Visual grid representation */}
+              <div className="flex justify-center py-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg mb-4">
+                <LotteryGrid lotteryId={lottery.id} size="sm" />
+              </div>
+
+              {/* Status indicator */}
+              <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
+                <span className={cn(
+                  'inline-flex h-2 w-2 rounded-full',
+                  lottery.available ? 'bg-amber-500' : 'bg-gray-400'
+                )} />
+                <span>{lottery.available ? 'Доступна для расчётов' : 'Скоро станет доступна'}</span>
+              </div>
+            </button>
           ))}
         </Grid>
       </Container>
