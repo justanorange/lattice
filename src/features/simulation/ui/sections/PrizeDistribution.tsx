@@ -34,8 +34,16 @@ export const PrizeDistribution: React.FC<PrizeDistributionProps> = ({
       return getMatchSum(b[0]) - getMatchSum(a[0]);
     });
 
-  // Count actual superprice wins based on prize table
-  const jackpotWins = superprizeCategory ? prizeDistribution[superprizeCategory] || 0 : 0;
+  // Count actual superprice wins - scan rounds for exact superprice wins
+  // prizeDistribution counts by category like "8+1", but we need wins with superprice value
+  let jackpotWins = 0;
+  for (const round of result.rounds) {
+    for (const match of round.matches) {
+      if (match.prizeCategory === superprizeCategory && match.prizeWon === superprice) {
+        jackpotWins++;
+      }
+    }
+  }
   const totalSuperpriceWon = jackpotWins * superprice;
 
   // Calculate total winning occurrences

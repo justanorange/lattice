@@ -131,9 +131,9 @@ export const BankrollHistogram: React.FC<BankrollHistogramProps> = ({
                     {bucket.count.toLocaleString('ru-RU')} ({percent.toFixed(1)}%)
                   </span>
                 </div>
-                <div className="h-3 w-full overflow-hidden bg-gray-200 dark:bg-gray-700">
+                <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                   <div
-                    className={`h-full transition-all ${bucket.color}`}
+                    className={`h-full rounded-full transition-all ${bucket.color}`}
                     style={{ width: `${barWidth}%` }}
                   />
                 </div>

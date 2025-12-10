@@ -88,8 +88,7 @@ function formatAmount(amount: number): string {
 }
 
 /**
- * Generate chart data points - show range around current superprice
- * If breakeven is within 5x of current, include it. Otherwise focus on current.
+ * Generate chart data points - ALWAYS show both current superprice and breakeven
  */
 function generateChartPoints(
   lottery: Lottery,
@@ -100,16 +99,26 @@ function generateChartPoints(
 ): { superprice: number; ev: number }[] {
   const points: { superprice: number; ev: number }[] = [];
   
-  // Base range on current superprice
-  const current = Math.max(currentSuperprice, 1_000_000); // At least 1M for reasonable scale
+  // Determine important points that MUST be visible
+  const current = Math.max(currentSuperprice, 1_000_000);
+  const breakeven = breakevenSuperprice && breakevenSuperprice > 0 ? breakevenSuperprice : null;
   
-  // Include breakeven only if it's within reasonable range (5x of current)
-  let maxSp = current * 3; // Default: show up to 3x current
-  if (breakevenSuperprice && breakevenSuperprice > 0 && breakevenSuperprice <= current * 5) {
-    maxSp = Math.max(maxSp, breakevenSuperprice * 1.5);
+  // Calculate range to show both points with margin
+  let minSp: number;
+  let maxSp: number;
+  
+  if (breakeven) {
+    // Both points must be visible
+    const lower = Math.min(current, breakeven);
+    const upper = Math.max(current, breakeven);
+    minSp = Math.max(0, lower * 0.5);
+    maxSp = upper * 1.3;
+  } else {
+    // Only current superprice matters
+    minSp = Math.max(0, current * 0.2);
+    maxSp = current * 2;
   }
   
-  const minSp = Math.max(0, Math.floor(current * 0.1));
   maxSp = Math.min(1_000_000_000, Math.ceil(maxSp));
   
   // Calculate step to get ~20-25 points
