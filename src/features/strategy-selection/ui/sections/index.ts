@@ -6,3 +6,4 @@
 export { StrategyList } from './StrategyList';
 export { StrategyParameters } from './StrategyParameters';
 export { CalculationResult } from './CalculationResult';
+export { ProbabilityTable } from './ProbabilityTable';

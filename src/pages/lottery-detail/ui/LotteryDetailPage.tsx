@@ -10,6 +10,7 @@ import {
   TicketSettings,
   PrizeTableSection,
   EVDisplay,
+  EVChart,
 } from '@/features/lottery-detail/ui/sections';
 import { buildRoute } from '@/app/router';
 
@@ -79,6 +80,13 @@ export const LotteryDetailPage: React.FC = () => {
       <EVDisplay
         ticketCost={ticketCost}
         evCalculation={evCalculation}
+      />
+
+      <EVChart
+        lottery={lottery}
+        prizeTable={prizeTable}
+        ticketCost={ticketCost}
+        currentSuperprice={superprice}
       />
 
       <div className="mb-6">

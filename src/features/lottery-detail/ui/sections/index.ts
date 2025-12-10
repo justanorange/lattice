@@ -6,3 +6,4 @@
 export { TicketSettings } from './TicketSettings';
 export { PrizeTableSection } from './PrizeTableSection';
 export { EVDisplay } from './EVDisplay';
+export { EVChart } from './EVChart';

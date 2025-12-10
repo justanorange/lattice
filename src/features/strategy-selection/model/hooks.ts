@@ -10,11 +10,13 @@ import {
   calculateTicketCountForStrategy,
 } from '@/entities/strategies/config';
 import type { Strategy, StrategyParameter } from '@/entities/strategies/types';
-import type { Lottery } from '@/entities/lottery/types';
+import type { Lottery, PrizeTable } from '@/entities/lottery/types';
 
 export interface UseStrategySelectionReturn {
   lottery: Lottery;
   ticketCost: number;
+  prizeTable: PrizeTable;
+  superprice: number;
   strategies: Strategy[];
   selectedStrategy: Strategy | undefined;
   selectedStrategyId: string;
@@ -33,7 +35,7 @@ export interface UseStrategySelectionReturn {
  * Main hook for strategy selection
  */
 export function useStrategySelection(): UseStrategySelectionReturn {
-  const { selectedLottery, currentTicketCost } = useLotteryStore();
+  const { selectedLottery, currentTicketCost, currentPrizeTable, currentSuperprice } = useLotteryStore();
 
   const [selectedStrategyId, setSelectedStrategyId] = useState<string>('');
   const [params, setParams] = useState<Record<string, unknown>>({});
@@ -86,6 +88,8 @@ export function useStrategySelection(): UseStrategySelectionReturn {
   return {
     lottery: selectedLottery,
     ticketCost: currentTicketCost,
+    prizeTable: currentPrizeTable,
+    superprice: currentSuperprice,
     strategies: availableStrategies,
     selectedStrategy: strategy,
     selectedStrategyId,

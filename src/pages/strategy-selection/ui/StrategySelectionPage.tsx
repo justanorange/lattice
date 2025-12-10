@@ -10,6 +10,7 @@ import {
   StrategyList,
   StrategyParameters,
   CalculationResult,
+  ProbabilityTable,
 } from '@/features/strategy-selection/ui/sections';
 import { useStrategyStore } from '@/entities/strategies/store';
 import { useLotteryStore } from '@/entities/lottery/store';
@@ -27,7 +28,10 @@ export const StrategySelectionPage: React.FC = () => {
   }
 
   const {
+    lottery,
     ticketCost,
+    prizeTable,
+    superprice,
     strategies,
     selectedStrategy,
     selectedStrategyId,
@@ -81,6 +85,13 @@ export const StrategySelectionPage: React.FC = () => {
             customTicketCount={customTicketCount}
             onTicketCountChange={setCustomTicketCount}
             onBudgetChange={setBudget}
+          />
+
+          <ProbabilityTable
+            lottery={lottery}
+            prizeTable={prizeTable}
+            ticketCount={effectiveTicketCount}
+            superprice={superprice}
           />
 
           <div className="mb-6">

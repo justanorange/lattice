@@ -10,6 +10,8 @@ import {
   SimulationControls,
   SimulationStats,
   BankrollChart,
+  BankrollHistogram,
+  PrizeDistribution,
 } from '@/features/simulation/ui/sections';
 import { useStrategyStore } from '@/entities/strategies/store';
 import { useLotteryStore } from '@/entities/lottery/store';
@@ -19,7 +21,7 @@ export const SimulationPage: React.FC = () => {
   const { lotteryId } = useParams<{ lotteryId: string }>();
   const navigate = useNavigate();
   const { generatedTickets } = useStrategyStore();
-  const { selectedLottery } = useLotteryStore();
+  const { selectedLottery, currentSuperprice, currentTicketCost } = useLotteryStore();
 
   if (!lotteryId) {
     navigate('/');
@@ -59,6 +61,8 @@ export const SimulationPage: React.FC = () => {
       {result && !isRunning && (
         <>
           <SimulationStats result={result} />
+          <PrizeDistribution result={result} superprice={currentSuperprice} />
+          <BankrollHistogram result={result} ticketCost={currentTicketCost} />
           <BankrollChart result={result} />
         </>
       )}
