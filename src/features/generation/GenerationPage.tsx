@@ -152,8 +152,8 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
               </h2>
             </CardHeader>
             <CardBody>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-96 overflow-y-auto">
-                {result.tickets.slice(0, 12).map((ticket, index) => (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 max-h-screen overflow-y-auto">
+                {result.tickets.map((ticket, index) => (
                   <div key={index}>
                     <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
                       Билет #{index + 1}
@@ -165,11 +165,6 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
                   </div>
                 ))}
               </div>
-              {result.tickets.length > 12 && (
-                <p className="mt-4 text-xs text-gray-600 dark:text-gray-400">
-                  ... и еще {result.tickets.length - 12} билетов
-                </p>
-              )}
             </CardBody>
           </Card>
         </>

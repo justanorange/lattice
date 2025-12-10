@@ -103,10 +103,15 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
                 onClick={() => {
                   setSelectedStrategy(strat.id);
                   setCustomTicketCount(null);
-                  // Reset params to defaults
+                  // Reset params to defaults (only for non-text fields or if has meaningful default)
                   const newParams: Record<string, unknown> = {};
                   for (const param of strat.parameters) {
-                    newParams[param.key] = param.defaultValue;
+                    // For text fields with empty default, don't set anything
+                    if (param.type === 'text' && (!param.defaultValue || param.defaultValue === '')) {
+                      newParams[param.key] = '';
+                    } else {
+                      newParams[param.key] = param.defaultValue;
+                    }
                   }
                   setParams(newParams);
                 }}

@@ -74,7 +74,7 @@ export const FULL_WHEEL_STRATEGY: Strategy = {
       key: 'wheelnumbers',
       label: 'Числа для колеса (через запятую или пробел)',
       type: 'text',
-      defaultValue: '1 2 3 4 5 6 7 8 9 10',
+      defaultValue: '',
       description: 'Список чисел (пример: 5 10 15 20 25 30 или 5,10,15,20,25,30)',
     },
   ],
@@ -94,20 +94,20 @@ export const KEY_WHEEL_STRATEGY: Strategy = {
       key: 'keyNumbers',
       label: 'Обязательные числа (через запятую или пробел)',
       type: 'text',
-      defaultValue: '1 2 3 4',
+      defaultValue: '',
       description: 'Эти числа будут во ВСЕХ сгенерированных билетах',
     },
   ],
 };
 
 /**
- * Strategy 5: Controlled Risk
- * User-defined risk tolerance
+ * Strategy 5: Target Win Probability
+ * User-defined win probability
  */
 export const RISK_STRATEGY: Strategy = {
   id: 'risk_strategy',
-  name: 'Контролируемый риск',
-  description: 'Логарифмическая шкала: меньше риск = больше билетов',
+  name: 'Целевая вероятность выигрыша',
+  description: 'Укажите желаемую вероятность выигрыша хотя бы в одном билете',
   supportedLotteries: [
     'lottery_6_45',
     'lottery_7_49',
@@ -116,13 +116,13 @@ export const RISK_STRATEGY: Strategy = {
   ],
   parameters: [
     {
-      key: 'riskLevel',
-      label: 'Риск (%)',
+      key: 'winProbability',
+      label: 'Вероятность выигрыша (%)',
       type: 'range',
       defaultValue: 50,
       min: 1,
       max: 99,
-      description: 'Риск не выиграть ничего (логарифмическая шкала)',
+      description: 'Вероятность выигрыша хотя бы в одном билете (1% - 99%)',
     },
   ],
 };
@@ -305,19 +305,26 @@ export function calculateTicketCountForStrategy(
     }
 
     case 'risk_strategy': {
-      const risk = (params['riskLevel'] as number) || 50;
+      const winProb = (params['winProbability'] as number) || 50;
       const totalCombos = getTotalCombinations(lottery);
       
-      // Convert risk to coverage using logarithmic scale
-      // Risk 1% = 95% coverage (very safe)
-      // Risk 50% = 50% coverage (balanced)
-      // Risk 99% = 5% coverage (very risky)
-      const safetyFactor = Math.log(100 - risk + 1) / Math.log(100);
-      const targetCoverage = safetyFactor * 90; // Max 90% to avoid extreme values
+      // Convert win probability to coverage
+      // If user wants 50% chance to win at least once
+      // We need enough tickets such that: 1 - (1 - p)^n >= 0.5
+      // Where p is single ticket win probability
+      // This gives us: n >= log(1 - winProb) / log(1 - p)
       
-      const targetFraction = Math.max(0.01, Math.min(0.99, targetCoverage / 100));
+      const singleTicketWinProb = getWinProbabilityForTicket(lottery);
+      const targetFraction = winProb / 100;
       
-      const tickets = Math.ceil(-totalCombos * Math.log(1 - targetFraction));
+      // Solve: 1 - (1 - singleTicketWinProb)^n >= targetFraction
+      // n >= log(1 - targetFraction) / log(1 - singleTicketWinProb)
+      if (targetFraction >= 0.99) return totalCombos;
+      if (targetFraction <= 0) return 1;
+      
+      const tickets = Math.ceil(
+        Math.log(1 - targetFraction) / Math.log(1 - singleTicketWinProb)
+      );
       return Math.min(tickets, totalCombos);
     }
 
