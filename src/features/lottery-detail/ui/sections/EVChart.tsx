@@ -33,16 +33,24 @@ function findBreakevenSuperprice(
 
   // Binary search for EV = 0 point
   let low = 0;
-  let high = 1_000_000_000; // 1 billion
-  const tolerance = 1000; // 1000 rubles precision
+  let high = 500_000_000;
+  const tolerance = Math.max(0.1, ticketCost * 0.001); // 0.1% of ticket cost or 0.1₽
 
-  // Check if profitable at max superprice
-  const evAtMax = calculateEV(lottery, high, prizeTable, ticketCost);
-  if (evAtMax.expectedValue < 0) {
-    return null; // Never profitable even at 1 billion superprice
+  // Check if profitable at high bound
+  let evAtHigh = calculateEV(lottery, high, prizeTable, ticketCost);
+  
+  // If still not profitable at 500M, expand range
+  while (evAtHigh.expectedValue < 0 && high < 10_000_000_000) {
+    high *= 2;
+    evAtHigh = calculateEV(lottery, high, prizeTable, ticketCost);
+  }
+  
+  if (evAtHigh.expectedValue < 0) {
+    return null; // Never profitable
   }
 
-  for (let i = 0; i < 50; i++) {
+  // Binary search with more iterations for precision
+  for (let i = 0; i < 100; i++) {
     const mid = (low + high) / 2;
     const ev = calculateEV(lottery, mid, prizeTable, ticketCost);
 
@@ -51,9 +59,14 @@ function findBreakevenSuperprice(
     }
 
     if (ev.expectedValue < 0) {
-      low = mid; // Need higher superprice
+      low = mid;
     } else {
-      high = mid; // Superprice too high
+      high = mid;
+    }
+    
+    // Extra precision check
+    if (high - low < 1000) {
+      return Math.round((low + high) / 2);
     }
   }
 
