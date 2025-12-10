@@ -114,8 +114,7 @@ const FieldGrid: React.FC<{
   field: FieldConfig;
   seed: string;
   sizeClass: typeof SIZE_CLASSES['sm'];
-  isSecondField?: boolean;
-}> = ({ field, seed, sizeClass, isSecondField }) => {
+}> = ({ field, seed, sizeClass }) => {
   const selectedIndices = useMemo(
     () => generateSelectedIndices(seed, field.from, field.pick),
     [seed, field.from, field.pick]
@@ -135,9 +134,7 @@ const FieldGrid: React.FC<{
             sizeClass.circle,
             'rounded-full transition-colors',
             isSelected
-              ? isSecondField
-                ? 'bg-blue-500'
-                : 'bg-amber-500'
+              ? 'bg-amber-500'
               : 'bg-gray-300 dark:bg-gray-600'
           )}
         />
@@ -198,7 +195,6 @@ export const LotteryGrid: React.FC<LotteryGridProps> = ({
             field={pattern.field2}
             seed={`${lotteryId}-field2`}
             sizeClass={sizeClass}
-            isSecondField
           />
         </>
       )}
