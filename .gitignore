@@ -26,3 +26,4 @@ dist-ssr
 .forge/
 ENTRY.md
 SPEC.md
+.geminiignore

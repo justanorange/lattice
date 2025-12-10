@@ -101,20 +101,24 @@ function generateChartPoints(
   
   // Determine important points that MUST be visible
   const current = Math.max(currentSuperprice, 1_000_000);
-  const breakeven = breakevenSuperprice && breakevenSuperprice > 0 ? breakevenSuperprice : null;
   
   // Calculate range to show both points with margin
   let minSp: number;
   let maxSp: number;
   
-  if (breakeven) {
-    // Both points must be visible
-    const lower = Math.min(current, breakeven);
-    const upper = Math.max(current, breakeven);
+  if (breakevenSuperprice !== null && breakevenSuperprice > 0) {
+    // Both current and breakeven points must be visible
+    const lower = Math.min(current, breakevenSuperprice);
+    const upper = Math.max(current, breakevenSuperprice);
     minSp = Math.max(0, lower * 0.5);
     maxSp = upper * 1.3;
+  } else if (breakevenSuperprice === 0) {
+    // Lottery is already profitable at any superprice
+    // Show from near-zero to current superprice * 1.5
+    minSp = 0;
+    maxSp = current * 1.5;
   } else {
-    // Only current superprice matters
+    // breakeven is null - unreachable, show range around current
     minSp = Math.max(0, current * 0.2);
     maxSp = current * 2;
   }
@@ -221,22 +225,35 @@ export const EVChart: React.FC<EVChartProps> = ({
               EV
             </div>
             
-            {/* Zero line with label */}
+            {/* Zero line with label - account for pt-4 (16px) padding on chart area */}
             {minEV < 0 && maxEV > 0 && (
-              <>
-                <div
-                  className="absolute left-0 right-0 z-10 border-t-2 border-gray-500 dark:border-gray-400"
-                  style={{
-                    top: `${(maxEV / evRange) * 100}%`,
-                  }}
-                />
-                <span 
-                  className="absolute left-1 z-10 -translate-y-1/2 rounded bg-gray-500 px-1 text-xs text-white"
-                  style={{ top: `${(maxEV / evRange) * 100}%` }}
-                >
-                  0
-                </span>
-              </>
+              (() => {
+                // Chart has pt-4 (16px) padding, h-40 (160px) total height
+                // Bar area height = 160 - 16 = 144px
+                // Zero line should be at: 16px + (maxEV / evRange) * 144px
+                const paddingTop = 16;
+                const totalHeight = 160;
+                const barAreaHeight = totalHeight - paddingTop;
+                const zeroLineTop = paddingTop + (maxEV / evRange) * barAreaHeight;
+                const zeroLinePercent = (zeroLineTop / totalHeight) * 100;
+                
+                return (
+                  <>
+                    <div
+                      className="absolute left-0 right-0 z-10 border-t-2 border-gray-500 dark:border-gray-400"
+                      style={{
+                        top: `${zeroLinePercent}%`,
+                      }}
+                    />
+                    <span 
+                      className="absolute left-1 z-10 -translate-y-1/2 rounded bg-gray-500 px-1 text-xs text-white"
+                      style={{ top: `${zeroLinePercent}%` }}
+                    >
+                      0
+                    </span>
+                  </>
+                );
+              })()
             )}
 
             {/* Breakeven marker */}
@@ -270,9 +287,14 @@ export const EVChart: React.FC<EVChartProps> = ({
                 const normalizedHeight = Math.abs(point.ev) / maxAbsEV;
                 const heightPercent = normalizedHeight * 45; // 45% max height each direction
                 
-                const isCurrent =
-                  Math.abs(point.superprice - currentSuperprice) < 
-                  (chartPoints[1]?.superprice - chartPoints[0]?.superprice || 10_000_000) / 2;
+                // Only highlight the bar that exactly matches current superprice
+                // by finding which bar is closest and checking if this is that bar
+                const closestIndex = chartPoints.reduce((closestIdx, p, idx) => 
+                  Math.abs(p.superprice - currentSuperprice) < Math.abs(chartPoints[closestIdx].superprice - currentSuperprice)
+                    ? idx
+                    : closestIdx
+                , 0);
+                const isCurrent = index === closestIndex;
 
                 // Zero position in the chart (where negative bars start from)
                 const zeroPosition = maxEV >= 0 && minEV < 0 

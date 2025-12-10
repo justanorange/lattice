@@ -54,9 +54,20 @@ function calculateRowProbability(lottery: Lottery, row: PrizeRow): number {
 function formatProbability(prob: number): { percent: string; ratio: string } {
   if (prob === 0) return { percent: '0%', ratio: '—' };
   
-  const percent = prob >= 0.0001 
-    ? `${(prob * 100).toFixed(prob >= 0.01 ? 2 : 4)}%`
-    : `${(prob * 100).toExponential(1)}`;
+  // Always use decimal format, never scientific notation
+  // For very small numbers, use enough decimal places
+  let percent: string;
+  const percentValue = prob * 100;
+  
+  if (prob >= 0.01) {
+    percent = `${percentValue.toFixed(2)}%`;
+  } else if (prob >= 0.0001) {
+    percent = `${percentValue.toFixed(4)}%`;
+  } else if (prob >= 0.000001) {
+    percent = `${percentValue.toFixed(6)}%`;
+  } else {
+    percent = `${percentValue.toFixed(8)}%`;
+  }
   
   const odds = Math.round(1 / prob);
   const ratio = `1:${odds.toLocaleString('ru-RU')}`;

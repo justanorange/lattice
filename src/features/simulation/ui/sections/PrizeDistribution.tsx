@@ -24,14 +24,24 @@ export const PrizeDistribution: React.FC<PrizeDistributionProps> = ({
   const superprizeRow = prizeTable.rows.find(row => row.prize === 'Суперприз');
   const superprizeCategory = superprizeRow?.matches.join('+');
 
-  // Sort categories by "importance" (jackpot first, then by match count)
+  // Sort categories by prize table order (jackpot first)
   const sortedCategories = Object.entries(prizeDistribution)
     .filter(([, count]) => count > 0)
     .sort((a, b) => {
-      // Sort by total matches descending
-      const getMatchSum = (cat: string) =>
-        cat.split('+').reduce((sum, n) => sum + parseInt(n), 0);
-      return getMatchSum(b[0]) - getMatchSum(a[0]);
+      // Get index in prize table (lower index = higher priority)
+      const getTableIndex = (cat: string) => {
+        const matches = cat.split('+').map(Number);
+        return prizeTable.rows.findIndex(row => 
+          row.matches.length === matches.length &&
+          row.matches.every((m, i) => m === matches[i])
+        );
+      };
+      const indexA = getTableIndex(a[0]);
+      const indexB = getTableIndex(b[0]);
+      // If not found in table, put at end
+      if (indexA === -1) return 1;
+      if (indexB === -1) return -1;
+      return indexA - indexB;
     });
 
   // Count actual superprice wins - scan rounds for exact superprice wins
