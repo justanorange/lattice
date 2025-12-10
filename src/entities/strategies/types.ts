@@ -30,7 +30,7 @@ export interface StrategyParameter {
   /** Russian label */
   label: string;
   /** Parameter type */
-  type: 'number' | 'boolean' | 'select' | 'range';
+  type: 'number' | 'boolean' | 'select' | 'range' | 'text';
   /** Default value */
   defaultValue: unknown;
   /** Min value (for number/range) */

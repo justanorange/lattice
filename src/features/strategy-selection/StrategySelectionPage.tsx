@@ -1,36 +1,43 @@
 /**
  * Strategy Selection Page
- * Allow users to choose lottery strategy and configure parameters
- * Each strategy shows minimum ticket requirements and expected value
+ * User selects strategy and inputs parameters
+ * System calculates required ticket count
+ * User can then adjust tickets or budget before generation
  */
 
 import React, { useState, useMemo } from 'react';
-import { Card, CardHeader, CardBody, Button, Container, Input, Slider, Select, Grid } from '../../shared/ui';
+import { Card, CardHeader, CardBody, Button, Container, Input, Slider, Grid } from '../../shared/ui';
 import { useLotteryStore } from '../../entities/lottery/store';
-import { getStrategiesForLottery, getStrategyGuarantee } from '../../entities/strategies/config';
-import { calculateEV } from '../../entities/lottery/calculation';
+import { getStrategiesForLottery, calculateTicketCountForStrategy } from '../../entities/strategies/config';
 
 export interface StrategySelectionPageProps {
   onNext?: (strategyId: string, params: Record<string, unknown>, ticketCount: number) => void;
   onBack?: () => void;
 }
 
-/**
- * Strategy Selection Component
- */
 export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
   onNext,
   onBack,
 }) => {
-  const { selectedLottery, currentTicketCost, currentSuperprice, currentPrizeTable } = useLotteryStore();
+  const { selectedLottery, currentTicketCost } = useLotteryStore();
   const [selectedStrategy, setSelectedStrategy] = useState<string>('max_coverage');
   const [params, setParams] = useState<Record<string, unknown>>({
-    budget: 1000,
+    targetCoverage: 80,
   });
-  const [customTicketCount, setCustomTicketCount] = useState<number | null>(null);
 
   const availableStrategies = getStrategiesForLottery(selectedLottery.id);
   const strategy = availableStrategies.find((s) => s.id === selectedStrategy);
+
+  // Calculated ticket count based on strategy and parameters
+  const calculatedTicketCount = useMemo(() => {
+    if (!strategy) return 1;
+    return calculateTicketCountForStrategy(strategy.id, selectedLottery, params, currentTicketCost);
+  }, [strategy, selectedLottery, params, currentTicketCost]);
+
+  // User can override
+  const [customTicketCount, setCustomTicketCount] = useState<number | null>(null);
+  const effectiveTicketCount = customTicketCount ?? calculatedTicketCount;
+  const effectiveBudget = effectiveTicketCount * currentTicketCost;
 
   const handleParamChange = (key: string, value: unknown) => {
     setParams((prev) => ({
@@ -39,42 +46,28 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
     }));
   };
 
-  // Calculate guarantee for current strategy
-  const guarantee = useMemo(() => {
-    if (!strategy) return null;
-    return getStrategyGuarantee(strategy, selectedLottery, params);
-  }, [strategy, selectedLottery, params]);
+  const handleTicketCountChange = (value: number | null) => {
+    setCustomTicketCount(value);
+  };
 
-  // Calculate expected value
-  const evInfo = useMemo(() => {
-    const ticketCount = customTicketCount ?? guarantee?.ticketCount ?? 1;
-    const ev = calculateEV(
-      selectedLottery,
-      currentSuperprice,
-      currentPrizeTable,
-      currentTicketCost
-    );
-    return {
-      ...ev,
-      totalCost: ticketCount * currentTicketCost,
-      evTotal: ev.expectedValue * ticketCount,
-    };
-  }, [guarantee?.ticketCount, customTicketCount, selectedLottery, currentSuperprice, currentPrizeTable, currentTicketCost]);
+  const handleBudgetChange = (value: number) => {
+    const tickets = Math.max(1, Math.floor(value / currentTicketCost));
+    setCustomTicketCount(tickets);
+  };
 
   const handleNext = () => {
-    if (onNext && strategy && guarantee) {
-      const ticketCount = customTicketCount ?? guarantee.ticketCount;
-      onNext(strategy.id, params, ticketCount);
+    if (onNext && strategy) {
+      onNext(strategy.id, params, effectiveTicketCount);
     }
   };
 
   return (
     <Container>
-      <div className="mb-8 flex flex-col gap-2">
-        <h1 className="text-3xl font-bold leading-tight text-gray-900 dark:text-white">
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
           Выберите стратегию
         </h1>
-        <p className="text-base text-gray-600 dark:text-gray-400">
+        <p className="text-gray-600 dark:text-gray-400">
           для {selectedLottery.name}
         </p>
       </div>
@@ -82,32 +75,38 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
       {/* Strategy Selection */}
       <Card className="mb-6">
         <CardHeader>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
             Доступные стратегии
           </h2>
         </CardHeader>
         <CardBody>
           <Grid cols={1} gap="md">
             {availableStrategies.map((strat) => (
-              <div
+              <button
                 key={strat.id}
                 onClick={() => {
                   setSelectedStrategy(strat.id);
                   setCustomTicketCount(null);
+                  // Reset params to defaults
+                  const newParams: Record<string, unknown> = {};
+                  for (const param of strat.parameters) {
+                    newParams[param.key] = param.defaultValue;
+                  }
+                  setParams(newParams);
                 }}
-                className={`p-4 rounded-xl border-2 cursor-pointer transition ${
+                className={`text-left p-4 rounded-lg border-2 transition ${
                   selectedStrategy === strat.id
-                    ? 'border-amber-500 dark:border-amber-600 bg-amber-50 dark:bg-amber-900/20'
-                    : 'border-gray-200 dark:border-gray-700 hover:border-amber-300 dark:hover:border-amber-800'
+                    ? 'border-amber-500 bg-amber-50 dark:bg-amber-900/20'
+                    : 'border-gray-200 dark:border-gray-700 hover:border-amber-300'
                 }`}
               >
-                <h3 className="font-semibold text-gray-900 dark:text-white mb-1">
+                <h3 className="font-semibold text-gray-900 dark:text-white">
                   {strat.name}
                 </h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400">
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                   {strat.description}
                 </p>
-              </div>
+              </button>
             ))}
           </Grid>
         </CardBody>
@@ -117,8 +116,8 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
       {strategy && (
         <Card className="mb-6">
           <CardHeader>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Параметры стратегии
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Параметры
             </h2>
           </CardHeader>
           <CardBody>
@@ -130,9 +129,7 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
                       type="number"
                       label={param.label}
                       value={params[param.key]?.toString() || param.defaultValue?.toString() || ''}
-                      onChange={(e) =>
-                        handleParamChange(param.key, Number.parseFloat(e.target.value))
-                      }
+                      onChange={(e) => handleParamChange(param.key, parseInt(e.target.value))}
                       min={param.min}
                       max={param.max}
                       step={param.step || 1}
@@ -143,49 +140,24 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
                   {param.type === 'range' && (
                     <Slider
                       label={param.label}
-                      value={
-                        (params[param.key] as number) || (param.defaultValue as number) || 0
-                      }
+                      value={(params[param.key] as number) || (param.defaultValue as number) || 0}
                       onValueChange={(value) => handleParamChange(param.key, value[0])}
-                      min={param.min}
-                      max={param.max}
+                      min={param.min || 0}
+                      max={param.max || 100}
                       step={param.step || 1}
                       helper={param.description}
                     />
                   )}
 
-                  {param.type === 'select' && (
-                    <Select
+                  {param.type === 'text' && (
+                    <Input
+                      type="text"
                       label={param.label}
-                      options={
-                        param.options?.map((o: any) => ({
-                          value: o.value,
-                          label: o.label,
-                        })) || []
-                      }
-                      value={params[param.key]?.toString() || param.defaultValue?.toString() || ''}
+                      value={(params[param.key] as string) || (param.defaultValue as string) || ''}
                       onChange={(e) => handleParamChange(param.key, e.target.value)}
+                      placeholder={param.defaultValue?.toString() || ''}
+                      helper={param.description}
                     />
-                  )}
-
-                  {param.type === 'boolean' && (
-                    <div className="flex items-center gap-2">
-                      <input
-                        type="checkbox"
-                        id={param.key}
-                        checked={(params[param.key] as boolean) || (param.defaultValue as boolean) || false}
-                        onChange={(e) => handleParamChange(param.key, e.target.checked)}
-                        className="rounded-lg w-4 h-4 accent-amber-500"
-                      />
-                      <label htmlFor={param.key} className="text-sm font-medium text-gray-900 dark:text-white">
-                        {param.label}
-                      </label>
-                      {param.description && (
-                        <p className="text-xs text-gray-600 dark:text-gray-400 ml-auto">
-                          {param.description}
-                        </p>
-                      )}
-                    </div>
                   )}
                 </div>
               ))}
@@ -194,93 +166,90 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
         </Card>
       )}
 
-      {/* Strategy Guarantee & EV */}
-      {strategy && guarantee && (
+      {/* Calculation Result */}
+      {strategy && (
         <Card className="mb-6 border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/20">
           <CardHeader>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Расчет стратегии
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              Расчет по стратегии
             </h2>
           </CardHeader>
           <CardBody>
             <div className="space-y-4">
-              {/* Minimum Requirements */}
               <div className="pb-4 border-b border-amber-200 dark:border-amber-800">
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Минимально для выполнения:
+                <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                  Рекомендуемое количество:
                 </p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">
+                  {calculatedTicketCount} билетов
+                </div>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                  Стоимость: {calculatedTicketCount * currentTicketCost} ₽
+                </p>
+              </div>
+
+              {/* Ticket Count Input */}
+              <div>
+                <label className="text-sm font-medium text-gray-900 dark:text-white block mb-2">
+                  Хотите изменить количество?
+                </label>
+                <Input
+                  type="number"
+                  value={customTicketCount?.toString() || ''}
+                  onChange={(e) => {
+                    const val = e.target.value ? parseInt(e.target.value) : null;
+                    handleTicketCountChange(val);
+                  }}
+                  min={1}
+                  max={1000}
+                  placeholder={calculatedTicketCount.toString()}
+                  helper="Оставьте пусто для рекомендуемого количества"
+                />
+              </div>
+
+              {/* Budget Input - synchronized with ticket count */}
+              <div>
+                <label className="text-sm font-medium text-gray-900 dark:text-white block mb-2">
+                  Или установите бюджет
+                </label>
+                <Input
+                  type="number"
+                  value={effectiveBudget.toString()}
+                  onChange={(e) => {
+                    const val = parseInt(e.target.value);
+                    if (!isNaN(val)) {
+                      handleBudgetChange(val);
+                    }
+                  }}
+                  min={currentTicketCost}
+                  step={currentTicketCost}
+                  helper="Выразится в целое число билетов"
+                />
+                <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                  = {effectiveTicketCount} билетов
+                </p>
+              </div>
+
+              {/* Summary */}
+              <div className="pt-3 border-t border-amber-200 dark:border-amber-800">
+                <p className="text-sm font-medium text-gray-900 dark:text-white">
+                  Итого к генерации:
+                </p>
+                <div className="grid grid-cols-2 gap-4 mt-2">
                   <div>
                     <p className="text-xs text-gray-600 dark:text-gray-400">Билетов</p>
-                    <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
-                      {guarantee.ticketCount}
+                    <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                      {effectiveTicketCount}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600 dark:text-gray-400">Стоимость</p>
-                    <p className="text-xl font-bold text-amber-600 dark:text-amber-400">
-                      {guarantee.ticketCount * currentTicketCost} ₽
+                    <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                      {effectiveBudget} ₽
                     </p>
                   </div>
                 </div>
               </div>
-
-              {/* Expected Value */}
-              <div>
-                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                  Ожидаемый возврат:
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">EV на билет</p>
-                    <p className={`text-lg font-bold ${evInfo.expectedValue >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {evInfo.expectedValue >= 0 ? '+' : ''}{evInfo.expectedValue.toFixed(0)} ₽
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-600 dark:text-gray-400">EV%</p>
-                    <p className={`text-lg font-bold ${evInfo.evPercent >= 0 ? 'text-green-600 dark:text-green-400' : 'text-red-600 dark:text-red-400'}`}>
-                      {evInfo.evPercent >= 0 ? '+' : ''}{evInfo.evPercent.toFixed(1)}%
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardBody>
-        </Card>
-      )}
-
-      {/* Custom Ticket Count */}
-      {guarantee && (
-        <Card className="mb-6">
-          <CardHeader>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Количество билетов (опционально)
-            </h2>
-          </CardHeader>
-          <CardBody>
-            <div className="space-y-2">
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                По умолчанию: {guarantee.ticketCount} (по расчету стратегии)
-              </p>
-              <Input
-                type="number"
-                label="Сгенерировать билетов"
-                value={customTicketCount?.toString() || ''}
-                onChange={(e) => {
-                  const val = e.target.value ? parseInt(e.target.value) : null;
-                  setCustomTicketCount(val);
-                }}
-                min={1}
-                max={1000}
-                placeholder={guarantee.ticketCount.toString()}
-                helper="Оставьте пусто для использования рекомендуемого количества"
-              />
-              {customTicketCount && customTicketCount !== guarantee.ticketCount && (
-                <p className="text-xs text-amber-600 dark:text-amber-400">
-                  ⚠️ Вы изменили количество билетов. Это может повлиять на гарантию стратегии.
-                </p>
-              )}
             </div>
           </CardBody>
         </Card>
@@ -292,7 +261,7 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
           Назад
         </Button>
         <Button onClick={handleNext} variant="primary" className="flex-1">
-          Далее →
+          Далее: Генерация →
         </Button>
       </div>
     </Container>

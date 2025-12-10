@@ -6,7 +6,7 @@
 import React from "react";
 import { useLotteryStore } from "../../entities/lottery/store";
 import { calculateEV } from "../../entities/lottery/calculation";
-import { Card, CardHeader, CardBody, Input, Slider, Button, Container } from "../../shared/ui";
+import { Card, CardHeader, CardBody, Input, Button, Container } from "../../shared/ui";
 import type { PrizeRow } from "../../entities/lottery/types";
 import { STRINGS } from "../../shared/constants";
 import { probabilityOfMatch } from "../../entities/calculations/probability";
@@ -126,29 +126,6 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
           </CardBody>
         </Card>
       </div>
-
-      {/* Risk Level Slider */}
-      <Card className="mb-6">
-        <CardHeader>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Уровень риска
-          </h2>
-        </CardHeader>
-        <CardBody>
-          <Slider
-            label="Риск (%)"
-            value={0}
-            onValueChange={(value) => {
-              // TODO: Store risk level in store when risk feature is implemented
-              console.log("Risk level:", value[0]);
-            }}
-            min={0}
-            max={100}
-            step={1}
-            helper="Выберите уровень риска от 0% (минимальный риск) до 100% (максимальный риск)"
-          />
-        </CardBody>
-      </Card>
 
       {/* EV Display */}
       <Card className="mb-6">

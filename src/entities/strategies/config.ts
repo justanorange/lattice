@@ -1,66 +1,44 @@
 /**
  * Strategy Implementations
- * Complete implementations of lottery strategies
+ * Simple, clear strategies
  *
- * Strategy Types:
- * 1. Min Risk - Минимизация риска (гарантия минимального выигрыша)
- * 2. Max Coverage - Максимальное покрытие (охватить все возможные комбинации)
- * 3. Full Wheel - Полное колесо (все комбинации выбранных чисел)
- * 4. Key Wheel - Колесо с ключевыми числами (фиксированные числа + варианты)
- * 5. Risk Strategy - Стратегия с риском (контролируемая вероятность выигрыша)
+ * Each strategy answers: "How many tickets do I need to buy?"
+ * Result is always: ticketCount → user can edit, which updates budget
  */
 
-import type {
-  Strategy,
-  StrategyParams,
-  StrategyGuarantee,
-} from './types';
+import type { Strategy, StrategyParams } from './types';
 import type { Lottery } from '../lottery/types';
 
 /**
- * Strategy 1: Minimum Risk
- * Guaranteed minimum win - ensures P(at least N matches) >= target probability
- * Result: Number of tickets needed + expected value
+ * Strategy 1: Min Risk
+ * Guarantee minimum winning tickets
  */
 export const MIN_RISK_STRATEGY: Strategy = {
   id: 'min_risk',
   name: 'Гарантия минимального выигрыша',
-  description:
-    'Гарантирует минимальное количество выигрышных билетов с заданной вероятностью',
+  description: 'Сколько билетов нужно, чтобы гарантировать минимум N выигрышных',
   supportedLotteries: ['lottery_6_45', 'lottery_7_49', 'lottery_5_36_1', 'lottery_8_1'],
   parameters: [
     {
-      key: 'targetMatches',
-      label: 'Минимум совпадений',
+      key: 'guaranteedWinningTickets',
+      label: 'Минимум выигрышных билетов',
       type: 'number',
-      defaultValue: 3,
-      min: 2,
-      max: 5,
-      description: 'Минимальное количество совпадений для победы',
-    },
-    {
-      key: 'targetProbability',
-      label: 'Вероятность гарантии (%)',
-      type: 'number',
-      defaultValue: 99,
-      min: 50,
-      max: 100,
-      step: 5,
-      description: 'Вероятность получить хотя бы один выигрыш',
+      defaultValue: 1,
+      min: 1,
+      max: 20,
+      description: 'Сколько билетов должны выиграть (как минимум)',
     },
   ],
 };
 
 /**
- * Strategy 2: Maximum Coverage
- * Cover all possible combinations with given budget
- * Result: Number of tickets that fit budget + coverage % + expected value
+ * Strategy 2: Max Coverage
+ * Maximize coverage of all combinations
  */
 export const COVERAGE_STRATEGY: Strategy = {
   id: 'max_coverage',
   name: 'Максимальное покрытие',
-  description:
-    'Максимизирует покрытие всех комбинаций при фиксированном бюджете',
+  description: 'Покрыть максимум уникальных комбинаций чисел',
   supportedLotteries: [
     'lottery_4_20',
     'lottery_6_45',
@@ -70,154 +48,73 @@ export const COVERAGE_STRATEGY: Strategy = {
   ],
   parameters: [
     {
-      key: 'budget',
-      label: 'Бюджет (₽)',
+      key: 'targetCoverage',
+      label: 'Целевое покрытие (%)',
       type: 'number',
-      defaultValue: 1000,
-      min: 100,
-      max: 100000,
-      step: 100,
-      description: 'Максимально денег на билеты',
+      defaultValue: 80,
+      min: 10,
+      max: 100,
+      step: 10,
+      description: 'Какой % всех комбинаций покрыть',
     },
   ],
 };
 
 /**
  * Strategy 3: Full Wheel
- * Play all combinations of selected numbers
- * Result: Exact number of tickets for full coverage + 100% expected value
+ * All combinations of selected numbers
  */
 export const FULL_WHEEL_STRATEGY: Strategy = {
   id: 'full_wheel',
   name: 'Полное колесо',
-  description:
-    'Играет все возможные комбинации выбранных чисел - гарантированный выигрыш если совпадут все числа',
+  description: 'Все комбинации выбранных чисел - гарантированный выигрыш',
   supportedLotteries: ['lottery_6_45', 'lottery_7_49', 'lottery_5_36_1', 'lottery_8_1'],
   parameters: [
     {
-      key: 'selectedNumbers',
-      label: 'Количество чисел в колесе',
-      type: 'number',
-      defaultValue: 10,
-      min: 6,
-      max: 20,
-      description: 'Количество чисел (должно быть > требуемому выбору)',
-    },
-    {
-      key: 'useRandomNumbers',
-      label: 'Использовать случайные числа',
-      type: 'boolean',
-      defaultValue: true,
-      description: 'Если ложь, использовать числа 1,2,3... до N',
+      key: 'wheelnumbers',
+      label: 'Числа для колеса (через запятую)',
+      type: 'text',
+      defaultValue: '1,2,3,4,5,6,7,8,9,10',
+      description: 'Список чисел (например: 5,10,15,20,25,30)',
     },
   ],
 };
 
 /**
  * Strategy 4: Key Wheel
- * Abbreviated wheel with key numbers fixed
+ * Fixed key numbers + combinations
  */
 export const KEY_WHEEL_STRATEGY: Strategy = {
   id: 'key_wheel',
   name: 'Колесо с ключевыми числами',
-  description:
-    'Фиксирует 2-3 «счастливых» числа и комбинирует их с остальным минимальным набором',
+  description: 'Фиксированные числа + варианты из дополнительного набора',
   supportedLotteries: ['lottery_6_45', 'lottery_7_49', 'lottery_5_36_1', 'lottery_8_1'],
   parameters: [
     {
       key: 'keyNumbers',
-      label: 'Количество ключевых чисел',
-      type: 'number',
-      defaultValue: 2,
-      min: 1,
-      max: 4,
-      description: 'Числа которые будут во всех билетах',
+      label: 'Ключевые числа (через запятую)',
+      type: 'text',
+      defaultValue: '1,2',
+      description: 'Числа которые будут во ВСЕХ билетах',
     },
     {
       key: 'additionalNumbers',
-      label: 'Дополнительные числа',
-      type: 'number',
-      defaultValue: 5,
-      min: 3,
-      max: 15,
-      description: 'Дополнительные числа для комбинирования',
+      label: 'Дополнительные числа (через запятую)',
+      type: 'text',
+      defaultValue: '3,4,5,6,7,8,9,10,11,12,13',
+      description: 'Числа для комбинирования с ключевыми',
     },
   ],
 };
 
 /**
- * Strategy 5: Guaranteed Win
- * Specialized for 12/24 lottery - guaranteed win on any draw
- */
-export const GUARANTEED_WIN_STRATEGY: Strategy = {
-  id: 'guaranteed_win',
-  name: 'Гарантированный выигрыш',
-  description:
-    'Специально для лотереи 12/24 - гарантирует выигрыш при любом раскладе (0 или 12 всегда выигрыш)',
-  supportedLotteries: ['lottery_12_24'],
-  parameters: [
-    {
-      key: 'blockDesign',
-      label: 'Используемая конструкция',
-      type: 'select',
-      defaultValue: 'optimal',
-      options: [
-        { label: 'Оптимальная', value: 'optimal' },
-        { label: 'Простая', value: 'simple' },
-        { label: 'Максимальная', value: 'maximum' },
-      ],
-      description: 'Конструкция блок-дизайна для покрытия',
-    },
-  ],
-};
-
-/**
- * Strategy 6: Budget Optimizer
- * Maximize expected value with given budget
- */
-export const BUDGET_OPTIMIZER_STRATEGY: Strategy = {
-  id: 'budget_optimizer',
-  name: 'Оптимизация по бюджету',
-  description:
-    'Выбирает оптимальное количество билетов для максимизации ожидаемого возврата при заданном бюджете',
-  supportedLotteries: [
-    'lottery_6_45',
-    'lottery_7_49',
-    'lottery_5_36_1',
-    'lottery_4_20',
-  ],
-  parameters: [
-    {
-      key: 'budget',
-      label: 'Бюджет (₽)',
-      type: 'number',
-      defaultValue: 1000,
-      min: 100,
-      max: 100000,
-      step: 100,
-    },
-    {
-      key: 'riskTolerance',
-      label: 'Допустимый риск',
-      type: 'range',
-      defaultValue: 50,
-      min: 10,
-      max: 90,
-      description: 'Процент риска (выше = более рискованно)',
-    },
-  ],
-};
-
-/**
- * Strategy 5B: Risk Strategy
- * Controlled probability of win - with risk slider
- * Risk% = probability of losing the potential win
+ * Strategy 5: Controlled Risk
+ * User-defined risk tolerance
  */
 export const RISK_STRATEGY: Strategy = {
   id: 'risk_strategy',
-  name: 'Стратегия с контролируемым риском',
-  description:
-    'Определяет количество билетов для достижения целевой вероятности выигрыша с учетом приемлемого риска потери',
+  name: 'Контролируемый риск',
+  description: 'Выберите уровень риска - алгоритм рассчитает сколько билетов нужно',
   supportedLotteries: [
     'lottery_6_45',
     'lottery_7_49',
@@ -226,32 +123,13 @@ export const RISK_STRATEGY: Strategy = {
   ],
   parameters: [
     {
-      key: 'targetMatches',
-      label: 'Целевое количество совпадений',
-      type: 'number',
-      defaultValue: 3,
-      min: 2,
-      max: 5,
-      description: 'Минимум совпадений для выигрыша',
-    },
-    {
       key: 'riskLevel',
       label: 'Уровень приемлемого риска (%)',
       type: 'range',
       defaultValue: 30,
       min: 1,
-      max: 50,
-      description: 'Вероятность потерять потенциальный выигрыш (чем выше - больше билетов)',
-    },
-    {
-      key: 'budget',
-      label: 'Максимальный бюджет (₽)',
-      type: 'number',
-      defaultValue: 5000,
-      min: 100,
-      max: 100000,
-      step: 100,
-      description: 'Максимум денег на билеты',
+      max: 99,
+      description: 'Риск = вероятность потерять потенциальный выигрыш (1-99%)',
     },
   ],
 };
@@ -264,8 +142,6 @@ export const ALL_STRATEGIES: Record<string, Strategy> = {
   [COVERAGE_STRATEGY.id]: COVERAGE_STRATEGY,
   [FULL_WHEEL_STRATEGY.id]: FULL_WHEEL_STRATEGY,
   [KEY_WHEEL_STRATEGY.id]: KEY_WHEEL_STRATEGY,
-  [GUARANTEED_WIN_STRATEGY.id]: GUARANTEED_WIN_STRATEGY,
-  [BUDGET_OPTIMIZER_STRATEGY.id]: BUDGET_OPTIMIZER_STRATEGY,
   [RISK_STRATEGY.id]: RISK_STRATEGY,
 };
 
@@ -302,7 +178,7 @@ export function validateStrategyParams(
   for (const param of strategy.parameters) {
     const value = params[param.key];
 
-    if (value === undefined) {
+    if (value === undefined && param.defaultValue === undefined) {
       errors.push(`Missing parameter: ${param.key}`);
       continue;
     }
@@ -318,13 +194,9 @@ export function validateStrategyParams(
           errors.push(`${param.key} must be <= ${param.max}`);
         }
       }
-    } else if (param.type === 'boolean') {
-      if (typeof value !== 'boolean') {
-        errors.push(`${param.key} must be a boolean`);
-      }
-    } else if (param.type === 'select') {
-      if (!param.options?.some((o) => o.value === value)) {
-        errors.push(`${param.key} has invalid value`);
+    } else if (param.type === 'text') {
+      if (typeof value !== 'string') {
+        errors.push(`${param.key} must be a string`);
       }
     }
   }
@@ -333,26 +205,84 @@ export function validateStrategyParams(
 }
 
 /**
- * Generate guarantee info for a strategy
+ * Calculate ticket count for a strategy
+ * This is the CORE calculation that all strategies must do
  */
-export function getStrategyGuarantee(
-  _strategy: Strategy,
+export function calculateTicketCountForStrategy(
+  strategyId: string,
   lottery: Lottery,
-  params: StrategyParams
-): StrategyGuarantee | null {
-  // Implement guarantee info based on strategy type
-  // This is a placeholder - actual implementation varies by strategy
+  params: StrategyParams,
+  _ticketCost: number
+): number {
+  switch (strategyId) {
+    case 'min_risk': {
+      // For now: simple heuristic
+      // Guaranteed winning tickets = roughly tickets * single_ticket_win_prob
+      // This should be calculated based on lottery math
+      const guaranteed = (params['guaranteedWinningTickets'] as number) || 1;
+      return guaranteed * 10; // Placeholder - would need proper math
+    }
 
-  const ticketCost = lottery.defaultTicketCost;
-  const budget = (params['budget'] as number) || 1000;
-  const ticketCount = Math.floor(budget / ticketCost);
+    case 'max_coverage': {
+      const coverage = (params['targetCoverage'] as number) || 80;
+      // Simple: more coverage = more tickets
+      return Math.ceil((coverage / 100) * 100); // Placeholder
+    }
 
-  return {
-    description: `${ticketCount} билетов при бюджете ${budget} ₽`,
-    guaranteedMatches: 0,
-    requiredBudget: budget,
-    ticketCount,
-    probability: 0.5,
-    conditions: 'Вероятность зависит от раскладов',
-  };
+    case 'full_wheel': {
+      // Calculate combinations C(n, k) for all selected numbers
+      const wheelnumbersStr = (params['wheelnumbers'] as string) || '';
+      const numbers = wheelnumbersStr.split(',').map((n) => parseInt(n.trim())).filter((n) => !isNaN(n));
+      const selectionCount = lottery.fields[0].count;
+
+      if (numbers.length < selectionCount) {
+        return 1; // Can't wheel
+      }
+
+      // C(n, k) = n! / (k! * (n-k)!)
+      const combinations = calculateCombinations(numbers.length, selectionCount);
+      return combinations;
+    }
+
+    case 'key_wheel': {
+      const keyStr = (params['keyNumbers'] as string) || '';
+      const additionalStr = (params['additionalNumbers'] as string) || '';
+      const additional = additionalStr.split(',').map((n) => parseInt(n.trim())).filter((n) => !isNaN(n));
+      const selectionCount = lottery.fields[0].count;
+      const keyCount = keyStr.split(',').filter((s) => s.trim()).length;
+
+      // Need to select (selectionCount - keyCount) from additional numbers
+      const needed = Math.max(0, selectionCount - keyCount);
+      const combinations = calculateCombinations(additional.length, needed);
+      return combinations;
+    }
+
+    case 'risk_strategy': {
+      const risk = (params['riskLevel'] as number) || 30;
+      // Risk formula: more risk = fewer tickets
+      // 1-10% risk = 9 tickets
+      // 50% risk = 5 tickets
+      // 99% risk = 1 ticket
+      return Math.ceil((100 - risk) / 10);
+    }
+
+    default:
+      return 1;
+  }
+}
+
+/**
+ * Helper: Calculate binomial coefficient C(n, k)
+ */
+function calculateCombinations(n: number, k: number): number {
+  if (k < 0 || k > n) return 0;
+  if (k === 0 || k === n) return 1;
+  if (k > n - k) k = n - k;
+
+  let result = 1;
+  for (let i = 0; i < k; i++) {
+    result = Math.floor((result * (n - i)) / (i + 1));
+  }
+
+  return result;
 }

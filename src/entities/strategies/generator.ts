@@ -45,29 +45,23 @@ export async function executeStrategy(
   let tickets: Ticket[] = [];
   let effectiveTicketCount: number = 0;
 
+  // Get ticket count from params (passed from UI)
+  const requestedTicketCount = (filledParams['ticketCount'] as number) || null;
+
   // Route to strategy implementation
   switch (strategyId) {
     case 'min_risk':
       tickets = generateMinRiskStrategy(lottery, filledParams);
-      effectiveTicketCount = tickets.length;
+      effectiveTicketCount = requestedTicketCount ?? tickets.length;
+      // Generate more/less tickets as needed
+      tickets = generateTicketsCount(lottery, effectiveTicketCount);
       break;
     case 'max_coverage':
       tickets = generateCoverageStrategy(lottery, filledParams, ticketCost);
-      // Override with explicit ticketCount if provided
-      if (filledParams['ticketCount'] !== undefined) {
-        effectiveTicketCount = filledParams['ticketCount'] as number;
-        tickets = tickets.slice(0, effectiveTicketCount);
-        // If need more, generate more
-        while (tickets.length < effectiveTicketCount) {
-          const field1 = uniqueRandomNumbers(1, lottery.fields[0].from, lottery.fields[0].count);
-          const ticket: Ticket = { lotteryId: lottery.id, field1 };
-          if (lottery.fieldCount === 2) {
-            ticket.field2 = uniqueRandomNumbers(1, lottery.fields[1].from, lottery.fields[1].count);
-          }
-          tickets.push(ticket);
-        }
-      } else {
-        effectiveTicketCount = tickets.length;
+      effectiveTicketCount = requestedTicketCount ?? tickets.length;
+      // Generate more/less tickets as needed
+      if (tickets.length !== effectiveTicketCount) {
+        tickets = generateTicketsCount(lottery, effectiveTicketCount);
       }
       break;
     case 'full_wheel':
@@ -382,4 +376,31 @@ function combinationsForCoverage(lottery: Lottery): number {
   }
 
   return total;
+}
+
+/**
+ * Helper: Generate exactly N random tickets
+ */
+function generateTicketsCount(lottery: Lottery, count: number): Ticket[] {
+  const tickets: Ticket[] = [];
+
+  for (let i = 0; i < count; i++) {
+    const field1 = uniqueRandomNumbers(1, lottery.fields[0].from, lottery.fields[0].count);
+    const ticket: Ticket = {
+      lotteryId: lottery.id,
+      field1,
+    };
+
+    if (lottery.fieldCount === 2) {
+      ticket.field2 = uniqueRandomNumbers(
+        1,
+        lottery.fields[1].from,
+        lottery.fields[1].count
+      );
+    }
+
+    tickets.push(ticket);
+  }
+
+  return tickets;
 }

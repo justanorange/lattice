@@ -14,7 +14,7 @@ export type {
   StrategyComparison,
 } from './types';
 
-export { ALL_STRATEGIES, getStrategyById, getStrategiesForLottery, validateStrategyParams, getStrategyGuarantee } from './config';
+export { ALL_STRATEGIES, getStrategyById, getStrategiesForLottery, validateStrategyParams, calculateTicketCountForStrategy } from './config';
 
 export { executeStrategy } from './generator';
 

@@ -6,7 +6,7 @@
 import type { StrategyParams, StrategyResult, StrategyComparison } from './types';
 import type { Lottery } from '../lottery/types';
 import { executeStrategy } from './generator';
-import { ALL_STRATEGIES, getStrategyGuarantee } from './config';
+import { ALL_STRATEGIES } from './config';
 
 /**
  * Compare two strategies
@@ -129,14 +129,12 @@ export async function getBestStrategy(
   }
 
   const result = await executeStrategy(bestStrategy, lottery, params[bestStrategy] || {}, ticketCost);
-  const strategy = ALL_STRATEGIES[bestStrategy];
-  const guarantee = strategy ? getStrategyGuarantee(strategy, lottery, params[bestStrategy] || {}) : null;
 
   return {
     strategyId: bestStrategy,
     result,
-    guarantee: guarantee || {
-      description: 'N/A',
+    guarantee: {
+      description: 'Strategy executed',
       guaranteedMatches: 0,
       requiredBudget: result.totalCost,
       ticketCount: result.ticketCount,
