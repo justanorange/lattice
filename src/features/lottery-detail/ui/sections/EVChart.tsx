@@ -18,16 +18,29 @@ interface EVChartProps {
 
 /**
  * Calculate breakeven superprice where EV = 0
+ * Returns: number (breakeven point), 0 (already profitable at 0), or null (never profitable)
  */
 function findBreakevenSuperprice(
   lottery: Lottery,
   prizeTable: PrizeTable,
   ticketCost: number
 ): number | null {
+  // First check if already profitable at superprice = 0
+  const evAtZero = calculateEV(lottery, 0, prizeTable, ticketCost);
+  if (evAtZero.expectedValue >= 0) {
+    return 0; // Already profitable without superprice
+  }
+
   // Binary search for EV = 0 point
   let low = 0;
   let high = 1_000_000_000; // 1 billion
   const tolerance = 1000; // 1000 rubles precision
+
+  // Check if profitable at max superprice
+  const evAtMax = calculateEV(lottery, high, prizeTable, ticketCost);
+  if (evAtMax.expectedValue < 0) {
+    return null; // Never profitable even at 1 billion superprice
+  }
 
   for (let i = 0; i < 50; i++) {
     const mid = (low + high) / 2;
@@ -38,16 +51,10 @@ function findBreakevenSuperprice(
     }
 
     if (ev.expectedValue < 0) {
-      low = mid;
+      low = mid; // Need higher superprice
     } else {
-      high = mid;
+      high = mid; // Superprice too high
     }
-  }
-
-  // If breakeven is beyond reasonable superprice
-  const evAtMax = calculateEV(lottery, high, prizeTable, ticketCost);
-  if (evAtMax.expectedValue < 0) {
-    return null; // Never profitable
   }
 
   return Math.round((low + high) / 2);
@@ -68,24 +75,33 @@ function formatAmount(amount: number): string {
 }
 
 /**
- * Generate chart data points - adapt range to current superprice
+ * Generate chart data points - adapt range to include breakeven and current superprice
  */
 function generateChartPoints(
   lottery: Lottery,
   prizeTable: PrizeTable,
   ticketCost: number,
-  currentSuperprice: number
+  currentSuperprice: number,
+  breakevenSuperprice: number | null
 ): { superprice: number; ev: number }[] {
   const points: { superprice: number; ev: number }[] = [];
   
-  // Adapt range based on current superprice
-  // Show from 10% of current to 10x of current (or min 100k to max 1B)
-  const minSp = Math.max(100_000, Math.floor(currentSuperprice * 0.1));
-  const maxSp = Math.min(1_000_000_000, Math.max(currentSuperprice * 10, 10_000_000));
+  // Determine range to show - include both current superprice and breakeven
+  const importantPoints = [currentSuperprice];
+  if (breakevenSuperprice && breakevenSuperprice > 0) {
+    importantPoints.push(breakevenSuperprice);
+  }
+  
+  const maxImportant = Math.max(...importantPoints);
+  const minImportant = Math.min(...importantPoints.filter(p => p > 0));
+  
+  // Show range that includes all important points with some margin
+  const minSp = Math.max(0, Math.floor(minImportant * 0.2));
+  const maxSp = Math.min(1_000_000_000, Math.ceil(maxImportant * 2));
   
   // Calculate step to get ~20-30 points
   const range = maxSp - minSp;
-  const step = Math.ceil(range / 25 / 100_000) * 100_000; // Round to 100k
+  const step = Math.max(100_000, Math.ceil(range / 25 / 100_000) * 100_000);
 
   for (let sp = minSp; sp <= maxSp; sp += step) {
     const ev = calculateEV(lottery, sp, prizeTable, ticketCost);
@@ -113,8 +129,8 @@ export const EVChart: React.FC<EVChartProps> = ({
   );
 
   const chartPoints = useMemo(() => 
-    generateChartPoints(lottery, prizeTable, ticketCost, currentSuperprice),
-    [lottery, prizeTable, ticketCost, currentSuperprice]
+    generateChartPoints(lottery, prizeTable, ticketCost, currentSuperprice, breakevenSuperprice),
+    [lottery, prizeTable, ticketCost, currentSuperprice, breakevenSuperprice]
   );
 
   // Find min/max EV for scaling
@@ -138,13 +154,30 @@ export const EVChart: React.FC<EVChartProps> = ({
       </CardHeader>
       <CardBody>
         {/* Breakeven info */}
-        <div className="mb-4 flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-900/20">
-          <Target className="mt-0.5 size-5 shrink-0 text-amber-600 dark:text-amber-400" />
+        <div className={`mb-4 flex items-start gap-3 rounded-lg border p-3 ${
+          breakevenSuperprice === 0
+            ? 'border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-900/20'
+            : 'border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20'
+        }`}>
+          <Target className={`mt-0.5 size-5 shrink-0 ${
+            breakevenSuperprice === 0
+              ? 'text-green-600 dark:text-green-400'
+              : 'text-amber-600 dark:text-amber-400'
+          }`} />
           <div className="text-sm">
-            {breakevenSuperprice ? (
+            {breakevenSuperprice === 0 ? (
+              <>
+                <p className="font-medium text-green-800 dark:text-green-300">
+                  ✓ Уже выгодно играть!
+                </p>
+                <p className="text-green-700 dark:text-green-400">
+                  EV положительный даже без учёта суперприза
+                </p>
+              </>
+            ) : breakevenSuperprice ? (
               <>
                 <p className="font-medium text-amber-800 dark:text-amber-300">
-                  Точка безубыточности: {formatAmount(breakevenSuperprice)} ₽
+                  Точка безубыточности: {formatAmount(breakevenSuperprice)}
                 </p>
                 <p className="text-amber-700 dark:text-amber-400">
                   При суперпризе выше этой суммы EV становится положительным
@@ -233,7 +266,7 @@ export const EVChart: React.FC<EVChartProps> = ({
                   >
                     {isAboveZero ? (
                       <div
-                        className={`absolute w-full rounded-t transition-all ${
+                        className={`absolute w-full transition-all ${
                           isCurrent
                             ? 'bg-amber-500 ring-2 ring-amber-300'
                             : 'bg-green-400 hover:bg-green-500 dark:bg-green-500 dark:hover:bg-green-400'
@@ -246,7 +279,7 @@ export const EVChart: React.FC<EVChartProps> = ({
                       />
                     ) : (
                       <div
-                        className={`absolute w-full rounded-b transition-all ${
+                        className={`absolute w-full transition-all ${
                           isCurrent
                             ? 'bg-amber-500 ring-2 ring-amber-300'
                             : 'bg-red-400 hover:bg-red-500 dark:bg-red-500 dark:hover:bg-red-400'

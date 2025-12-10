@@ -5,18 +5,24 @@
 
 import { Card, CardHeader, CardBody } from '@/shared/ui';
 import { Trophy, Award } from 'lucide-react';
-import type { SimulationResult } from '@/entities/lottery/types';
+import type { SimulationResult, PrizeTable } from '@/entities/lottery/types';
 
 interface PrizeDistributionProps {
   result: SimulationResult;
   superprice: number;
+  prizeTable: PrizeTable;
 }
 
 export const PrizeDistribution: React.FC<PrizeDistributionProps> = ({
   result,
   superprice,
+  prizeTable,
 }) => {
   const { prizeDistribution } = result.statistics;
+
+  // Find superprice match pattern from prize table
+  const superprizeRow = prizeTable.rows.find(row => row.prize === 'Суперприз');
+  const superprizeCategory = superprizeRow?.matches.join('+');
 
   // Sort categories by "importance" (jackpot first, then by match count)
   const sortedCategories = Object.entries(prizeDistribution)
@@ -28,10 +34,8 @@ export const PrizeDistribution: React.FC<PrizeDistributionProps> = ({
       return getMatchSum(b[0]) - getMatchSum(a[0]);
     });
 
-  // Count superprice wins (full matches like 8+1, 7+0 for single field, etc.)
-  // Superprice is usually the first (highest match) category
-  const jackpotCategory = sortedCategories.length > 0 ? sortedCategories[0] : null;
-  const jackpotWins = jackpotCategory ? prizeDistribution[jackpotCategory[0]] || 0 : 0;
+  // Count actual superprice wins based on prize table
+  const jackpotWins = superprizeCategory ? prizeDistribution[superprizeCategory] || 0 : 0;
   const totalSuperpriceWon = jackpotWins * superprice;
 
   // Calculate total winning occurrences
@@ -111,7 +115,7 @@ export const PrizeDistribution: React.FC<PrizeDistributionProps> = ({
             <div className="space-y-2">
               {sortedCategories.map(([category, count]) => {
                 const percent = (count / totalTicketChecks) * 100;
-                const isJackpot = category === jackpotCategory?.[0];
+                const isJackpot = category === superprizeCategory;
 
                 return (
                   <PrizeCategoryRow

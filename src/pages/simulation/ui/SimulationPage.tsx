@@ -21,7 +21,7 @@ export const SimulationPage: React.FC = () => {
   const { lotteryId } = useParams<{ lotteryId: string }>();
   const navigate = useNavigate();
   const { generatedTickets } = useStrategyStore();
-  const { selectedLottery, currentSuperprice, currentTicketCost } = useLotteryStore();
+  const { selectedLottery, currentSuperprice, currentTicketCost, currentPrizeTable } = useLotteryStore();
 
   if (!lotteryId) {
     navigate('/');
@@ -61,7 +61,7 @@ export const SimulationPage: React.FC = () => {
       {result && !isRunning && (
         <>
           <SimulationStats result={result} />
-          <PrizeDistribution result={result} superprice={currentSuperprice} />
+          <PrizeDistribution result={result} superprice={currentSuperprice} prizeTable={currentPrizeTable} />
           <BankrollHistogram result={result} ticketCost={currentTicketCost} />
           <BankrollChart result={result} />
         </>
