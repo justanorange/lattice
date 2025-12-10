@@ -49,32 +49,37 @@ function calculateRowProbability(lottery: Lottery, row: PrizeRow): number {
 }
 
 /**
- * Format probability as percentage or "1 in X"
+ * Format probability as both percentage and ratio on separate lines
  */
-function formatProbability(prob: number): string {
-  if (prob === 0) return '0%';
-  if (prob >= 0.01) {
-    return `${(prob * 100).toFixed(2)}%`;
-  } else if (prob >= 0.0001) {
-    return `${(prob * 100).toFixed(4)}%`;
-  } else {
-    const odds = Math.round(1 / prob);
-    return `1 из ${odds.toLocaleString('ru-RU')}`;
-  }
+function formatProbability(prob: number): { percent: string; ratio: string } {
+  if (prob === 0) return { percent: '0%', ratio: '—' };
+  
+  const percent = prob >= 0.0001 
+    ? `${(prob * 100).toFixed(prob >= 0.01 ? 2 : 4)}%`
+    : `${(prob * 100).toExponential(1)}`;
+  
+  const odds = Math.round(1 / prob);
+  const ratio = `1:${odds.toLocaleString('ru-RU')}`;
+  
+  return { percent, ratio };
 }
 
 /**
- * Format prize value for display
+ * Format prize value for display (no ₽ symbol to save space)
  */
 function formatPrize(row: PrizeRow, superprice: number): string {
   if (row.prize === 'Суперприз') {
-    return `${(superprice / 1_000_000).toFixed(0)} млн ₽`;
+    // Show actual value, not hardcoded millions
+    if (superprice >= 1_000_000) {
+      return `${(superprice / 1_000_000).toFixed(1)} млн`;
+    }
+    return superprice.toLocaleString('ru-RU');
   } else if (row.prize === 'Приз') {
     return 'Приз';
   } else if (typeof row.prize === 'number') {
-    return `${row.prize.toLocaleString('ru-RU')} ₽`;
+    return row.prize.toLocaleString('ru-RU');
   } else if (row.prizePercent !== undefined) {
-    return `${row.prizePercent}% фонда`;
+    return `${row.prizePercent}%`;
   }
   return '-';
 }
@@ -157,8 +162,8 @@ export const ProbabilityTable: React.FC<ProbabilityTableProps> = ({
 interface ProbabilityRowProps {
   matches: string;
   prize: string;
-  singleProbability: string;
-  multiProbability: string;
+  singleProbability: { percent: string; ratio: string };
+  multiProbability: { percent: string; ratio: string };
   isJackpot?: boolean;
 }
 
@@ -176,11 +181,13 @@ const ProbabilityRow: React.FC<ProbabilityRowProps> = ({
     <td className={`py-2 text-right ${isJackpot ? 'font-semibold text-amber-600 dark:text-amber-400' : 'text-gray-700 dark:text-gray-300'}`}>
       {prize}
     </td>
-    <td className="py-2 text-right text-gray-500 dark:text-gray-400">
-      {singleProbability}
+    <td className="py-2 text-right text-xs text-gray-500 dark:text-gray-400">
+      <div>{singleProbability.percent}</div>
+      <div className="text-gray-400 dark:text-gray-500">{singleProbability.ratio}</div>
     </td>
-    <td className="py-2 text-right font-medium text-gray-900 dark:text-white">
-      {multiProbability}
+    <td className="py-2 text-right text-xs font-medium text-gray-900 dark:text-white">
+      <div>{multiProbability.percent}</div>
+      <div className="text-gray-400 dark:text-gray-500">{multiProbability.ratio}</div>
     </td>
   </tr>
 );

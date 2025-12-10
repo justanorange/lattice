@@ -76,13 +76,13 @@ export const PrizeDistribution: React.FC<PrizeDistributionProps> = ({
           </div>
           {jackpotWins === 0 && (
             <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-              При {totalTicketChecks.toLocaleString('ru-RU')} проверок билетов суперприз не выпал. 
+              За {totalRounds.toLocaleString('ru-RU')} тиражей ({totalTickets} билетов × {totalRounds} тиражей) суперприз не выпал. 
               Это нормально — шанс очень мал.
             </p>
           )}
           {jackpotWins > 0 && (
             <p className="mt-3 text-sm text-gray-500 dark:text-gray-400">
-              Повезло! Суперприз выпал {jackpotWins} раз(а) из {totalTicketChecks.toLocaleString('ru-RU')} проверок.
+              Повезло! Суперприз выпал {jackpotWins} раз(а) за {totalRounds.toLocaleString('ru-RU')} тиражей.
             </p>
           )}
         </CardBody>

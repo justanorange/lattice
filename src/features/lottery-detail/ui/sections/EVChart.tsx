@@ -3,6 +3,7 @@
  * Visual chart showing EV vs Superprice relationship
  */
 
+import { useMemo } from 'react';
 import { Card, CardHeader, CardBody } from '@/shared/ui';
 import { TrendingUp, Target } from 'lucide-react';
 import { calculateEV } from '@/entities/lottery/calculation';
@@ -53,22 +54,40 @@ function findBreakevenSuperprice(
 }
 
 /**
- * Generate chart data points
+ * Format amount for display (compact)
+ */
+function formatAmount(amount: number): string {
+  if (amount >= 1_000_000_000) {
+    return `${(amount / 1_000_000_000).toFixed(1)}млрд`;
+  } else if (amount >= 1_000_000) {
+    return `${(amount / 1_000_000).toFixed(0)}млн`;
+  } else if (amount >= 1000) {
+    return `${(amount / 1000).toFixed(0)}к`;
+  }
+  return amount.toString();
+}
+
+/**
+ * Generate chart data points - adapt range to current superprice
  */
 function generateChartPoints(
   lottery: Lottery,
   prizeTable: PrizeTable,
   ticketCost: number,
-  _currentSuperprice: number
+  currentSuperprice: number
 ): { superprice: number; ev: number }[] {
   const points: { superprice: number; ev: number }[] = [];
   
-  // Generate points from 10M to 500M
-  const min = 10_000_000;
-  const max = 500_000_000;
-  const step = 10_000_000;
+  // Adapt range based on current superprice
+  // Show from 10% of current to 10x of current (or min 100k to max 1B)
+  const minSp = Math.max(100_000, Math.floor(currentSuperprice * 0.1));
+  const maxSp = Math.min(1_000_000_000, Math.max(currentSuperprice * 10, 10_000_000));
+  
+  // Calculate step to get ~20-30 points
+  const range = maxSp - minSp;
+  const step = Math.ceil(range / 25 / 100_000) * 100_000; // Round to 100k
 
-  for (let sp = min; sp <= max; sp += step) {
+  for (let sp = minSp; sp <= maxSp; sp += step) {
     const ev = calculateEV(lottery, sp, prizeTable, ticketCost);
     points.push({ superprice: sp, ev: ev.expectedValue });
   }
@@ -82,14 +101,21 @@ export const EVChart: React.FC<EVChartProps> = ({
   ticketCost,
   currentSuperprice,
 }) => {
-  const breakevenSuperprice = findBreakevenSuperprice(
-    lottery,
-    prizeTable,
-    ticketCost
+  // Memoize calculations that depend on lottery/prizeTable/ticketCost
+  const breakevenSuperprice = useMemo(() => 
+    findBreakevenSuperprice(lottery, prizeTable, ticketCost),
+    [lottery, prizeTable, ticketCost]
   );
 
-  const currentEV = calculateEV(lottery, currentSuperprice, prizeTable, ticketCost);
-  const chartPoints = generateChartPoints(lottery, prizeTable, ticketCost, currentSuperprice);
+  const currentEV = useMemo(() => 
+    calculateEV(lottery, currentSuperprice, prizeTable, ticketCost),
+    [lottery, currentSuperprice, prizeTable, ticketCost]
+  );
+
+  const chartPoints = useMemo(() => 
+    generateChartPoints(lottery, prizeTable, ticketCost, currentSuperprice),
+    [lottery, prizeTable, ticketCost, currentSuperprice]
+  );
 
   // Find min/max EV for scaling
   const evValues = chartPoints.map((p) => p.ev);
@@ -118,7 +144,7 @@ export const EVChart: React.FC<EVChartProps> = ({
             {breakevenSuperprice ? (
               <>
                 <p className="font-medium text-amber-800 dark:text-amber-300">
-                  Точка безубыточности: {(breakevenSuperprice / 1_000_000).toFixed(0)} млн ₽
+                  Точка безубыточности: {formatAmount(breakevenSuperprice)} ₽
                 </p>
                 <p className="text-amber-700 dark:text-amber-400">
                   При суперпризе выше этой суммы EV становится положительным
@@ -182,11 +208,11 @@ export const EVChart: React.FC<EVChartProps> = ({
             </div>
           </div>
 
-          {/* X-axis labels */}
+          {/* X-axis labels - show actual range */}
           <div className="mt-1 flex justify-between text-xs text-gray-500 dark:text-gray-400">
-            <span>10 млн</span>
-            <span>250 млн</span>
-            <span>500 млн</span>
+            <span>{formatAmount(chartPoints[0]?.superprice || 0)}</span>
+            <span>{formatAmount(chartPoints[Math.floor(chartPoints.length / 2)]?.superprice || 0)}</span>
+            <span>{formatAmount(chartPoints[chartPoints.length - 1]?.superprice || 0)}</span>
           </div>
         </div>
 
@@ -198,7 +224,7 @@ export const EVChart: React.FC<EVChartProps> = ({
                 Текущий суперприз
               </p>
               <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                {(currentSuperprice / 1_000_000).toFixed(0)} млн ₽
+                {formatAmount(currentSuperprice)} ₽
               </p>
             </div>
             <div>
@@ -231,8 +257,8 @@ export const EVChart: React.FC<EVChartProps> = ({
                 }`}
               >
                 {currentSuperprice >= breakevenSuperprice
-                  ? `✓ Суперприз выше на ${((currentSuperprice - breakevenSuperprice) / 1_000_000).toFixed(0)} млн`
-                  : `↑ Нужно еще ${((breakevenSuperprice - currentSuperprice) / 1_000_000).toFixed(0)} млн`}
+                  ? `✓ Суперприз выше на ${formatAmount(currentSuperprice - breakevenSuperprice)}`
+                  : `↑ Нужно еще ${formatAmount(breakevenSuperprice - currentSuperprice)}`}
               </p>
             </div>
           )}

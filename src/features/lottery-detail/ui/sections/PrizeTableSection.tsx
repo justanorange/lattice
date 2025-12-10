@@ -151,7 +151,7 @@ const PrizeTableRow: React.FC<PrizeTableRowProps> = ({ row, index, lottery, onUp
       </td>
       <td className="px-3 py-2 text-right text-sm">
         {isEditable ? (
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end gap-1">
             <Input
               type="text"
               value={typeof row.prize === 'number' ? row.prize.toString() : '0'}
@@ -159,9 +159,8 @@ const PrizeTableRow: React.FC<PrizeTableRowProps> = ({ row, index, lottery, onUp
               onBlur={handlePrizeBlur}
               min={0}
               step={100}
-              className="w-32 text-right"
+              className="text-right"
             />
-            <span className="text-gray-600 dark:text-gray-400">₽</span>
           </div>
         ) : isSuperprice || isSecondaryPrize ? (
           <span className="font-medium text-amber-600 dark:text-amber-400">{row.prize}</span>

@@ -13,49 +13,53 @@ interface BankrollHistogramProps {
 }
 
 /**
- * Create histogram buckets for prize amounts
+ * Create histogram buckets for prize amounts per round
+ * Uses actual prize ranges rather than multiples of cost
  */
 function createHistogramBuckets(
   rounds: SimulationResult['rounds'],
-  ticketCost: number,
-  ticketCount: number
-): { label: string; count: number; color: string }[] {
-  const roundCost = ticketCost * ticketCount;
-  
-  // Count rounds by result type
-  let zeroWins = 0;
-  let smallWins = 0; // less than cost
-  let breakEven = 0; // around cost
-  let goodWins = 0; // 1-10x cost
-  let bigWins = 0; // 10-100x cost
-  let hugeWins = 0; // 100x+ cost
+  _ticketCost: number,
+  _ticketCount: number
+): { label: string; count: number; color: string; range: string }[] {
+  // Define meaningful prize ranges
+  const buckets: { label: string; min: number; max: number; count: number; color: string }[] = [
+    { label: 'Ноль', min: 0, max: 0, count: 0, color: 'bg-gray-400' },
+    { label: '1-100', min: 1, max: 100, count: 0, color: 'bg-red-300' },
+    { label: '100-500', min: 100, max: 500, count: 0, color: 'bg-red-400' },
+    { label: '500-1к', min: 500, max: 1000, count: 0, color: 'bg-orange-400' },
+    { label: '1к-5к', min: 1000, max: 5000, count: 0, color: 'bg-yellow-400' },
+    { label: '5к-10к', min: 5000, max: 10000, count: 0, color: 'bg-lime-400' },
+    { label: '10к-50к', min: 10000, max: 50000, count: 0, color: 'bg-green-400' },
+    { label: '50к-100к', min: 50000, max: 100000, count: 0, color: 'bg-teal-400' },
+    { label: '100к-1млн', min: 100000, max: 1000000, count: 0, color: 'bg-blue-400' },
+    { label: '1млн+', min: 1000000, max: Infinity, count: 0, color: 'bg-purple-500' },
+  ];
 
   for (const round of rounds) {
     const prize = round.totalPrizeThisRound;
     
-    if (prize === 0) {
-      zeroWins++;
-    } else if (prize < roundCost * 0.5) {
-      smallWins++;
-    } else if (prize < roundCost * 2) {
-      breakEven++;
-    } else if (prize < roundCost * 10) {
-      goodWins++;
-    } else if (prize < roundCost * 100) {
-      bigWins++;
-    } else {
-      hugeWins++;
+    for (const bucket of buckets) {
+      if (bucket.min === 0 && prize === 0) {
+        bucket.count++;
+        break;
+      } else if (prize > bucket.min && prize <= bucket.max) {
+        bucket.count++;
+        break;
+      }
     }
   }
 
-  return [
-    { label: 'Без выигрыша', count: zeroWins, color: 'bg-gray-400' },
-    { label: `< ${Math.round(roundCost * 0.5)} ₽`, count: smallWins, color: 'bg-red-400' },
-    { label: `~затраты`, count: breakEven, color: 'bg-yellow-400' },
-    { label: `x2-10`, count: goodWins, color: 'bg-green-400' },
-    { label: `x10-100`, count: bigWins, color: 'bg-blue-400' },
-    { label: `x100+`, count: hugeWins, color: 'bg-purple-400' },
-  ].filter(b => b.count > 0);
+  // Return only non-empty buckets with range description
+  return buckets
+    .filter(b => b.count > 0)
+    .map(b => ({
+      label: b.label,
+      count: b.count,
+      color: b.color,
+      range: b.min === 0 ? 'без выигрыша' : 
+             b.max === Infinity ? `>${b.min.toLocaleString('ru-RU')}₽` :
+             `${b.min.toLocaleString('ru-RU')}-${b.max.toLocaleString('ru-RU')}₽`
+    }));
 }
 
 export const BankrollHistogram: React.FC<BankrollHistogramProps> = ({
@@ -77,30 +81,30 @@ export const BankrollHistogram: React.FC<BankrollHistogramProps> = ({
         <div className="flex items-center gap-2">
           <BarChart3 className="size-5 text-gray-600 dark:text-gray-400" />
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-            Гистограмма выигрышей
+            Распределение выигрышей
           </h2>
         </div>
         <p className="text-sm text-gray-500 dark:text-gray-400">
-          Распределение размера выигрышей по тиражам
+          Сколько тиражей попало в каждый диапазон выигрыша
         </p>
       </CardHeader>
       <CardBody>
-        <div className="space-y-3">
+        <div className="space-y-2">
           {buckets.map((bucket, index) => {
             const percent = (bucket.count / totalRounds) * 100;
             const barWidth = (bucket.count / maxCount) * 100;
 
             return (
-              <div key={index} className="space-y-1">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-600 dark:text-gray-400">
+              <div key={index} className="space-y-0.5">
+                <div className="flex justify-between text-xs">
+                  <span className="text-gray-600 dark:text-gray-400" title={bucket.range}>
                     {bucket.label}
                   </span>
                   <span className="font-medium text-gray-900 dark:text-white">
                     {bucket.count.toLocaleString('ru-RU')} ({percent.toFixed(1)}%)
                   </span>
                 </div>
-                <div className="h-4 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
+                <div className="h-3 w-full overflow-hidden rounded-full bg-gray-200 dark:bg-gray-700">
                   <div
                     className={`h-full rounded-full transition-all ${bucket.color}`}
                     style={{ width: `${barWidth}%` }}
@@ -111,10 +115,8 @@ export const BankrollHistogram: React.FC<BankrollHistogramProps> = ({
           })}
         </div>
 
-        <div className="mt-4 border-t border-gray-200 pt-4 dark:border-gray-700">
-          <p className="text-xs text-gray-500 dark:text-gray-400">
-            * Категории показывают размер выигрыша за тираж относительно затрат ({(ticketCost * result.tickets.length).toLocaleString('ru-RU')} ₽ за тираж)
-          </p>
+        <div className="mt-3 text-xs text-gray-400 dark:text-gray-500">
+          Всего {totalRounds.toLocaleString('ru-RU')} тиражей
         </div>
       </CardBody>
     </Card>
