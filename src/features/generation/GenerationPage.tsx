@@ -7,8 +7,9 @@ import React, { useState, useEffect } from "react";
 import { useLotteryStore } from "../../entities/lottery/store";
 import { executeStrategy } from "../../entities/strategies/generator";
 import type { StrategyResult } from "../../entities/strategies/types";
-import { Card, CardHeader, CardBody, Button, Container, Spinner, TicketVisualization } from "../../shared/ui";
+import { Card, CardHeader, CardBody, Container, Spinner, TicketVisualization } from "../../shared/ui";
 import { STRINGS } from "../../shared/constants";
+import { ChevronLeft } from "lucide-react";
 
 export interface GenerationPageProps {
   strategyId?: string;
@@ -65,14 +66,31 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
 
   return (
     <Container>
-      <div className="mb-8 flex flex-col gap-2">
-        <h1 className="text-3xl font-bold leading-tight text-gray-900 dark:text-white">
+      <header className="h-[72px] inset-x-16 top-0 z-20 flex flex-col items-center justify-center fixed">
+        {onBack && (
+
+          <div className="absolute inset-y-0 -left-8 flex items-center">
+            <button
+              type="button"
+              onClick={onBack}
+              className="
+                flex items-center gap-2
+                text-gray-500 dark:text-gray-400
+                transition-colors active:scale-95
+              "
+              aria-label="Go back"
+            >
+              <ChevronLeft className="w-7 h-7" />
+            </button>
+          </div>
+        )}
+        <h1 className="text-center text-base font-semibold leading-tight text-gray-900 dark:text-white">
           {STRINGS.generation_title}
         </h1>
-        <p className="text-base text-gray-600 dark:text-gray-400">
+        <p className="text-center text-sm text-gray-600 dark:text-gray-400">
           Сгенерированные билеты для {selectedLottery.name}
         </p>
-      </div>
+      </header>
 
       {isGenerating && (
         <Card className="mb-6">
@@ -110,7 +128,7 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Количество билетов
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                     {result.ticketCount}
                   </p>
                 </div>
@@ -118,7 +136,7 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Общая стоимость
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                     {result.totalCost.toLocaleString()} ₽
                   </p>
                 </div>
@@ -159,16 +177,11 @@ export const GenerationPage: React.FC<GenerationPageProps> = ({
 
       {/* Navigation */}
       <div className="flex gap-3">
-        {onBack && (
-          <Button variant="secondary" onClick={onBack}>
-            {STRINGS.button_back}
-          </Button>
-        )}
-        {result && (
+        {/* {result && (
           <Button variant="primary">
             {STRINGS.generation_download_pdf}
           </Button>
-        )}
+        )} */}
       </div>
     </Container>
   );

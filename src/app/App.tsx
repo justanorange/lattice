@@ -1,8 +1,6 @@
 import { useState } from 'react';
-import { Sun, Moon } from 'lucide-react';
 import { STRINGS } from '../shared/constants';
-import { Container, Stack, Grid, Card, CardHeader, CardBody, Button, Spinner, Alert } from '../shared/ui';
-import { useTheme } from '../shared/hooks';
+import { Container, Grid, Card, CardHeader, CardBody, Button, Spinner, Alert } from '../shared/ui';
 import { LOTTERIES_ARRAY } from '../entities/lottery/config';
 import { useLotteryStore } from '../entities/lottery/store';
 import { LotteryDetailPage } from '../features/lottery-detail/LotteryDetailPage';
@@ -10,6 +8,7 @@ import { StrategySelectionPage } from '../features/strategy-selection/StrategySe
 import { GenerationPage } from '../features/generation/GenerationPage';
 import { SimulationPage } from '../features/simulation/SimulationPage';
 import './styles/App.css';
+import { ThemeMode } from '@/widgets/theme-mode/ui/ThemeMode';
 
 /**
  * MVP: Only first lottery (8+1) is available
@@ -24,7 +23,6 @@ const LOTTERY_AVAILABILITY: Record<string, boolean> = {
 };
 
 function App() {
-  const { isDark, setTheme } = useTheme();
   const [currentPage, setCurrentPage] = useState<'lottery' | 'detail' | 'strategy' | 'generation' | 'simulation'>('lottery');
   const [selectedLotteryId, setSelectedLotteryId] = useState<string | null>(null);
   const [selectedStrategyId, setSelectedStrategyId] = useState<string>('max_coverage');
@@ -70,28 +68,14 @@ function App() {
   };
 
   return (
-    <div className={`min-h-screen ${isDark ? 'dark' : ''}`}>
+    <div className="min-h-screen relative">
       {/* Header */}
-      <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 sticky top-0 z-50">
-        <Container>
-          <Stack direction="row" className="items-center justify-between py-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {STRINGS.app_title}
-              </h1>
-            </div>
-            <button
-              onClick={() => setTheme(isDark ? 'light' : 'dark')}
-              className="p-2 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-800 transition"
-            >
-              {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
-          </Stack>
-        </Container>
+      <header className="fixed inset-x-0 top-0 z-10 flex items-center justify-end p-4 bg-white/70 dark:bg-gray-900/70 backdrop-blur-md">
+        <ThemeMode></ThemeMode>
       </header>
 
       {/* Main Content */}
-      <main className="py-8">
+      <main className="pt-20">
         <Container>
           {error && <Alert type="error" message={error} onClose={() => setError(null)} />}
 
@@ -101,45 +85,49 @@ function App() {
             </div>
           ) : currentPage === 'lottery' ? (
             // Page: Lottery Selection
-            <div>
-              <h2 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
-                {STRINGS.lottery_select_title}
-              </h2>
-              <Grid cols={2} gap="md">
-                {lotteries.map((lottery) => (
-                  <Card
-                    key={lottery.id}
-                    className={`cursor-pointer transition-all ${
-                      !lottery.available ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-lg'
-                    }`}
-                  >
-                    <CardHeader>
-                      <h3 className="text-xl font-bold text-gray-900 dark:text-white">
-                        {lottery.name}
-                      </h3>
-                      {!lottery.available && (
-                        <span className="text-xs bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 px-2 py-1 rounded">
-                          {STRINGS.lottery_coming_soon}
-                        </span>
-                      )}
-                    </CardHeader>
-                    <CardBody>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-                        {lottery.description || 'Russian lottery'}
-                      </p>
-                      <Button
-                        variant={lottery.available ? 'primary' : 'ghost'}
-                        disabled={!lottery.available}
-                        onClick={() => handleSelectLottery(lottery.id)}
-                        className="w-full"
-                      >
-                        {STRINGS.lottery_details}
-                      </Button>
-                    </CardBody>
-                  </Card>
-                ))}
-              </Grid>
-            </div>
+            <>
+              <header className="h-[72px] inset-x-16 top-0 z-20 flex flex-col items-center justify-center fixed">
+                <h1 className="text-center text-xl font-semibold leading-tight text-gray-900 dark:text-white">
+                  {STRINGS.lottery_select_title}
+                </h1>
+              </header>
+              <div>
+                <Grid cols={2} gap="md">
+                  {lotteries.map((lottery) => (
+                    <Card
+                      key={lottery.id}
+                      className={`cursor-pointer transition-all ${
+                        !lottery.available ? 'opacity-60 cursor-not-allowed' : 'hover:shadow-lg'
+                      }`}
+                    >
+                      <CardHeader>
+                        <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                          {lottery.name}
+                        </h3>
+                        {!lottery.available && (
+                          <span className="text-xs bg-amber-100 dark:bg-amber-900 text-amber-800 dark:text-amber-200 px-2 py-1 rounded">
+                            {STRINGS.lottery_coming_soon}
+                          </span>
+                        )}
+                      </CardHeader>
+                      <CardBody>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
+                          {lottery.description || 'Russian lottery'}
+                        </p>
+                        <Button
+                          variant={lottery.available ? 'primary' : 'ghost'}
+                          disabled={!lottery.available}
+                          onClick={() => handleSelectLottery(lottery.id)}
+                          className="w-full"
+                        >
+                          {STRINGS.lottery_details}
+                        </Button>
+                      </CardBody>
+                    </Card>
+                  ))}
+                </Grid>
+              </div>
+            </>
           ) : currentPage === 'detail' ? (
             // Page: Lottery Detail
             selectedLotteryId && (
@@ -179,14 +167,6 @@ function App() {
         </Container>
       </main>
 
-      {/* Footer */}
-      {/* <footer className="bg-gray-100 dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 mt-12 py-6">
-        <Container>
-          <p className="text-center text-sm text-gray-600 dark:text-gray-400">
-            © 2025 Lattice - Mathematical Lottery System
-          </p>
-        </Container>
-      </footer> */}
     </div>
   );
 }

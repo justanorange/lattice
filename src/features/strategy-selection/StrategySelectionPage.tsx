@@ -9,6 +9,7 @@ import React, { useState, useMemo } from 'react';
 import { Card, CardHeader, CardBody, Button, Container, Input, Slider, Grid } from '../../shared/ui';
 import { useLotteryStore } from '../../entities/lottery/store';
 import { getStrategiesForLottery, calculateTicketCountForStrategy } from '../../entities/strategies/config';
+import { ChevronLeft } from 'lucide-react';
 
 export interface StrategySelectionPageProps {
   onNext?: (strategyId: string, params: Record<string, unknown>, ticketCount: number) => void;
@@ -61,14 +62,31 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
 
   return (
     <Container>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+      <header className="h-[72px] inset-x-16 top-0 z-20 flex flex-col items-center justify-center fixed">
+        {onBack && (
+
+          <div className="absolute inset-y-0 -left-8 flex items-center">
+            <button
+              type="button"
+              onClick={onBack}
+              className="
+                flex items-center gap-2
+                text-gray-500 dark:text-gray-400
+                transition-colors active:scale-95
+              "
+              aria-label="Go back"
+            >
+              <ChevronLeft className="w-7 h-7" />
+            </button>
+          </div>
+        )}
+        <h1 className="text-center text-xl font-semibold leading-tight text-gray-900 dark:text-white">
           Выберите стратегию
         </h1>
-        <p className="text-gray-600 dark:text-gray-400">
+        <p className="text-center text-base text-gray-600 dark:text-gray-400">
           для {selectedLottery.name}
         </p>
-      </div>
+      </header>
 
       {/* Strategy Selection */}
       <Card className="mb-6">
@@ -124,7 +142,7 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
                 <div key={param.key}>
                   {param.type === 'number' && (
                     <Input
-                      type="number"
+                      type="text"
                       label={param.label}
                       value={params[param.key]?.toString() || param.defaultValue?.toString() || ''}
                       onChange={(e) => handleParamChange(param.key, parseInt(e.target.value))}
@@ -160,7 +178,7 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
                         }
                       }}
                       placeholder={param.defaultValue?.toString() || ''}
-                      helper={param.description + ' (только числа и запятые)'}
+                      helper={param.description}
                     />
                   )}
                 </div>
@@ -184,7 +202,7 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
                 <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
                   Рекомендуемое количество:
                 </p>
-                <div className="text-3xl font-bold text-amber-600 dark:text-amber-400">
+                <div className="text-3xl font-semibold text-amber-600 dark:text-amber-400">
                   {calculatedTicketCount} билетов
                 </div>
                 <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -198,7 +216,7 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
                   Хотите изменить количество?
                 </label>
                 <Input
-                  type="number"
+                  type="text"
                   value={customTicketCount?.toString() || ''}
                   onChange={(e) => {
                     const val = e.target.value ? parseInt(e.target.value) : null;
@@ -217,7 +235,7 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
                   Или установите бюджет
                 </label>
                 <Input
-                  type="number"
+                  type="text"
                   value={effectiveBudget.toString()}
                   onChange={(e) => {
                     const val = parseInt(e.target.value);
@@ -242,13 +260,13 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   <div>
                     <p className="text-xs text-gray-600 dark:text-gray-400">Билетов</p>
-                    <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                    <p className="text-2xl font-semibold text-amber-600 dark:text-amber-400">
                       {effectiveTicketCount}
                     </p>
                   </div>
                   <div>
                     <p className="text-xs text-gray-600 dark:text-gray-400">Стоимость</p>
-                    <p className="text-2xl font-bold text-amber-600 dark:text-amber-400">
+                    <p className="text-2xl font-semibold text-amber-600 dark:text-amber-400">
                       {effectiveBudget} ₽
                     </p>
                   </div>
@@ -261,12 +279,11 @@ export const StrategySelectionPage: React.FC<StrategySelectionPageProps> = ({
 
       {/* Navigation */}
       <div className="flex gap-3 mb-6">
-        <Button onClick={onBack} variant="secondary" className="flex-1">
-          Назад
-        </Button>
-        <Button onClick={handleNext} variant="primary" className="flex-1">
-          Далее: Генерация →
-        </Button>
+        {strategy && (
+          <Button onClick={handleNext} variant="primary" className="flex-1">
+            Сгенерировать
+          </Button>
+        )}
       </div>
     </Container>
   );

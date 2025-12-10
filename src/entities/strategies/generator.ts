@@ -5,9 +5,41 @@
 
 import type { StrategyParams, StrategyResult } from './types';
 import type { Ticket, Lottery } from '../lottery/types';
-import { getStrategyById, validateStrategyParams } from './config';
-import { uniqueRandomNumbers, combinations } from '../calculations/combinatorics';
-import { totalCombinations } from '../calculations/probability';
+import { getStrategyById, validateStrategyParams, calculateCombinations } from './config';
+import { uniqueRandomNumbers } from '../calculations/combinatorics';
+
+/**
+ * Helper: Parse numbers from string (supports both comma and space separators)
+ */
+function parseNumbers(str: string): number[] {
+  return str
+    .split(/[,\s]+/)
+    .map((n) => parseInt(n.trim()))
+    .filter((n) => !isNaN(n) && n > 0);
+}
+
+/**
+ * Generate all combinations of elements
+ */
+function generateCombinations(elements: number[], r: number): number[][] {
+  if (r === 0) return [[]];
+  if (elements.length === 0) return [];
+  
+  const result: number[][] = [];
+  const [first, ...rest] = elements;
+  
+  // Combinations that include the first element
+  const combosWithFirst = generateCombinations(rest, r - 1);
+  for (const combo of combosWithFirst) {
+    result.push([first, ...combo]);
+  }
+  
+  // Combinations that don't include the first element
+  const combosWithoutFirst = generateCombinations(rest, r);
+  result.push(...combosWithoutFirst);
+  
+  return result;
+}
 
 /**
  * Execute strategy and generate tickets
@@ -43,7 +75,6 @@ export async function executeStrategy(
   }
 
   let tickets: Ticket[] = [];
-  let effectiveTicketCount: number = 0;
 
   // Get ticket count from params (passed from UI)
   const requestedTicketCount = (filledParams['ticketCount'] as number) || null;
@@ -51,137 +82,63 @@ export async function executeStrategy(
   // Route to strategy implementation
   switch (strategyId) {
     case 'min_risk':
-      tickets = generateMinRiskStrategy(lottery, filledParams);
-      effectiveTicketCount = requestedTicketCount ?? tickets.length;
-      // Generate more/less tickets as needed
-      tickets = generateTicketsCount(lottery, effectiveTicketCount);
+      tickets = generateMinRiskStrategy(lottery, filledParams, requestedTicketCount);
       break;
     case 'max_coverage':
-      tickets = generateCoverageStrategy(lottery, filledParams, ticketCost);
-      effectiveTicketCount = requestedTicketCount ?? tickets.length;
-      // Generate more/less tickets as needed
-      if (tickets.length !== effectiveTicketCount) {
-        tickets = generateTicketsCount(lottery, effectiveTicketCount);
-      }
+      tickets = generateCoverageStrategy(lottery, filledParams, requestedTicketCount);
       break;
     case 'full_wheel':
       tickets = generateFullWheelStrategy(lottery, filledParams);
-      effectiveTicketCount = tickets.length;
       break;
     case 'key_wheel':
       tickets = generateKeyWheelStrategy(lottery, filledParams);
-      effectiveTicketCount = tickets.length;
-      break;
-    case 'guaranteed_win':
-      tickets = generateGuaranteedWinStrategy(lottery, filledParams);
-      effectiveTicketCount = tickets.length;
-      break;
-    case 'budget_optimizer':
-      tickets = generateBudgetOptimizerStrategy(lottery, filledParams, ticketCost);
-      effectiveTicketCount = tickets.length;
       break;
     case 'risk_strategy':
-      tickets = generateRiskStrategy(lottery, filledParams);
-      effectiveTicketCount = tickets.length;
+      tickets = generateRiskStrategy(lottery, filledParams, requestedTicketCount);
       break;
     default:
       throw new Error(`Unknown strategy: ${strategyId}`);
   }
 
+  const effectiveTicketCount = tickets.length;
   const totalCost = effectiveTicketCount * ticketCost;
-
-  // Calculate coverage estimate
-  const field = lottery.fields[0];
-  const totalCombinations = field
-    ? combinationsForCoverage(lottery)
-    : 0;
 
   return {
     tickets,
     ticketCount: effectiveTicketCount,
     totalCost,
-    coverage: totalCombinations > 0 ? {
-      covered: Math.min(effectiveTicketCount * 10, totalCombinations), // Rough estimate
-      total: totalCombinations,
-      percent: (Math.min(effectiveTicketCount * 10, totalCombinations) / totalCombinations) * 100,
-    } : undefined,
     metadata: {
       strategy: strategyId,
       parameters: filledParams,
       generatedAt: new Date(),
-      notes: `Generated ${effectiveTicketCount} tickets`,
     },
   };
 }
 
 /**
- * Generate min risk strategy tickets
+ * Generate min risk strategy
  */
 function generateMinRiskStrategy(
   lottery: Lottery,
-  params: StrategyParams
+  _params: StrategyParams,
+  requestedTicketCount: number | null
 ): Ticket[] {
-  const ticketCount = (params['ticketCount'] as number) || 5;
-  const tickets: Ticket[] = [];
-
-  for (let i = 0; i < ticketCount; i++) {
-    const field1 = uniqueRandomNumbers(1, lottery.fields[0].from, lottery.fields[0].count);
-
-    const ticket: Ticket = {
-      lotteryId: lottery.id,
-      field1,
-    };
-
-    if (lottery.fieldCount === 2) {
-      ticket.field2 = uniqueRandomNumbers(
-        1,
-        lottery.fields[1].from,
-        lottery.fields[1].count
-      );
-    }
-
-    tickets.push(ticket);
-  }
-
-  return tickets;
+  // Generate requested number of tickets, or full random
+  const count = requestedTicketCount || 10;
+  return generateTicketsCount(lottery, count);
 }
 
 /**
- * Generate coverage strategy tickets
+ * Generate coverage strategy
  */
 function generateCoverageStrategy(
   lottery: Lottery,
-  params: StrategyParams,
-  ticketCost: number
+  _params: StrategyParams,
+  requestedTicketCount: number | null
 ): Ticket[] {
-  const budget = (params['budget'] as number) || 1000;
-  const ticketCount = Math.floor(budget / ticketCost);
-  const tickets: Ticket[] = [];
-
-  const totalAvailable = lottery.fields[0].from;
-  const selection = lottery.fields[0].count;
-
-  for (let i = 0; i < ticketCount; i++) {
-    // Always use random selection for proper coverage
-    const field1 = uniqueRandomNumbers(1, totalAvailable, selection);
-
-    const ticket: Ticket = {
-      lotteryId: lottery.id,
-      field1,
-    };
-
-    if (lottery.fieldCount === 2) {
-      ticket.field2 = uniqueRandomNumbers(
-        1,
-        lottery.fields[1].from,
-        lottery.fields[1].count
-      );
-    }
-
-    tickets.push(ticket);
-  }
-
-  return tickets;
+  // Generate random tickets for coverage
+  const count = requestedTicketCount || 50;
+  return generateTicketsCount(lottery, count);
 }
 
 /**
@@ -191,22 +148,41 @@ function generateFullWheelStrategy(
   lottery: Lottery,
   params: StrategyParams
 ): Ticket[] {
-  const selectedNumbers = (params['selectedNumbers'] as number) || 10;
-  const useRandom = (params['useRandomNumbers'] as boolean) ?? true;
+  const wheelnumbersStr = (params['wheelnumbers'] as string) || '';
+  const numbers = parseNumbers(wheelnumbersStr);
+  
+  if (numbers.length === 0) {
+    // No numbers provided, return empty
+    return [];
+  }
 
-  let numbers: number[];
-  if (useRandom) {
-    numbers = uniqueRandomNumbers(1, lottery.fields[0].from, selectedNumbers);
-  } else {
-    numbers = Array.from({ length: selectedNumbers }, (_, i) => i + 1);
+  const selectionCount = lottery.fields[0].count;
+  
+  if (numbers.length < selectionCount) {
+    // Not enough numbers for wheel
+    return [];
   }
 
   // Generate all combinations
-  const combos = combinations(numbers, lottery.fields[0].count);
-  const tickets: Ticket[] = combos.map((field1) => ({
-    lotteryId: lottery.id,
-    field1: field1 as number[],
-  }));
+  const combos = generateCombinations(numbers, selectionCount);
+  
+  const tickets: Ticket[] = combos.map((field1) => {
+    const ticket: Ticket = {
+      lotteryId: lottery.id,
+      field1: field1.sort((a, b) => a - b),
+    };
+
+    if (lottery.fieldCount === 2) {
+      // For second field, use random numbers
+      ticket.field2 = uniqueRandomNumbers(
+        1,
+        lottery.fields[1].from,
+        lottery.fields[1].count
+      );
+    }
+
+    return ticket;
+  });
 
   return tickets;
 }
@@ -218,97 +194,54 @@ function generateKeyWheelStrategy(
   lottery: Lottery,
   params: StrategyParams
 ): Ticket[] {
-  const keyNumberCount = (params['keyNumbers'] as number) || 2;
-  const additionalNumbers = (params['additionalNumbers'] as number) || 5;
+  const keyStr = (params['keyNumbers'] as string) || '';
+  const keyNumbers = parseNumbers(keyStr);
 
-  const keyNums = uniqueRandomNumbers(1, lottery.fields[0].from, keyNumberCount);
-  const additionalNums = uniqueRandomNumbers(
-    1,
-    lottery.fields[0].from,
-    additionalNumbers
-  );
-
-  // Remove any key numbers from additional
-  const filtered = additionalNums.filter((n) => !keyNums.includes(n));
-
-  // Generate combinations with fixed key numbers
-  const neededAdditional = lottery.fields[0].count - keyNumberCount;
-  const additionalCombos = combinations(filtered, neededAdditional);
-
-  const tickets: Ticket[] = additionalCombos.map((combo) => ({
-    lotteryId: lottery.id,
-    field1: [...keyNums, ...combo] as number[],
-  }));
-
-  return tickets;
-}
-
-/**
- * Generate guaranteed win strategy (12/24)
- */
-function generateGuaranteedWinStrategy(
-  lottery: Lottery,
-  _params: StrategyParams
-): Ticket[] {
-  // Simplified: generate balanced tickets
-  const tickets: Ticket[] = [];
-
-  // Create 4 tickets that together guarantee coverage
-  // This is a simplified implementation
-  for (let i = 0; i < 4; i++) {
-    const start = i * 6;
-    const field1 = Array.from(
-      { length: 12 },
-      (_, j) => ((start + j) % 24) + 1
-    );
-    tickets.push({
-      lotteryId: lottery.id,
-      field1: field1 as number[],
-    });
+  if (keyNumbers.length === 0) {
+    // No key numbers, return empty
+    return [];
   }
 
-  return tickets;
-}
+  const selectionCount = lottery.fields[0].count;
+  const keyCount = keyNumbers.length;
 
-/**
- * Generate budget optimizer strategy
- */
-function generateBudgetOptimizerStrategy(
-  lottery: Lottery,
-  params: StrategyParams,
-  ticketCost: number
-): Ticket[] {
-  const budget = (params['budget'] as number) || 1000;
-  const riskTolerance = (params['riskTolerance'] as number) || 50;
-
-  const ticketCount = Math.floor(budget / ticketCost);
-  const tickets: Ticket[] = [];
-
-  // Risk affects diversification
-  const diversify = riskTolerance < 50; // Low risk = high diversification
-
-  for (let i = 0; i < ticketCount; i++) {
-    let field1: number[];
-
-    if (diversify) {
-      // Spread numbers for low risk
-      const spread = Math.floor((i * lottery.fields[0].count) / ticketCount);
-      field1 = Array.from(
-        { length: lottery.fields[0].count },
-        (_, j) => ((spread + j) % lottery.fields[0].from) + 1
-      );
-    } else {
-      // Random for higher risk
-      field1 = uniqueRandomNumbers(
+  if (keyCount > selectionCount) {
+    // Key numbers exceed selection count, just return tickets with key numbers
+    const tickets: Ticket[] = [{
+      lotteryId: lottery.id,
+      field1: keyNumbers.slice(0, selectionCount),
+    }];
+    
+    if (lottery.fieldCount === 2) {
+      tickets[0].field2 = uniqueRandomNumbers(
         1,
-        lottery.fields[0].from,
-        lottery.fields[0].count
+        lottery.fields[1].from,
+        lottery.fields[1].count
       );
     }
+    
+    return tickets;
+  }
 
+  // Generate combinations from remaining pool
+  const needed = selectionCount - keyCount;
+  const allNumbers = Array.from({ length: lottery.fields[0].from }, (_, i) => i + 1);
+  
+  // Remove key numbers from available pool
+  const availableNumbers = allNumbers.filter((n) => !keyNumbers.includes(n));
+
+  if (availableNumbers.length < needed) {
+    // Not enough numbers available
+    return [];
+  }
+
+  // Generate combinations from available numbers
+  const combos = generateCombinations(availableNumbers, needed);
+
+  const tickets: Ticket[] = combos.map((additionalNums) => {
     const ticket: Ticket = {
       lotteryId: lottery.id,
-      field1,
+      field1: [...keyNumbers, ...additionalNums].sort((a, b) => a - b),
     };
 
     if (lottery.fieldCount === 2) {
@@ -319,32 +252,37 @@ function generateBudgetOptimizerStrategy(
       );
     }
 
-    tickets.push(ticket);
-  }
+    return ticket;
+  });
 
   return tickets;
 }
 
 /**
- * Generate risk strategy tickets
- * Control probability of win with risk slider
+ * Generate risk strategy
  */
 function generateRiskStrategy(
   lottery: Lottery,
-  params: StrategyParams
+  _params: StrategyParams,
+  requestedTicketCount: number | null
 ): Ticket[] {
-  // targetMatches and budget are available in params but not used in ticket generation
-  // They affect the recommendation, not the actual ticket generation
-  const riskLevel = (params['riskLevel'] as number) || 30; // 1-50%, higher = more tickets
-  
-  // Risk level determines ticket count
-  // Lower risk = more tickets
-  // Higher risk = fewer tickets
-  const ticketCount = Math.ceil((100 - riskLevel) / 10);
+  // Generate requested number of tickets
+  const count = requestedTicketCount || 5;
+  return generateTicketsCount(lottery, count);
+}
+
+/**
+ * Helper: Generate exactly N random tickets
+ */
+function generateTicketsCount(lottery: Lottery, count: number): Ticket[] {
   const tickets: Ticket[] = [];
 
-  for (let i = 0; i < ticketCount; i++) {
-    const field1 = uniqueRandomNumbers(1, lottery.fields[0].from, lottery.fields[0].count);
+  for (let i = 0; i < count; i++) {
+    const field1 = uniqueRandomNumbers(
+      1,
+      lottery.fields[0].from,
+      lottery.fields[0].count
+    );
 
     const ticket: Ticket = {
       lotteryId: lottery.id,
@@ -368,39 +306,12 @@ function generateRiskStrategy(
 /**
  * Helper: Calculate total combinations for coverage
  */
-function combinationsForCoverage(lottery: Lottery): number {
-  let total = totalCombinations(lottery.fields[0].from, lottery.fields[0].count);
+export function combinationsForCoverage(lottery: Lottery): number {
+  let total = calculateCombinations(lottery.fields[0].from, lottery.fields[0].count);
 
   if (lottery.fieldCount === 2) {
-    total *= totalCombinations(lottery.fields[1].from, lottery.fields[1].count);
+    total *= calculateCombinations(lottery.fields[1].from, lottery.fields[1].count);
   }
 
   return total;
-}
-
-/**
- * Helper: Generate exactly N random tickets
- */
-function generateTicketsCount(lottery: Lottery, count: number): Ticket[] {
-  const tickets: Ticket[] = [];
-
-  for (let i = 0; i < count; i++) {
-    const field1 = uniqueRandomNumbers(1, lottery.fields[0].from, lottery.fields[0].count);
-    const ticket: Ticket = {
-      lotteryId: lottery.id,
-      field1,
-    };
-
-    if (lottery.fieldCount === 2) {
-      ticket.field2 = uniqueRandomNumbers(
-        1,
-        lottery.fields[1].from,
-        lottery.fields[1].count
-      );
-    }
-
-    tickets.push(ticket);
-  }
-
-  return tickets;
 }

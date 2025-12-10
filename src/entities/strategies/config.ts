@@ -50,12 +50,12 @@ export const COVERAGE_STRATEGY: Strategy = {
     {
       key: 'targetCoverage',
       label: 'Целевое покрытие (%)',
-      type: 'number',
-      defaultValue: 80,
-      min: 10,
-      max: 100,
-      step: 10,
-      description: 'Какой % всех комбинаций покрыть',
+      type: 'range',
+      defaultValue: 50,
+      min: 1,
+      max: 99,
+      step: 1,
+      description: 'Какой % всех комбинаций покрыть (экспоненциальная шкала)',
     },
   ],
 };
@@ -72,10 +72,10 @@ export const FULL_WHEEL_STRATEGY: Strategy = {
   parameters: [
     {
       key: 'wheelnumbers',
-      label: 'Числа для колеса (через запятую)',
+      label: 'Числа для колеса (через запятую или пробел)',
       type: 'text',
-      defaultValue: '1,2,3,4,5,6,7,8,9,10',
-      description: 'Список чисел (например: 5,10,15,20,25,30)',
+      defaultValue: '1 2 3 4 5 6 7 8 9 10',
+      description: 'Список чисел (пример: 5 10 15 20 25 30 или 5,10,15,20,25,30)',
     },
   ],
 };
@@ -87,22 +87,15 @@ export const FULL_WHEEL_STRATEGY: Strategy = {
 export const KEY_WHEEL_STRATEGY: Strategy = {
   id: 'key_wheel',
   name: 'Колесо с ключевыми числами',
-  description: 'Фиксированные числа + варианты из дополнительного набора',
+  description: 'Фиксированные числа во всех билетах + комбинации с другими числами',
   supportedLotteries: ['lottery_6_45', 'lottery_7_49', 'lottery_5_36_1', 'lottery_8_1'],
   parameters: [
     {
       key: 'keyNumbers',
-      label: 'Ключевые числа (через запятую)',
+      label: 'Обязательные числа (через запятую или пробел)',
       type: 'text',
-      defaultValue: '1,2',
-      description: 'Числа которые будут во ВСЕХ билетах',
-    },
-    {
-      key: 'additionalNumbers',
-      label: 'Дополнительные числа (через запятую)',
-      type: 'text',
-      defaultValue: '3,4,5,6,7,8,9,10,11,12,13',
-      description: 'Числа для комбинирования с ключевыми',
+      defaultValue: '1 2 3 4',
+      description: 'Эти числа будут во ВСЕХ сгенерированных билетах',
     },
   ],
 };
@@ -114,7 +107,7 @@ export const KEY_WHEEL_STRATEGY: Strategy = {
 export const RISK_STRATEGY: Strategy = {
   id: 'risk_strategy',
   name: 'Контролируемый риск',
-  description: 'Выберите уровень риска - алгоритм рассчитает сколько билетов нужно',
+  description: 'Логарифмическая шкала: меньше риск = больше билетов',
   supportedLotteries: [
     'lottery_6_45',
     'lottery_7_49',
@@ -124,12 +117,12 @@ export const RISK_STRATEGY: Strategy = {
   parameters: [
     {
       key: 'riskLevel',
-      label: 'Уровень приемлемого риска (%)',
+      label: 'Риск (%)',
       type: 'range',
-      defaultValue: 30,
+      defaultValue: 50,
       min: 1,
       max: 99,
-      description: 'Риск = вероятность потерять потенциальный выигрыш (1-99%)',
+      description: 'Риск не выиграть ничего (логарифмическая шкала)',
     },
   ],
 };
@@ -205,6 +198,16 @@ export function validateStrategyParams(
 }
 
 /**
+ * Helper: Parse numbers from string (supports both comma and space separators)
+ */
+function parseNumbers(str: string): number[] {
+  return str
+    .split(/[,\s]+/)
+    .map((n) => parseInt(n.trim()))
+    .filter((n) => !isNaN(n) && n > 0);
+}
+
+/**
  * Calculate total combinations for lottery
  */
 function getTotalCombinations(lottery: Lottery): number {
@@ -221,19 +224,15 @@ function getTotalCombinations(lottery: Lottery): number {
  * Calculate win probability for single ticket in lottery
  */
 function getWinProbabilityForTicket(lottery: Lottery): number {
-  // This is approximate - probability of winning ANY prize (not just jackpot)
-  // For 8+1 lottery: roughly 5-10% of tickets win something
-  // For simplicity, using a lookup table per lottery
-  
   const probabilities: Record<string, number> = {
-    'lottery_8_1': 0.08, // ~8% win probability
-    'lottery_6_45': 0.027, // ~2.7%
-    'lottery_7_49': 0.022, // ~2.2%
-    'lottery_5_36_1': 0.018, // ~1.8%
-    'lottery_4_20': 0.03, // ~3%
+    'lottery_8_1': 0.08,
+    'lottery_6_45': 0.027,
+    'lottery_7_49': 0.022,
+    'lottery_5_36_1': 0.018,
+    'lottery_4_20': 0.03,
   };
   
-  return probabilities[lottery.id] || 0.05; // Default 5%
+  return probabilities[lottery.id] || 0.05;
 }
 
 /**
@@ -248,97 +247,77 @@ export function calculateTicketCountForStrategy(
 ): number {
   switch (strategyId) {
     case 'min_risk': {
-      // Guarantee N winning tickets
-      // Expected: if each ticket has prob p of winning
-      // To guarantee k wins, need k/p tickets on average
       const guaranteed = (params['guaranteedWinningTickets'] as number) || 1;
       const winProb = getWinProbabilityForTicket(lottery);
-      
-      // Safety factor: multiply by 1.5 to increase odds
       return Math.ceil((guaranteed / winProb) * 1.5);
     }
 
     case 'max_coverage': {
-      // Use Coupon Collector Problem formula
-      // Expected tickets for P% coverage: -N * ln(1 - P)
-      const coverage = (params['targetCoverage'] as number) || 80;
+      const coverage = (params['targetCoverage'] as number) || 50;
       const totalCombos = getTotalCombinations(lottery);
       const targetFraction = coverage / 100;
       
       if (targetFraction <= 0) return 1;
       if (targetFraction >= 0.99) return totalCombos;
       
-      // Formula: tickets = -totalCombos * ln(1 - targetFraction)
       const tickets = Math.ceil(-totalCombos * Math.log(1 - targetFraction));
-      
-      // Cap at total combinations (can't exceed all possible tickets)
       return Math.min(tickets, totalCombos);
     }
 
     case 'full_wheel': {
-      // Calculate combinations C(n, k) for all selected numbers
       const wheelnumbersStr = (params['wheelnumbers'] as string) || '';
-      const numbers = wheelnumbersStr
-        .split(',')
-        .map((n) => parseInt(n.trim()))
-        .filter((n) => !isNaN(n) && n > 0);
-      
+      const numbers = parseNumbers(wheelnumbersStr);
       const selectionCount = lottery.fields[0].count;
 
+      if (numbers.length === 0) return 1;
       if (numbers.length < selectionCount) {
-        return 0; // Can't make wheel with fewer numbers than needed
+        return 0;
       }
 
-      // C(n, k) = n! / (k! * (n-k)!)
       const combinations = calculateCombinations(numbers.length, selectionCount);
       return Math.max(1, combinations);
     }
 
     case 'key_wheel': {
       const keyStr = (params['keyNumbers'] as string) || '';
-      const additionalStr = (params['additionalNumbers'] as string) || '';
-      
-      const keyNumbers = keyStr
-        .split(',')
-        .map((n) => parseInt(n.trim()))
-        .filter((n) => !isNaN(n) && n > 0);
-      
-      const additionalNumbers = additionalStr
-        .split(',')
-        .map((n) => parseInt(n.trim()))
-        .filter((n) => !isNaN(n) && n > 0);
-      
+      const keyNumbers = parseNumbers(keyStr);
       const selectionCount = lottery.fields[0].count;
       const keyCount = keyNumbers.length;
 
-      // Need to select (selectionCount - keyCount) from additional numbers
+      // Need to select (selectionCount - keyCount) from lottery range
+      // Generate combinations from remaining pool
       const needed = Math.max(0, selectionCount - keyCount);
       
-      if (additionalNumbers.length < needed) {
+      if (keyCount > selectionCount) {
+        // If we have more key numbers than needed, just return 1 (all key numbers)
+        return 1;
+      }
+
+      // Remaining numbers available for random selection
+      const remainingInPool = lottery.fields[0].from - keyCount;
+      
+      if (remainingInPool < needed) {
         return 0; // Can't make wheel
       }
       
-      const combinations = calculateCombinations(additionalNumbers.length, needed);
+      const combinations = calculateCombinations(remainingInPool, needed);
       return Math.max(1, combinations);
     }
 
     case 'risk_strategy': {
-      // Risk-based strategy
-      // High risk (90%+) = few tickets
-      // Low risk (1-10%) = many tickets
-      const risk = (params['riskLevel'] as number) || 30;
+      const risk = (params['riskLevel'] as number) || 50;
       const totalCombos = getTotalCombinations(lottery);
       
-      // Convert risk % to coverage %
-      // Risk 1% = want 99% coverage (very safe)
-      // Risk 99% = want 1% coverage (very risky)
-      const targetCoverage = 100 - risk;
+      // Convert risk to coverage using logarithmic scale
+      // Risk 1% = 95% coverage (very safe)
+      // Risk 50% = 50% coverage (balanced)
+      // Risk 99% = 5% coverage (very risky)
+      const safetyFactor = Math.log(100 - risk + 1) / Math.log(100);
+      const targetCoverage = safetyFactor * 90; // Max 90% to avoid extreme values
       
-      if (targetCoverage < 1) return 1;
-      if (targetCoverage >= 99) return totalCombos;
+      const targetFraction = Math.max(0.01, Math.min(0.99, targetCoverage / 100));
       
-      // Use same formula as coverage strategy
-      const tickets = Math.ceil(-totalCombos * Math.log(1 - targetCoverage / 100));
+      const tickets = Math.ceil(-totalCombos * Math.log(1 - targetFraction));
       return Math.min(tickets, totalCombos);
     }
 

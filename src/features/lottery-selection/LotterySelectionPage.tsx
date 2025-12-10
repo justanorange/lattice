@@ -19,7 +19,7 @@ export const LotterySelectionPage: React.FC<LotterySelectionPageProps> = ({
   return (
     <Container>
       <div className="mb-8">
-        <h1 className="text-4xl font-bold mb-2 text-gray-900 dark:text-white">
+        <h1 className="text-4xl font-semibold mb-2 text-gray-900 dark:text-white">
           {STRINGS.lottery_select_title}
         </h1>
         <p className="text-lg text-gray-600 dark:text-gray-400">{STRINGS.lottery_select_desc}</p>

@@ -9,6 +9,7 @@ import { simulateLottery } from "../../entities/lottery/simulation";
 import type { SimulationResult, Ticket } from "../../entities/lottery/types";
 import { Card, CardHeader, CardBody, Button, Container, Input, Slider } from "../../shared/ui";
 import { STRINGS } from "../../shared/constants";
+import { ChevronLeft } from "lucide-react";
 
 export interface SimulationPageProps {
   tickets?: Ticket[];
@@ -66,14 +67,33 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
 
   return (
     <Container>
-      <div className="mb-8 flex flex-col gap-2">
-        <h1 className="text-3xl font-bold leading-tight text-gray-900 dark:text-white">
-          Симуляция лотереи
-        </h1>
-        <p className="text-base text-gray-600 dark:text-gray-400">
-          Симуляция {roundsCount} тиражей для {selectedLottery.name}
-        </p>
-      </div>
+      <header className="h-[72px] p-4 pr-10 mr-10 pl-[72px] flex-col gap-2 relative z-20">
+        <div className="absolute inset-0 z-20">
+          {onBack && (
+
+            <div className="absolute inset-y-0 left-0 flex items-center">
+              <button
+                type="button"
+                onClick={onBack}
+                className="
+                  flex items-center gap-2
+                  text-gray-500 dark:text-gray-400
+                  transition-colors active:scale-95
+                "
+                aria-label="Go back"
+              >
+                <ChevronLeft className="w-7 h-7" />
+              </button>
+            </div>
+          )}
+          <h1 className="text-center text-xl font-semibold leading-tight text-gray-900 dark:text-white">
+            Симуляция лотереи
+          </h1>
+          <p className="text-center text-base text-gray-600 dark:text-gray-400">
+            Симуляция {roundsCount} тиражей для {selectedLottery.name}
+          </p>
+        </div>
+      </header>
 
       {/* Controls */}
       <Card className="mb-6">
@@ -94,7 +114,7 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
           />
           <div className="flex items-center gap-2">
             <Input
-              type="number"
+              type="text"
               value={roundsCount.toString()}
               onChange={(e) => {
                 const value = Number.parseInt(e.target.value) || 100;
@@ -134,7 +154,7 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Всего инвестировано
                   </p>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                  <p className="text-2xl font-semibold text-gray-900 dark:text-white">
                     {result.statistics.totalInvestment.toLocaleString()} ₽
                   </p>
                 </div>
@@ -142,7 +162,7 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
                   <p className="text-sm text-gray-600 dark:text-gray-400">
                     Всего выиграно
                   </p>
-                  <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                  <p className="text-2xl font-semibold text-green-600 dark:text-green-400">
                     {result.statistics.totalWon.toLocaleString()} ₽
                   </p>
                 </div>
@@ -151,7 +171,7 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
                     Чистая прибыль
                   </p>
                   <p
-                    className={`text-2xl font-bold ${
+                    className={`text-2xl font-semibold ${
                       result.statistics.netReturn >= 0
                         ? "text-green-600 dark:text-green-400"
                         : "text-red-600 dark:text-red-400"
@@ -164,7 +184,7 @@ export const SimulationPage: React.FC<SimulationPageProps> = ({
                 <div>
                   <p className="text-sm text-gray-600 dark:text-gray-400">ROI</p>
                   <p
-                    className={`text-2xl font-bold ${
+                    className={`text-2xl font-semibold ${
                       result.statistics.roi >= 0
                         ? "text-green-600 dark:text-green-400"
                         : "text-red-600 dark:text-red-400"

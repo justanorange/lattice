@@ -10,6 +10,7 @@ import { Card, CardHeader, CardBody, Input, Button, Container } from "../../shar
 import type { PrizeRow } from "../../entities/lottery/types";
 import { STRINGS } from "../../shared/constants";
 import { probabilityOfMatch } from "../../entities/calculations/probability";
+import { Undo2, ChevronLeft } from "lucide-react";
 
 export interface LotteryDetailPageProps {
   lotteryId: string;
@@ -64,27 +65,39 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
 
   return (
     <Container>
-      <div className="mb-8 flex flex-col gap-2">
-        <h1 className="text-3xl font-bold leading-tight text-gray-900 dark:text-white">
+      <header className="h-[72px] inset-x-16 top-0 z-20 flex flex-col items-center justify-center fixed">
+        {onBack && (
+
+          <div className="absolute inset-y-0 -left-8 flex items-center">
+            <button
+              type="button"
+              onClick={onBack}
+              className="
+                flex items-center gap-2
+                text-gray-500 dark:text-gray-400
+                transition-colors active:scale-95
+              "
+              aria-label="Go back"
+            >
+              <ChevronLeft className="w-7 h-7" />
+            </button>
+          </div>
+        )}
+        <h1 className="text-center text-xl font-semibold leading-tight text-gray-900 dark:text-white">
           {selectedLottery.name}
         </h1>
-        <p className="text-base text-gray-600 dark:text-gray-400">
+        <p className="text-center text-base text-gray-600 dark:text-gray-400">
           {selectedLottery.description}
         </p>
-      </div>
+      </header>
 
       {/* Ticket Cost & Superprice - Side by Side */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         {/* Ticket Cost Input */}
         <Card>
-          <CardHeader>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Стоимость билета
-            </h2>
-          </CardHeader>
-          <CardBody>
+          <CardBody className="space-y-4">
             <Input
-              type="number"
+              type="text"
               label="Цена (₽)"
               value={currentTicketCost.toString()}
               onChange={(e) => {
@@ -95,19 +108,8 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
               }}
               helper="Введите стоимость одного билета в рублях"
             />
-          </CardBody>
-        </Card>
-
-        {/* Superprice Input */}
-        <Card>
-          <CardHeader>
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {STRINGS.detail_superprice}
-            </h2>
-          </CardHeader>
-          <CardBody>
             <Input
-              type="number"
+              type="text"
               label="Суперприз (₽)"
               value={currentSuperprice.toString()}
               onChange={(e) => {
@@ -126,6 +128,160 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
           </CardBody>
         </Card>
       </div>
+
+      {/* Prize Table */}
+      <Card className="mb-6">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+              {STRINGS.detail_prize_table}
+            </h2>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={resetPrizeTableToDefaults}
+              aria-label="Сбросить к умолчаниям"
+            >
+              <Undo2></Undo2>
+            </Button>
+          </div>
+        </CardHeader>
+        <CardBody>
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="border-b border-gray-200 dark:border-gray-700">
+                  <th className="text-left py-2 px-3 text-xs uppercase tracking-tighter font-semibold text-gray-700 dark:text-gray-300">
+                    Совп.
+                  </th>
+                  <th className="text-center py-2 px-3 text-xs uppercase tracking-tighter font-semibold text-gray-700 dark:text-gray-300">
+                    Вероятн.
+                  </th>
+                  <th className="text-right py-2 px-3 text-xs uppercase tracking-tighter font-semibold text-gray-700 dark:text-gray-300">
+                    Приз
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentPrizeTable.rows.map((row, index) => {
+                  const isEditable =
+                    typeof row.prize === "number" && row.prize >= 0;
+                  const isSuperprice = row.prize === "Суперприз";
+                  const isSecondaryPrize = row.prize === "Приз";
+
+                  // Calculate probability for this row
+                  let probability = 0;
+                  if (selectedLottery.fieldCount === 1) {
+                    const field = selectedLottery.fields[0];
+                    const matches = row.matches[0];
+                    probability = probabilityOfMatch(
+                      field.from,
+                      field.count,
+                      field.count,
+                      matches
+                    );
+                  } else if (selectedLottery.fieldCount === 2 && row.matches.length === 2) {
+                    const field1 = selectedLottery.fields[0];
+                    const field2 = selectedLottery.fields[1];
+                    const matches1 = row.matches[0];
+                    const matches2 = row.matches[1];
+
+                    const prob1 = probabilityOfMatch(
+                      field1.from,
+                      field1.count,
+                      field1.count,
+                      matches1
+                    );
+                    const prob2 = probabilityOfMatch(
+                      field2.from,
+                      field2.count,
+                      field2.count,
+                      matches2
+                    );
+
+                    probability = prob1 * prob2;
+                  }
+
+                  // Format probability
+                  const probPercent = (probability * 100).toFixed(4);
+                  const probOneIn = probability > 0 ? Math.round(1 / probability) : null;
+
+                  return (
+                    <tr
+                      key={index}
+                      className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                    >
+                      <td className="py-2 px-3 text-sm text-gray-900 dark:text-white">
+                        {row.matches.join(" + ")}
+                      </td>
+                      <td className="py-2 px-3 text-sm text-center text-gray-600 dark:text-gray-400">
+                        {probOneIn ? (
+                          <span title={`${probPercent}%`}>
+                            1:{probOneIn.toLocaleString()}
+                          </span>
+                        ) : (
+                          <span className="text-gray-400">—</span>
+                        )}
+                      </td>
+                      <td className="py-2 px-3 text-sm text-right">
+                        {isEditable ? (
+                          <div className="flex items-center justify-end gap-2">
+                            <Input
+                              type="text"
+                              value={typeof row.prize === 'number' ? row.prize.toString() : '0'}
+                              onChange={(e) => {
+                                const value =
+                                  Number.parseFloat(e.target.value) || 0;
+                                if (value >= 0) {
+                                  updatePrizeRow(index, {
+                                    ...row,
+                                    prize: value,
+                                  } as PrizeRow);
+                                }
+                              }}
+                              onBlur={(e) => {
+                                // Prevent empty values - set to 0 if empty
+                                const value = e.target.value.trim();
+                                if (value === '' || value === '0') {
+                                  updatePrizeRow(index, {
+                                    ...row,
+                                    prize: 0,
+                                  } as PrizeRow);
+                                }
+                              }}
+                              min={0}
+                              step={100}
+                              className="w-32 text-right"
+                            />
+                            <span className="text-gray-600 dark:text-gray-400">
+                              ₽
+                            </span>
+                          </div>
+                        ) : isSuperprice || isSecondaryPrize ? (
+                          <span className="font-medium text-amber-600 dark:text-amber-400">
+                            {row.prize}
+                          </span>
+                        ) : (
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {typeof row.prize === "number"
+                              ? `${row.prize.toLocaleString()} ₽`
+                              : row.prize}
+                          </span>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
+            Примечание: Суперприз и специальные призы редактируются отдельно.
+            Числовые призы можно редактировать напрямую в таблице.
+            Вероятность показана в формате 1:N (один выигрыш на N попыток).
+          </p>
+        </CardBody>
+      </Card>
 
       {/* EV Display */}
       <Card className="mb-6">
@@ -149,7 +305,7 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
             {/* Expected Value */}
             <div className="flex justify-between items-center">
               <span className="text-gray-600 dark:text-gray-400">
-                Математическое ожидание:
+                Мат. ожидание:
               </span>
               <span
                 className={`text-lg font-semibold ${
@@ -220,166 +376,8 @@ export const LotteryDetailPage: React.FC<LotteryDetailPageProps> = ({
         </CardBody>
       </Card>
 
-      {/* Prize Table */}
-      <Card className="mb-6">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              {STRINGS.detail_prize_table}
-            </h2>
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={resetPrizeTableToDefaults}
-            >
-              Сбросить к умолчаниям
-            </Button>
-          </div>
-        </CardHeader>
-        <CardBody>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b border-gray-200 dark:border-gray-700">
-                  <th className="text-left py-2 px-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Совпадения
-                  </th>
-                  <th className="text-center py-2 px-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Вероятность
-                  </th>
-                  <th className="text-right py-2 px-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-                    Приз
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentPrizeTable.rows.map((row, index) => {
-                  const isEditable =
-                    typeof row.prize === "number" && row.prize > 0;
-                  const isSuperprice = row.prize === "Суперприз";
-                  const isSecondaryPrize = row.prize === "Приз";
-
-                  // Calculate probability for this row
-                  let probability = 0;
-                  if (selectedLottery.fieldCount === 1) {
-                    const field = selectedLottery.fields[0];
-                    const matches = row.matches[0];
-                    probability = probabilityOfMatch(
-                      field.from,
-                      field.count,
-                      field.count,
-                      matches
-                    );
-                  } else if (selectedLottery.fieldCount === 2 && row.matches.length === 2) {
-                    const field1 = selectedLottery.fields[0];
-                    const field2 = selectedLottery.fields[1];
-                    const matches1 = row.matches[0];
-                    const matches2 = row.matches[1];
-
-                    const prob1 = probabilityOfMatch(
-                      field1.from,
-                      field1.count,
-                      field1.count,
-                      matches1
-                    );
-                    const prob2 = probabilityOfMatch(
-                      field2.from,
-                      field2.count,
-                      field2.count,
-                      matches2
-                    );
-
-                    probability = prob1 * prob2;
-                  }
-
-                  // Format probability
-                  const probPercent = (probability * 100).toFixed(4);
-                  const probOneIn = probability > 0 ? Math.round(1 / probability) : null;
-
-                  return (
-                    <tr
-                      key={index}
-                      className="border-b border-gray-100 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-800/50"
-                    >
-                      <td className="py-2 px-3 text-sm text-gray-900 dark:text-white">
-                        {row.matches.join(" + ")}
-                      </td>
-                      <td className="py-2 px-3 text-sm text-center text-gray-600 dark:text-gray-400">
-                        {probOneIn ? (
-                          <span title={`${probPercent}%`}>
-                            1:{probOneIn.toLocaleString()}
-                          </span>
-                        ) : (
-                          <span className="text-gray-400">—</span>
-                        )}
-                      </td>
-                      <td className="py-2 px-3 text-sm text-right">
-                        {isEditable ? (
-                          <div className="flex items-center justify-end gap-2">
-                            <Input
-                              type="number"
-                              value={typeof row.prize === 'number' ? row.prize.toString() : '0'}
-                              onChange={(e) => {
-                                const value =
-                                  Number.parseFloat(e.target.value) || 0;
-                                if (value >= 0) {
-                                  updatePrizeRow(index, {
-                                    ...row,
-                                    prize: value,
-                                  } as PrizeRow);
-                                }
-                              }}
-                              onBlur={(e) => {
-                                // Prevent empty values - set to 0 if empty
-                                const value = e.target.value.trim();
-                                if (value === '' || value === '0') {
-                                  updatePrizeRow(index, {
-                                    ...row,
-                                    prize: 0,
-                                  } as PrizeRow);
-                                }
-                              }}
-                              min={0}
-                              step={100}
-                              className="w-32 text-right"
-                            />
-                            <span className="text-gray-600 dark:text-gray-400">
-                              ₽
-                            </span>
-                          </div>
-                        ) : isSuperprice || isSecondaryPrize ? (
-                          <span className="font-medium text-amber-600 dark:text-amber-400">
-                            {row.prize}
-                          </span>
-                        ) : (
-                          <span className="font-medium text-gray-900 dark:text-white">
-                            {typeof row.prize === "number"
-                              ? `${row.prize.toLocaleString()} ₽`
-                              : row.prize}
-                          </span>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          <p className="mt-4 text-xs text-gray-500 dark:text-gray-400">
-            Примечание: Суперприз и специальные призы редактируются отдельно.
-            Числовые призы можно редактировать напрямую в таблице.
-            Вероятность показана в формате 1:N (один выигрыш на N попыток).
-          </p>
-        </CardBody>
-      </Card>
-
       {/* Navigation */}
-      <div className="flex gap-3">
-        {onBack && (
-          <Button variant="secondary" onClick={onBack}>
-            {STRINGS.button_back}
-          </Button>
-        )}
+      <div className="flex gap-3 mb-6">
         {onNext && (
           <Button onClick={onNext} className="flex-1">
             {STRINGS.button_next}
