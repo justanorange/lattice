@@ -17,7 +17,7 @@ export const MIN_RISK_STRATEGY: Strategy = {
   id: 'min_risk',
   name: 'Гарантия минимального выигрыша',
   description: 'Сколько билетов нужно, чтобы гарантировать минимум N выигрышных',
-  supportedLotteries: ['lottery_6_45', 'lottery_7_49', 'lottery_5_36_1', 'lottery_8_1'],
+  supportedLotteries: ['lottery_4_20', 'lottery_8_1', 'lottery_12_24', 'lottery_5_36_1', 'lottery_6_45', 'lottery_7_49'],
   parameters: [
     {
       key: 'guaranteedWinningTickets',
@@ -41,10 +41,11 @@ export const COVERAGE_STRATEGY: Strategy = {
   description: 'Покрыть максимум уникальных комбинаций чисел',
   supportedLotteries: [
     'lottery_4_20',
+    'lottery_8_1',
+    'lottery_12_24',
+    'lottery_5_36_1',
     'lottery_6_45',
     'lottery_7_49',
-    'lottery_5_36_1',
-    'lottery_8_1',
   ],
   parameters: [
     {
@@ -68,7 +69,7 @@ export const FULL_WHEEL_STRATEGY: Strategy = {
   id: 'full_wheel',
   name: 'Полное колесо',
   description: 'Все комбинации выбранных чисел - гарантированный выигрыш',
-  supportedLotteries: ['lottery_6_45', 'lottery_7_49', 'lottery_5_36_1', 'lottery_8_1'],
+  supportedLotteries: ['lottery_4_20', 'lottery_8_1', 'lottery_12_24', 'lottery_5_36_1', 'lottery_6_45', 'lottery_7_49'],
   parameters: [
     {
       key: 'wheelnumbers',
@@ -88,7 +89,7 @@ export const KEY_WHEEL_STRATEGY: Strategy = {
   id: 'key_wheel',
   name: 'Колесо с ключевыми числами',
   description: 'Фиксированные числа во всех билетах + комбинации с другими числами',
-  supportedLotteries: ['lottery_6_45', 'lottery_7_49', 'lottery_5_36_1', 'lottery_8_1'],
+  supportedLotteries: ['lottery_4_20', 'lottery_8_1', 'lottery_12_24', 'lottery_5_36_1', 'lottery_6_45', 'lottery_7_49'],
   parameters: [
     {
       key: 'keyNumbers',
@@ -109,10 +110,12 @@ export const RISK_STRATEGY: Strategy = {
   name: 'Целевая вероятность выигрыша',
   description: 'Укажите желаемую вероятность выигрыша хотя бы в одном билете',
   supportedLotteries: [
+    'lottery_4_20',
+    'lottery_8_1',
+    'lottery_12_24',
+    'lottery_5_36_1',
     'lottery_6_45',
     'lottery_7_49',
-    'lottery_5_36_1',
-    'lottery_8_1',
   ],
   parameters: [
     {

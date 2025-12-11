@@ -7,15 +7,15 @@ import { buildRoute } from '@/app/router';
 import { cn } from '@/shared/lib/utils';
 
 /**
- * MVP: Only first lottery (8+1) is available
+ * All lotteries now available with complete strategy support
  */
 const LOTTERY_AVAILABILITY: Record<string, boolean> = {
   lottery_8_1: true,
-  lottery_4_20: false,
-  lottery_12_24: false,
-  lottery_5_36_1: false,
-  lottery_6_45: false,
-  lottery_7_49: false,
+  lottery_4_20: true,
+  lottery_12_24: true,
+  lottery_5_36_1: true,
+  lottery_6_45: true,
+  lottery_7_49: true,
 };
 
 export const LotterySelectionPage: React.FC = () => {
