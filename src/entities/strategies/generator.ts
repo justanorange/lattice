@@ -116,29 +116,29 @@ export async function executeStrategy(
 }
 
 /**
- * Generate min risk strategy
+ * Generate min risk strategy - random diverse combinations
  */
 function generateMinRiskStrategy(
   lottery: Lottery,
   _params: StrategyParams,
   requestedTicketCount: number | null
 ): Ticket[] {
-  // Generate requested number of tickets, or full random
+  // Generate requested number of tickets with good distribution
   const count = requestedTicketCount || 10;
-  return generateTicketsCount(lottery, count);
+  return generateDiverseTickets(lottery, count);
 }
 
 /**
- * Generate coverage strategy
+ * Generate coverage strategy - diverse combinations with max coverage
  */
 function generateCoverageStrategy(
   lottery: Lottery,
   _params: StrategyParams,
   requestedTicketCount: number | null
 ): Ticket[] {
-  // Generate random tickets for coverage
+  // Generate random tickets for coverage with diversity
   const count = requestedTicketCount || 50;
-  return generateTicketsCount(lottery, count);
+  return generateDiverseTickets(lottery, count);
 }
 
 /**
@@ -188,7 +188,7 @@ function generateFullWheelStrategy(
 }
 
 /**
- * Generate key wheel strategy
+ * Generate key wheel strategy - fixed key numbers + diverse random combinations
  */
 function generateKeyWheelStrategy(
   lottery: Lottery,
@@ -223,7 +223,7 @@ function generateKeyWheelStrategy(
     return tickets;
   }
 
-  // Generate combinations from remaining pool
+  // Generate diverse combinations from remaining pool
   const needed = selectionCount - keyCount;
   const allNumbers = Array.from({ length: lottery.fields[0].from }, (_, i) => i + 1);
   
@@ -235,10 +235,28 @@ function generateKeyWheelStrategy(
     return [];
   }
 
-  // Generate combinations from available numbers
-  const combos = generateCombinations(availableNumbers, needed);
+  // Generate all combinations from available numbers
+  const allCombos = generateCombinations(availableNumbers, needed);
 
-  const tickets: Ticket[] = combos.map((additionalNums) => {
+  // If we have more combinations than we can reasonably use, sample randomly
+  let combosToUse = allCombos;
+  const MAX_REASONABLE_COMBOS = 1000;
+  
+  if (allCombos.length > MAX_REASONABLE_COMBOS) {
+    // Sample random combinations instead of using all
+    combosToUse = [];
+    const usedIndices = new Set<number>();
+    
+    while (combosToUse.length < Math.min(MAX_REASONABLE_COMBOS, allCombos.length)) {
+      const randomIndex = Math.floor(Math.random() * allCombos.length);
+      if (!usedIndices.has(randomIndex)) {
+        usedIndices.add(randomIndex);
+        combosToUse.push(allCombos[randomIndex]);
+      }
+    }
+  }
+
+  const tickets: Ticket[] = combosToUse.map((additionalNums) => {
     const ticket: Ticket = {
       lotteryId: lottery.id,
       field1: [...keyNumbers, ...additionalNums].sort((a, b) => a - b),
@@ -259,30 +277,77 @@ function generateKeyWheelStrategy(
 }
 
 /**
- * Generate risk strategy
+ * Generate risk strategy - fewer tickets but diverse
  */
 function generateRiskStrategy(
   lottery: Lottery,
   _params: StrategyParams,
   requestedTicketCount: number | null
 ): Ticket[] {
-  // Generate requested number of tickets
+  // Generate requested number of tickets with good distribution
   const count = requestedTicketCount || 5;
-  return generateTicketsCount(lottery, count);
+  return generateDiverseTickets(lottery, count);
 }
 
 /**
- * Helper: Generate exactly N random tickets
+ * Count intersection between two tickets (how many numbers match)
  */
-function generateTicketsCount(lottery: Lottery, count: number): Ticket[] {
+function countIntersection(ticket1: number[], ticket2: number[]): number {
+  const set2 = new Set(ticket2);
+  return ticket1.filter((n) => set2.has(n)).length;
+}
+
+/**
+ * Generate N diverse tickets with good spread
+ * Uses random combinations that don't overlap too much
+ */
+function generateDiverseTickets(lottery: Lottery, count: number): Ticket[] {
+  const field = lottery.fields[0];
+  const selectionCount = field.count;
+  const maxTries = 50; // Try up to 50 times to find a diverse ticket
+  const maxIntersection = Math.max(1, Math.floor(selectionCount / 3)); // Allow up to 1/3 overlap
+
   const tickets: Ticket[] = [];
+  const usedCombos = new Set<string>();
 
   for (let i = 0; i < count; i++) {
-    const field1 = uniqueRandomNumbers(
-      1,
-      lottery.fields[0].from,
-      lottery.fields[0].count
-    );
+    let field1: number[] | null = null;
+    let attempts = 0;
+
+    // Try to generate a ticket that doesn't overlap too much with previous ones
+    while (!field1 && attempts < maxTries) {
+      const candidate = uniqueRandomNumbers(1, field.from, selectionCount);
+      const comboKey = candidate.join(',');
+
+      // Check if we've already used this exact combination
+      if (usedCombos.has(comboKey)) {
+        attempts++;
+        continue;
+      }
+
+      // Check overlap with existing tickets
+      let tooMuchOverlap = false;
+      for (const existingTicket of tickets) {
+        const intersection = countIntersection(candidate, existingTicket.field1);
+        if (intersection > maxIntersection) {
+          tooMuchOverlap = true;
+          break;
+        }
+      }
+
+      if (!tooMuchOverlap) {
+        field1 = candidate;
+        usedCombos.add(comboKey);
+      } else {
+        attempts++;
+      }
+    }
+
+    // If we couldn't find a diverse one after maxTries, just use the best we have
+    if (!field1) {
+      field1 = uniqueRandomNumbers(1, field.from, selectionCount);
+      usedCombos.add(field1.join(','));
+    }
 
     const ticket: Ticket = {
       lotteryId: lottery.id,

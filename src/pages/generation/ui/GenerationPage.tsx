@@ -27,7 +27,7 @@ export const GenerationPage: React.FC = () => {
     return null;
   }
 
-  const { lottery, result, isGenerating, error } = useGeneration({
+  const { lottery, result, isGenerating, error, regenerate } = useGeneration({
     strategyId: selectedStrategyId,
     strategyParams,
     ticketCount,
@@ -78,7 +78,19 @@ export const GenerationPage: React.FC = () => {
           <TicketsGrid result={result} lottery={lottery} />
 
           <div className="mb-6 flex gap-3">
-            <Button onClick={handleSimulate} variant="primary" className="flex-1">
+            <Button 
+              onClick={regenerate} 
+              variant="secondary" 
+              disabled={isGenerating}
+            >
+              Сгенерировать заново
+            </Button>
+            <Button 
+              onClick={handleSimulate} 
+              variant="primary" 
+              className="flex-1"
+              disabled={isGenerating}
+            >
               Симулировать тиражи
             </Button>
           </div>

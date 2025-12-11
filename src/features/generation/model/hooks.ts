@@ -14,6 +14,7 @@ export interface UseGenerationReturn {
   result: StrategyResult | null;
   isGenerating: boolean;
   error: string | null;
+  regenerate: () => Promise<void>;
 }
 
 export interface UseGenerationParams {
@@ -36,37 +37,42 @@ export function useGeneration({
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const generateTickets = async () => {
-      setIsGenerating(true);
-      setError(null);
-      try {
-        // Pass ticketCount as part of params if not already there
-        const params = {
-          ...strategyParams,
-          ticketCount,
-        };
-        const strategyResult = await executeStrategy(
-          strategyId,
-          selectedLottery,
-          params,
-          currentTicketCost
-        );
-        setResult(strategyResult);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Ошибка генерации');
-      } finally {
-        setIsGenerating(false);
-      }
-    };
+  const generateTickets = async () => {
+    setIsGenerating(true);
+    setError(null);
+    try {
+      // Pass ticketCount as part of params if not already there
+      const params = {
+        ...strategyParams,
+        ticketCount,
+      };
+      const strategyResult = await executeStrategy(
+        strategyId,
+        selectedLottery,
+        params,
+        currentTicketCost
+      );
+      setResult(strategyResult);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Ошибка генерации');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
+  useEffect(() => {
     generateTickets();
   }, [strategyId, strategyParams, ticketCount, selectedLottery.id, currentTicketCost]);
+
+  const regenerate = async () => {
+    await generateTickets();
+  };
 
   return {
     lottery: selectedLottery,
     result,
     isGenerating,
     error,
+    regenerate,
   };
 }
