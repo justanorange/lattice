@@ -26,8 +26,8 @@ const GRID_LAYOUTS: Record<string, GridConfig[]> = {
     { totalNumbers: 4, selected: 1, columns: 4 },
   ],
   lottery_4_20: [
-    { totalNumbers: 20, selected: 4, columns: 5 },
-    { totalNumbers: 20, selected: 4, columns: 5 },
+    { totalNumbers: 20, selected: 4, columns: 4 },
+    { totalNumbers: 20, selected: 4, columns: 4 },
   ],
   lottery_12_24: [
     { totalNumbers: 24, selected: 12, columns: 6 },

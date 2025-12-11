@@ -101,7 +101,7 @@ export const LOTTERY_4_FROM_20: Lottery = {
         ],
         currency: '₽',
       },
-      averagePool: 5000000,
+      averagePool: 4000000,
     },
   ],
   visualLayout: '2 fields × 4 columns × 5 rows',
@@ -121,37 +121,16 @@ export const LOTTERY_12_FROM_24: Lottery = {
   fields: [{ count: 12, from: 24 }],
   defaultTicketCost: 300,
   defaultSuperprice: 100000000,
-  variants: [
-    {
-      type: 'fixed',
-      label: 'Фиксированные выигрыши',
-      prizeTable: {
-        rows: [
-          { matches: [12], prize: 'Суперприз' },
-          { matches: [11], prize: 30000 },
-          { matches: [10], prize: 3000 },
-          { matches: [9], prize: 600 },
-          { matches: [8], prize: 150 },
-        ],
-        currency: '₽',
-      },
-    },
-    {
-      type: 'pool_percentage',
-      label: 'Процент от призового фонда',
-      prizeTable: {
-        rows: [
-          { matches: [12], prizePercent: 50, prizeNote: 'Суперприз' },
-          { matches: [11], prizePercent: 15 },
-          { matches: [10], prizePercent: 20 },
-          { matches: [9], prizePercent: 10 },
-          { matches: [8], prizePercent: 5 },
-        ],
-        currency: '₽',
-      },
-      averagePool: 10000000,
-    },
-  ],
+  prizeTable: {
+    rows: [
+      { matches: [12], prize: 'Суперприз' },
+      { matches: [11], prize: 30000 },
+      { matches: [10], prize: 3000 },
+      { matches: [9], prize: 600 },
+      { matches: [8], prize: 150 },
+    ],
+    currency: '₽',
+  },
   visualLayout: '6 columns × 4 rows',
   availableStrategies: ['guaranteed_win'],
 };
