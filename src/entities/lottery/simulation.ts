@@ -103,7 +103,8 @@ export function simulateLottery(
         matches,
         superprice,
         secondaryPrize,
-        poolAmount
+        poolAmount,
+        lottery.id
       );
 
       const prizeValue =
@@ -114,7 +115,7 @@ export function simulateLottery(
         field1Matches: matches[0] || 0,
         field2Matches: matches[1],
         prizeWon: prizeValue,
-        prizeCategory: getPrizeCategory(matches),
+        prizeCategory: getPrizeCategory(matches, lottery.id),
       });
 
       totalPrizeThisRound += prizeValue;

@@ -36,20 +36,54 @@ export function isSymmetricMatch(matches: number[]): boolean {
 }
 
 /**
+ * Normalize matches for 12/24 single-field lottery
+ * In 12/24, matching X is equivalent to matching (12-X) because:
+ * - You pick 12 numbers
+ * - If you match X, the other 12 numbers you didn't pick match (12-X) in the non-drawn set
+ * This normalizes to the higher value (e.g., 0→12, 1→11, 2→10, etc.)
+ * 
+ * @param matches - Array with single match count
+ * @param fieldCount - Number of numbers selected in the field (12 for 12/24)
+ * @returns Normalized match count (always the higher of matches or complement)
+ */
+export function normalize12_24Matches(matches: number[], fieldCount: number = 12): number[] {
+  if (matches.length !== 1) return matches;
+  const m = matches[0];
+  const complement = fieldCount - m;
+  // Return the higher value (canonical form)
+  return [Math.max(m, complement)];
+}
+
+/**
  * Finds the prize for a given combination
  * Automatically normalizes the combination before lookup
+ * Handles both 2-field symmetric lotteries (4_20) and 12/24 complement symmetry
  * 
  * @param matches - The combination to look up (will be normalized)
  * @param prizeRows - The prize table rows to search
+ * @param lotteryId - Optional lottery ID for special handling (12/24)
  * @returns The matching prize row, or undefined if not found
  */
 export function findPrizeForCombination(
   matches: number[],
-  prizeRows: PrizeRow[]
+  prizeRows: PrizeRow[],
+  lotteryId?: string
 ): PrizeRow | undefined {
-  const normalized = normalizeMatches(matches);
+  let normalized = normalizeMatches(matches);
+  
+  // Special handling for 12/24 single-field complement symmetry
+  if (lotteryId === 'lottery_12_24' && matches.length === 1) {
+    normalized = normalize12_24Matches(matches);
+  }
+  
   return prizeRows.find((row) => {
-    const rowNormalized = normalizeMatches(row.matches);
+    let rowNormalized = normalizeMatches(row.matches);
+    
+    // Also normalize row matches for 12/24
+    if (lotteryId === 'lottery_12_24' && row.matches.length === 1) {
+      rowNormalized = normalize12_24Matches(row.matches);
+    }
+    
     return (
       rowNormalized.length === normalized.length &&
       rowNormalized.every((val, idx) => val === normalized[idx])

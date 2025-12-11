@@ -11,7 +11,7 @@ import type {
   EVCalculation,
 } from './types';
 
-import { findPrizeForCombination, normalizeMatches } from './utils';
+import { findPrizeForCombination, normalizeMatches, isSymmetricLottery, normalize12_24Matches } from './utils';
 import { probabilityOfMatch } from '@/entities/calculations/probability';
 
 /**
@@ -19,13 +19,15 @@ import { probabilityOfMatch } from '@/entities/calculations/probability';
  * Automatically handles symmetric combinations (e.g., [3,4] matches [4,3])
  * @param prizeTable - The prize table to search
  * @param matches - Array of match counts (e.g., [8, 1] for 8+1 lottery)
+ * @param lotteryId - Optional lottery ID for special handling (12/24 complement symmetry)
  * @returns Prize amount (number or string like "Суперприз") or 0 if no match
  */
 export function findPrizeByMatches(
   prizeTable: PrizeTable,
-  matches: number[]
+  matches: number[],
+  lotteryId?: string
 ): number | string {
-  const matchedRow = findPrizeForCombination(matches, prizeTable.rows);
+  const matchedRow = findPrizeForCombination(matches, prizeTable.rows, lotteryId);
   return matchedRow?.prize ?? 0;
 }
 
@@ -38,6 +40,7 @@ export function findPrizeByMatches(
  * @param superprice - Current superprice (for "Суперприз")
  * @param secondaryPrize - Secondary prize (for 5из36+1)
  * @param poolAmount - Prize pool amount (for percentage-based prizes)
+ * @param lotteryId - Lottery ID for special handling (12/24 complement symmetry)
  * @returns Prize amount in rubles, or undefined for superprice
  */
 export function calculatePrizeAmount(
@@ -45,10 +48,11 @@ export function calculatePrizeAmount(
   matches: number[],
   _superprice: number,
   _secondaryPrize?: number,
-  poolAmount: number = 0
+  poolAmount: number = 0,
+  lotteryId?: string
 ): number | 'Суперприз' | 'Приз' {
-  // Find the row for these matches - using normalized lookup
-  const matchedRow = findPrizeForCombination(matches, prizeTable.rows);
+  // Find the row for these matches - using normalized lookup with lottery context
+  const matchedRow = findPrizeForCombination(matches, prizeTable.rows, lotteryId);
 
   if (!matchedRow) {
     return 0;
@@ -124,6 +128,7 @@ export function isWinningCombination(
  * Calculate Expected Value (EV) for a lottery
  * EV = sum(prize * probability) - ticket_cost
  * Uses actual probability calculations for accurate EV
+ * Accounts for symmetric lotteries (12/24 and 4_20) where multiple combinations win same prize
  *
  * @param lottery - The lottery definition
  * @param superprice - Current superprice
@@ -143,6 +148,7 @@ export function calculateEV(
 ): EVCalculation {
 
   let expectedValue = 0; // Sum of (prize * probability)
+  const isSymmetric = isSymmetricLottery(lottery.id);
 
   // Calculate EV based on actual probabilities
   for (const row of prizeTable.rows) {
@@ -165,17 +171,35 @@ export function calculateEV(
     let probability = 0;
 
     if (lottery.fieldCount === 1) {
-      // Single field lottery (6из45, 7из49)
+      // Single field lottery (6из45, 7из49, 12/24)
       const field = lottery.fields[0];
       const matches = row.matches[0];
+      
       probability = probabilityOfMatch(
         field.from,
         field.count,
         field.count, // drawn = selected
         matches
       );
+      
+      // For 12/24: matching X numbers is same as matching (field.count - X) numbers
+      // because if you pick 12 numbers and match X, the 12 numbers you didn't pick match (12-X)
+      // Example: 12 matches = 0 not-matches, 11 matches = 1 not-match - both win same prize
+      if (lottery.id === 'lottery_12_24') {
+        const complementMatches = field.count - matches;
+        // Only add complement probability if it's different from original (not middle point)
+        if (complementMatches !== matches) {
+          const complementProbability = probabilityOfMatch(
+            field.from,
+            field.count,
+            field.count,
+            complementMatches
+          );
+          probability += complementProbability;
+        }
+      }
     } else if (lottery.fieldCount === 2 && row.matches.length === 2) {
-      // Two field lottery (8+1, 5из36+1)
+      // Two field lottery (8+1, 5из36+1, 4из20)
       const field1 = lottery.fields[0];
       const field2 = lottery.fields[1];
       const matches1 = row.matches[0];
@@ -196,6 +220,27 @@ export function calculateEV(
 
       // Probability of both fields matching = prob1 * prob2
       probability = prob1 * prob2;
+      
+      // For symmetric 2-field lotteries (4из20): [a,b] and [b,a] win same prize
+      // Prize table only contains normalized form [min,max], so we need to double the probability
+      // if the combination is not symmetric (a != b)
+      if (isSymmetric && matches1 !== matches2) {
+        // The prize table is normalized, so [3,4] entry covers both [3,4] and [4,3]
+        // We need to add the probability of [4,3] as well
+        const prob1Swap = probabilityOfMatch(
+          field1.from,
+          field1.count,
+          field1.count,
+          matches2  // swapped
+        );
+        const prob2Swap = probabilityOfMatch(
+          field2.from,
+          field2.count,
+          field2.count,
+          matches1  // swapped
+        );
+        probability += prob1Swap * prob2Swap;
+      }
     }
 
     // Add to expected value: prize * probability
@@ -216,11 +261,19 @@ export function calculateEV(
 /**
  * Get prize category label for histogram/statistics
  * Normalizes symmetric combinations so [2,3] and [3,2] are counted together
+ * For 12/24: normalizes complement matches (0→12, 1→11, etc.)
  * @param matches - Match counts
+ * @param lotteryId - Optional lottery ID for special handling
  * @returns Category label (e.g., "4+1", "3+0", etc.) normalized for symmetric lotteries
  */
-export function getPrizeCategory(matches: number[]): string {
-  // Normalize symmetric combinations to canonical form
+export function getPrizeCategory(matches: number[], lotteryId?: string): string {
+  // Handle 12/24 complement symmetry
+  if (lotteryId === 'lottery_12_24' && matches.length === 1) {
+    const normalized = normalize12_24Matches(matches);
+    return normalized[0].toString();
+  }
+  
+  // Normalize symmetric combinations to canonical form for 2-field lotteries
   const normalized = normalizeMatches(matches);
   return normalized.map((m) => m.toString()).join('+');
 }
