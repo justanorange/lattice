@@ -75,16 +75,21 @@ export const GenerationPage: React.FC = () => {
       {result && !isGenerating && (
         <>
           <GenerationStats result={result} />
-          <TicketsGrid result={result} lottery={lottery} />
-
-          <div className="mb-6 flex gap-3">
+          
+          <div className="mb-6">
             <Button 
               onClick={regenerate} 
-              variant="secondary" 
+              variant="outline" 
               disabled={isGenerating}
+              className="w-full"
             >
               Сгенерировать заново
             </Button>
+          </div>
+
+          <TicketsGrid result={result} lottery={lottery} />
+
+          <div className="mb-6 flex gap-3">
             <Button 
               onClick={handleSimulate} 
               variant="primary" 
