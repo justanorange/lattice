@@ -57,9 +57,12 @@ export const TicketVisualization: React.FC<TicketVisualizationProps> = ({
     return <div className="p-4 text-sm text-gray-600">Макет билета не поддерживается</div>;
   }
 
+  // Determine layout direction: 4из20 has fields side-by-side, others top-to-bottom
+  const isSideBySide = lottery.id === 'lottery_4_20' && layouts.length === 2;
+
   return (
     <div className={cn('p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-x-auto', className)}>
-      <div className="space-y-4 min-w-min">
+      <div className={cn('min-w-min', isSideBySide ? 'flex gap-8' : 'space-y-4')}>
         {/* Field 1 */}
         {layouts[0] && (
           <div>

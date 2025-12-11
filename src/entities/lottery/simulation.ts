@@ -13,7 +13,7 @@ import type {
 
   PrizeTable,
 } from './types';
-import { calculatePrizeAmount } from './calculation';
+import { calculatePrizeAmount, getPrizeCategory } from './calculation';
 import { calculateSimulationStats } from '@/entities/calculations/statistics';
 import { uniqueRandomNumbers } from '@/entities/calculations/combinatorics';
 
@@ -72,6 +72,7 @@ function calculateMatches(
  * @param superprice - Superprice amount
  * @param ticketCost - Cost per ticket
  * @param secondaryPrize - Secondary prize (if applicable)
+ * @param poolAmount - Average prize pool (for percentage-based lotteries)
  * @returns Simulation result
  */
 export function simulateLottery(
@@ -81,7 +82,8 @@ export function simulateLottery(
   prizeTable: PrizeTable,
   superprice: number,
   ticketCost: number,
-  secondaryPrize?: number
+  secondaryPrize?: number,
+  poolAmount: number = 0
 ): SimulationResult {
   const rounds: SimulationRound[] = [];
   let bankroll = 0;
@@ -100,7 +102,8 @@ export function simulateLottery(
         prizeTable,
         matches,
         superprice,
-        secondaryPrize
+        secondaryPrize,
+        poolAmount
       );
 
       const prizeValue =
@@ -111,7 +114,7 @@ export function simulateLottery(
         field1Matches: matches[0] || 0,
         field2Matches: matches[1],
         prizeWon: prizeValue,
-        prizeCategory: matches.join('+'),
+        prizeCategory: getPrizeCategory(matches),
       });
 
       totalPrizeThisRound += prizeValue;

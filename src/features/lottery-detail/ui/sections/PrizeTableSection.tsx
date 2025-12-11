@@ -13,6 +13,9 @@ import type { Lottery, PrizeTable, PrizeRow } from '@/entities/lottery/types';
 interface PrizeTableSectionProps {
   lottery: Lottery;
   prizeTable: PrizeTable;
+  superprice: number;
+  secondaryPrize?: number;
+  averagePool?: number;
   onUpdateRow: (index: number, row: PrizeRow) => void;
   onReset: () => void;
 }
@@ -50,6 +53,9 @@ function formatProbability(probability: number): { text: string; tooltip: string
 export const PrizeTableSection: React.FC<PrizeTableSectionProps> = ({
   lottery,
   prizeTable,
+  superprice,
+  secondaryPrize,
+  averagePool,
   onUpdateRow,
   onReset,
 }) => {
@@ -95,6 +101,9 @@ export const PrizeTableSection: React.FC<PrizeTableSectionProps> = ({
                     displayLabel={displayLabel}
                     index={index}
                     lottery={lottery}
+                    superprice={superprice}
+                    secondaryPrize={secondaryPrize}
+                    averagePool={averagePool}
                     onUpdate={onUpdateRow}
                   />
                 )
@@ -117,16 +126,43 @@ interface PrizeTableRowProps {
   displayLabel: string;
   index: number;
   lottery: Lottery;
+  superprice: number;
+  secondaryPrize?: number;
+  averagePool?: number;
   onUpdate: (index: number, row: PrizeRow) => void;
 }
 
-const PrizeTableRow: React.FC<PrizeTableRowProps> = ({ row, displayLabel, index, lottery, onUpdate }) => {
+const PrizeTableRow: React.FC<PrizeTableRowProps> = ({
+  row,
+  displayLabel,
+  index,
+  lottery,
+  superprice,
+  secondaryPrize,
+  averagePool,
+  onUpdate,
+}) => {
   const isEditable = typeof row.prize === 'number' && row.prize >= 0;
   const isSuperprice = row.prize === 'Суперприз';
   const isSecondaryPrize = row.prize === 'Приз';
 
   const probability = calculateRowProbability(lottery, row);
   const probFormatted = formatProbability(probability);
+
+  // Calculate displayed prize value
+  let displayedPrize: number | string;
+  if (isSuperprice) {
+    displayedPrize = superprice;
+  } else if (isSecondaryPrize) {
+    displayedPrize = secondaryPrize || 0;
+  } else if (typeof row.prize === 'number') {
+    displayedPrize = row.prize;
+  } else if (row.prizePercent !== undefined && averagePool) {
+    // Calculate from percentage and average pool
+    displayedPrize = Math.floor((row.prizePercent / 100) * averagePool);
+  } else {
+    displayedPrize = 0;
+  }
 
   const handlePrizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number.parseFloat(e.target.value) || 0;
@@ -167,11 +203,27 @@ const PrizeTableRow: React.FC<PrizeTableRowProps> = ({ row, displayLabel, index,
               className="text-right"
             />
           </div>
-        ) : isSuperprice || isSecondaryPrize ? (
-          <span className="font-medium text-amber-600 dark:text-amber-400">{row.prize}</span>
+        ) : isSuperprice ? (
+          <span className="font-medium text-amber-600 dark:text-amber-400">
+            {typeof displayedPrize === 'number' ? `${displayedPrize.toLocaleString()} ₽` : displayedPrize}
+          </span>
+        ) : isSecondaryPrize ? (
+          <span className="font-medium text-amber-600 dark:text-amber-400">
+            {typeof displayedPrize === 'number' ? `${displayedPrize.toLocaleString()} ₽` : displayedPrize}
+          </span>
+        ) : row.prizePercent !== undefined ? (
+          // For percentage-based prizes, show both percentage and calculated amount
+          <div className="flex flex-col items-end gap-0.5">
+            <span className="font-medium text-gray-900 dark:text-white">
+              {typeof displayedPrize === 'number' ? `${displayedPrize.toLocaleString()} ₽` : '—'}
+            </span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              {row.prizePercent}%
+            </span>
+          </div>
         ) : (
           <span className="font-medium text-gray-900 dark:text-white">
-            {typeof row.prize === 'number' ? `${row.prize.toLocaleString()} ₽` : row.prize}
+            {typeof displayedPrize === 'number' ? `${displayedPrize.toLocaleString()} ₽` : displayedPrize}
           </span>
         )}
       </td>

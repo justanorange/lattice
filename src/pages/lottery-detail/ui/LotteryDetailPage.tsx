@@ -99,6 +99,9 @@ export const LotteryDetailPage: React.FC = () => {
         <PrizeTableSection
           lottery={lottery}
           prizeTable={prizeTable}
+          superprice={superprice}
+          secondaryPrize={secondaryPrize}
+          averagePool={averagePool}
           onUpdateRow={updatePrizeRow}
           onReset={resetPrizeTable}
         />

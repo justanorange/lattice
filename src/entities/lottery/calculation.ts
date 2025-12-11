@@ -11,7 +11,7 @@ import type {
   EVCalculation,
 } from './types';
 
-import { findPrizeForCombination } from './utils';
+import { findPrizeForCombination, normalizeMatches } from './utils';
 import { probabilityOfMatch } from '@/entities/calculations/probability';
 
 /**
@@ -215,12 +215,14 @@ export function calculateEV(
 
 /**
  * Get prize category label for histogram/statistics
+ * Normalizes symmetric combinations so [2,3] and [3,2] are counted together
  * @param matches - Match counts
- * @param prizeTable - Prize table
- * @returns Category label (e.g., "4+1", "3+0", etc.)
+ * @returns Category label (e.g., "4+1", "3+0", etc.) normalized for symmetric lotteries
  */
 export function getPrizeCategory(matches: number[]): string {
-  return matches.map((m) => m.toString()).join('+');
+  // Normalize symmetric combinations to canonical form
+  const normalized = normalizeMatches(matches);
+  return normalized.map((m) => m.toString()).join('+');
 }
 
 /**

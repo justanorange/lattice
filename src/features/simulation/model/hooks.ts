@@ -26,6 +26,7 @@ export function useSimulation(): UseSimulationReturn {
     currentTicketCost,
     currentPrizeTable,
     currentSuperprice,
+    currentAveragePool,
   } = useLotteryStore();
 
   const [roundsCount, setRoundsCount] = useState(100);
@@ -50,7 +51,9 @@ export function useSimulation(): UseSimulationReturn {
           roundsCount,
           currentPrizeTable,
           currentSuperprice,
-          currentTicketCost
+          currentTicketCost,
+          undefined,
+          currentAveragePool
         );
         setResult(simulationResult);
       } catch (err) {
@@ -60,7 +63,7 @@ export function useSimulation(): UseSimulationReturn {
         setIsRunning(false);
       }
     }, 10);
-  }, [selectedLottery, roundsCount, currentPrizeTable, currentSuperprice, currentTicketCost]);
+  }, [selectedLottery, roundsCount, currentPrizeTable, currentSuperprice, currentTicketCost, currentAveragePool]);
 
   return {
     lottery: selectedLottery,
