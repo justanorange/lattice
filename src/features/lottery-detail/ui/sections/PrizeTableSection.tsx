@@ -7,7 +7,7 @@ import { RotateCcw } from 'lucide-react';
 import { Card, CardHeader, CardBody, Button, Input } from '@/shared/ui';
 import { STRINGS } from '@/shared/constants';
 import { probabilityOfMatch } from '@/entities/calculations/probability';
-import { getSymmetricLabel } from '@/entities/lottery/utils';
+import { getCombinedSymmetricDisplay } from '@/entities/lottery/utils';
 import type { Lottery, PrizeTable, PrizeRow } from '@/entities/lottery/types';
 
 interface PrizeTableSectionProps {
@@ -87,15 +87,18 @@ export const PrizeTableSection: React.FC<PrizeTableSectionProps> = ({
               </tr>
             </thead>
             <tbody>
-              {prizeTable.rows.map((row, index) => (
-                <PrizeTableRow
-                  key={index}
-                  row={row}
-                  index={index}
-                  lottery={lottery}
-                  onUpdate={onUpdateRow}
-                />
-              ))}
+              {getCombinedSymmetricDisplay(prizeTable.rows, lottery.id).map(
+                ({ row, displayLabel }, index) => (
+                  <PrizeTableRow
+                    key={index}
+                    row={row}
+                    displayLabel={displayLabel}
+                    index={index}
+                    lottery={lottery}
+                    onUpdate={onUpdateRow}
+                  />
+                )
+              )}
             </tbody>
           </table>
         </div>
@@ -111,19 +114,19 @@ export const PrizeTableSection: React.FC<PrizeTableSectionProps> = ({
 
 interface PrizeTableRowProps {
   row: PrizeRow;
+  displayLabel: string;
   index: number;
   lottery: Lottery;
   onUpdate: (index: number, row: PrizeRow) => void;
 }
 
-const PrizeTableRow: React.FC<PrizeTableRowProps> = ({ row, index, lottery, onUpdate }) => {
+const PrizeTableRow: React.FC<PrizeTableRowProps> = ({ row, displayLabel, index, lottery, onUpdate }) => {
   const isEditable = typeof row.prize === 'number' && row.prize >= 0;
   const isSuperprice = row.prize === 'Суперприз';
   const isSecondaryPrize = row.prize === 'Приз';
 
   const probability = calculateRowProbability(lottery, row);
   const probFormatted = formatProbability(probability);
-  const symmetricLabel = getSymmetricLabel(row.matches);
 
   const handlePrizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number.parseFloat(e.target.value) || 0;
@@ -142,14 +145,7 @@ const PrizeTableRow: React.FC<PrizeTableRowProps> = ({ row, index, lottery, onUp
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900/50">
       <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">
-        <div className="flex flex-col gap-0.5">
-          <span>{row.matches.join(' + ')}</span>
-          {symmetricLabel && (
-            <span className="text-xs text-gray-500 dark:text-gray-400">
-              ({symmetricLabel})
-            </span>
-          )}
-        </div>
+        {displayLabel}
       </td>
       <td className="px-3 py-2 text-center text-sm text-gray-600 dark:text-gray-400">
         {probFormatted ? (

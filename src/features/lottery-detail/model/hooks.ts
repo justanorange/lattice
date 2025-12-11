@@ -16,12 +16,22 @@ export interface UseLotteryDetailReturn {
   evCalculation: EVCalculation;
   defaultTicketCost: number;
   defaultSuperprice: number;
+  selectedVariant?: string;
+  secondaryPrize?: number;
+  defaultSecondaryPrize?: number;
+  averagePool?: number;
+  defaultAveragePool?: number;
   updateTicketCost: (value: number) => void;
   updateSuperprice: (value: number) => void;
   updatePrizeRow: (index: number, row: PrizeRow) => void;
+  updateSecondaryPrize: (value: number) => void;
+  updateAveragePool: (value: number) => void;
+  selectVariant: (variantType: string) => void;
   resetPrizeTable: () => void;
   resetTicketCost: () => void;
   resetSuperprice: () => void;
+  resetSecondaryPrize: () => void;
+  resetAveragePool: () => void;
 }
 
 /**
@@ -31,12 +41,18 @@ export interface UseLotteryDetailReturn {
 export function useLotteryDetail(lotteryId: string): UseLotteryDetailReturn {
   const {
     selectedLottery,
+    selectedVariant,
     currentSuperprice,
     currentTicketCost,
     currentPrizeTable,
+    currentSecondaryPrize,
+    currentAveragePool,
     updateSuperprice,
     updateTicketCost,
+    updateSecondaryPrize,
+    updateAveragePool,
     selectLottery,
+    selectVariant,
     updatePrizeRow,
     resetPrizeTableToDefaults,
     resetSuperpriceToDefault,
@@ -62,6 +78,16 @@ export function useLotteryDetail(lotteryId: string): UseLotteryDetailReturn {
     [selectedLottery, currentSuperprice, currentPrizeTable, currentTicketCost]
   );
 
+  // Reset handlers for secondary prize and average pool
+  const resetSecondaryPrize = React.useCallback(() => {
+    updateSecondaryPrize(selectedLottery.defaultSecondaryPrize || 0);
+  }, [selectedLottery, updateSecondaryPrize]);
+
+  const resetAveragePool = React.useCallback(() => {
+    const defaultPool = selectedLottery.variants?.[0]?.averagePool || 0;
+    updateAveragePool(defaultPool);
+  }, [selectedLottery, updateAveragePool]);
+
   return {
     lottery: selectedLottery,
     ticketCost: currentTicketCost,
@@ -70,12 +96,22 @@ export function useLotteryDetail(lotteryId: string): UseLotteryDetailReturn {
     evCalculation,
     defaultTicketCost: selectedLottery.defaultTicketCost,
     defaultSuperprice: selectedLottery.defaultSuperprice,
+    selectedVariant,
+    secondaryPrize: currentSecondaryPrize,
+    defaultSecondaryPrize: selectedLottery.defaultSecondaryPrize,
+    averagePool: currentAveragePool,
+    defaultAveragePool: selectedLottery.variants?.[0]?.averagePool,
     updateTicketCost,
     updateSuperprice,
     updatePrizeRow,
+    updateSecondaryPrize,
+    updateAveragePool,
+    selectVariant,
     resetPrizeTable: resetPrizeTableToDefaults,
     resetTicketCost: resetTicketCostToDefault,
     resetSuperprice: resetSuperpriceToDefault,
+    resetSecondaryPrize,
+    resetAveragePool,
   };
 }
 

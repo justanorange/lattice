@@ -8,6 +8,7 @@ import { Container, PageHeader, Button } from '@/shared/ui';
 import { useLotteryDetail, clampSuperprice } from '@/features/lottery-detail/model';
 import {
   TicketSettings,
+  AdditionalSettingsSection,
   PrizeTableSection,
   EVDisplay,
   EVChart,
@@ -32,12 +33,22 @@ export const LotteryDetailPage: React.FC = () => {
     evCalculation,
     defaultTicketCost,
     defaultSuperprice,
+    selectedVariant,
+    secondaryPrize,
+    defaultSecondaryPrize,
+    averagePool,
+    defaultAveragePool,
     updateTicketCost,
     updateSuperprice,
+    updateSecondaryPrize,
+    updateAveragePool,
+    selectVariant,
     updatePrizeRow,
     resetPrizeTable,
     resetTicketCost,
     resetSuperprice,
+    resetSecondaryPrize,
+    resetAveragePool,
   } = useLotteryDetail(lotteryId);
 
   const handleBack = () => navigate('/');
@@ -69,6 +80,20 @@ export const LotteryDetailPage: React.FC = () => {
           onSuperpriceChange={handleSuperpriceChange}
           onResetTicketCost={resetTicketCost}
           onResetSuperprice={resetSuperprice}
+        />
+
+        <AdditionalSettingsSection
+          lottery={lottery}
+          selectedVariant={selectedVariant}
+          secondaryPrize={secondaryPrize}
+          averagePool={averagePool}
+          defaultSecondaryPrize={defaultSecondaryPrize}
+          defaultAveragePool={defaultAveragePool}
+          onVariantChange={selectVariant}
+          onSecondaryPrizeChange={updateSecondaryPrize}
+          onAveragePoolChange={updateAveragePool}
+          onResetSecondaryPrize={resetSecondaryPrize}
+          onResetAveragePool={resetAveragePool}
         />
 
         <PrizeTableSection

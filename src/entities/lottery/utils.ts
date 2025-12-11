@@ -71,3 +71,56 @@ export function getSymmetricLabel(matches: number[]): string {
   const [min, max] = a < b ? [a, b] : [b, a];
   return `${min} + ${max} или ${max} + ${min}`;
 }
+
+/**
+ * Check if a lottery is "symmetric-enabled" (supports symmetric combinations)
+ * Symmetric lotteries: 4из20 (2-field), 12/24 (symmetric matches)
+ * 
+ * @param lotteryId - The lottery ID to check
+ * @returns true if lottery uses symmetric combinations
+ */
+export function isSymmetricLottery(lotteryId: string): boolean {
+  // 2-field lotteries where both fields are identical ranges
+  if (lotteryId === 'lottery_4_20') return true; // 4 from 20 in each field
+  
+  // 1-field lotteries where high=total-low creates symmetry
+  if (lotteryId === 'lottery_12_24') return true; // 12 from 24, so 12+0=12, 11+1=12, etc
+  
+  return false;
+}
+
+/**
+ * Group symmetric prize rows together for combined display
+ * Returns rows with combined display text for symmetric pairs
+ * 
+ * @param prizeRows - The prize table rows
+ * @param lotteryId - The lottery ID
+ * @returns Grouped rows with display info
+ */
+export function getCombinedSymmetricDisplay(
+  prizeRows: PrizeRow[],
+  lotteryId: string
+): Array<{ row: PrizeRow; displayLabel: string }> {
+  if (!isSymmetricLottery(lotteryId)) {
+    // No combination needed for non-symmetric lotteries
+    return prizeRows.map((row) => ({
+      row,
+      displayLabel: row.matches.join(' + '),
+    }));
+  }
+
+  // For symmetric lotteries, return combined display
+  return prizeRows.map((row) => {
+    const label = getSymmetricLabel(row.matches);
+    if (label) {
+      return {
+        row,
+        displayLabel: `${row.matches.join(' + ')} (${label})`,
+      };
+    }
+    return {
+      row,
+      displayLabel: row.matches.join(' + '),
+    };
+  });
+}
