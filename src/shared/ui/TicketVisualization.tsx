@@ -25,11 +25,7 @@ const GRID_LAYOUTS: Record<string, GridConfig[]> = {
     { totalNumbers: 20, selected: 8, columns: 5 },
     { totalNumbers: 4, selected: 1, columns: 4 },
   ],
-  lottery_4_20_fixed: [
-    { totalNumbers: 20, selected: 4, columns: 5 },
-    { totalNumbers: 20, selected: 4, columns: 5 },
-  ],
-  lottery_4_20_percent: [
+  lottery_4_20: [
     { totalNumbers: 20, selected: 4, columns: 5 },
     { totalNumbers: 20, selected: 4, columns: 5 },
   ],
@@ -62,8 +58,8 @@ export const TicketVisualization: React.FC<TicketVisualizationProps> = ({
   }
 
   return (
-    <div className={cn('p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800', className)}>
-      <div className="space-y-4">
+    <div className={cn('p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-x-auto', className)}>
+      <div className="space-y-4 min-w-min">
         {/* Field 1 */}
         {layouts[0] && (
           <div>
@@ -71,9 +67,10 @@ export const TicketVisualization: React.FC<TicketVisualizationProps> = ({
               Поле 1: {layouts[0].selected} из {layouts[0].totalNumbers}
             </div>
             <div
-              className="inline-grid gap-2"
+              className="grid gap-2"
               style={{
                 gridTemplateColumns: `repeat(${layouts[0].columns}, minmax(2rem, 1fr))`,
+                width: `${Math.min(layouts[0].columns * 40, 100)}%`,
               }}
             >
               {Array.from({ length: layouts[0].totalNumbers }, (_, i) => {
@@ -104,9 +101,10 @@ export const TicketVisualization: React.FC<TicketVisualizationProps> = ({
               Поле 2: {layouts[1].selected} из {layouts[1].totalNumbers}
             </div>
             <div
-              className="inline-grid gap-2"
+              className="grid gap-2"
               style={{
                 gridTemplateColumns: `repeat(${layouts[1].columns}, minmax(2rem, 1fr))`,
+                width: `${Math.min(layouts[1].columns * 40, 100)}%`,
               }}
             >
               {Array.from({ length: layouts[1].totalNumbers }, (_, i) => {
