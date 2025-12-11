@@ -7,6 +7,7 @@ import { RotateCcw } from 'lucide-react';
 import { Card, CardHeader, CardBody, Button, Input } from '@/shared/ui';
 import { STRINGS } from '@/shared/constants';
 import { probabilityOfMatch } from '@/entities/calculations/probability';
+import { getSymmetricLabel } from '@/entities/lottery/utils';
 import type { Lottery, PrizeTable, PrizeRow } from '@/entities/lottery/types';
 
 interface PrizeTableSectionProps {
@@ -122,6 +123,7 @@ const PrizeTableRow: React.FC<PrizeTableRowProps> = ({ row, index, lottery, onUp
 
   const probability = calculateRowProbability(lottery, row);
   const probFormatted = formatProbability(probability);
+  const symmetricLabel = getSymmetricLabel(row.matches);
 
   const handlePrizeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = Number.parseFloat(e.target.value) || 0;
@@ -140,7 +142,14 @@ const PrizeTableRow: React.FC<PrizeTableRowProps> = ({ row, index, lottery, onUp
   return (
     <tr className="border-b border-gray-100 hover:bg-gray-50 dark:border-gray-800 dark:hover:bg-gray-900/50">
       <td className="px-3 py-2 text-sm text-gray-900 dark:text-white">
-        {row.matches.join(' + ')}
+        <div className="flex flex-col gap-0.5">
+          <span>{row.matches.join(' + ')}</span>
+          {symmetricLabel && (
+            <span className="text-xs text-gray-500 dark:text-gray-400">
+              ({symmetricLabel})
+            </span>
+          )}
+        </div>
       </td>
       <td className="px-3 py-2 text-center text-sm text-gray-600 dark:text-gray-400">
         {probFormatted ? (

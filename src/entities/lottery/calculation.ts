@@ -11,11 +11,12 @@ import type {
   EVCalculation,
 } from './types';
 
-
+import { findPrizeForCombination } from './utils';
 import { probabilityOfMatch } from '@/entities/calculations/probability';
 
 /**
  * Find prize amount for given matches
+ * Automatically handles symmetric combinations (e.g., [3,4] matches [4,3])
  * @param prizeTable - The prize table to search
  * @param matches - Array of match counts (e.g., [8, 1] for 8+1 lottery)
  * @returns Prize amount (number or string like "Суперприз") or 0 if no match
@@ -24,22 +25,14 @@ export function findPrizeByMatches(
   prizeTable: PrizeTable,
   matches: number[]
 ): number | string {
-  // Compare matches arrays directly - order matters (field1, field2)
-  for (const row of prizeTable.rows) {
-    if (
-      matches.length === row.matches.length &&
-      matches.every((val, idx) => val === row.matches[idx])
-    ) {
-      return row.prize ?? 0;
-    }
-  }
-
-  return 0; // No prize found
+  const matchedRow = findPrizeForCombination(matches, prizeTable.rows);
+  return matchedRow?.prize ?? 0;
 }
 
 /**
  * Calculate prize amount in rubles
  * Handles both fixed prizes and percentage-based prizes
+ * Automatically normalizes symmetric combinations before lookup
  * @param prizeTable - The prize table
  * @param matches - Match counts
  * @param superprice - Current superprice (for "Суперприз")
@@ -54,18 +47,8 @@ export function calculatePrizeAmount(
   _secondaryPrize?: number,
   poolAmount: number = 0
 ): number | 'Суперприз' | 'Приз' {
-  // Find the row for these matches - compare directly, order matters
-  let matchedRow: PrizeRow | undefined;
-
-  for (const row of prizeTable.rows) {
-    if (
-      matches.length === row.matches.length &&
-      matches.every((val, idx) => val === row.matches[idx])
-    ) {
-      matchedRow = row;
-      break;
-    }
-  }
+  // Find the row for these matches - using normalized lookup
+  const matchedRow = findPrizeForCombination(matches, prizeTable.rows);
 
   if (!matchedRow) {
     return 0;
@@ -93,6 +76,7 @@ export function calculatePrizeAmount(
 
   return 0;
 }
+
 
 /**
  * Get numeric prize value
