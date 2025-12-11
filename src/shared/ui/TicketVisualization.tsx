@@ -2,6 +2,7 @@
  * TicketVisualization Component
  * Display lottery ticket with visual grid of selected numbers
  * Numbers are highlighted in different colors based on their selection
+ * Uses CSS scale to fit wide tickets on mobile without horizontal scroll
  */
 
 import React from 'react';
@@ -44,6 +45,9 @@ const GRID_LAYOUTS: Record<string, GridConfig[]> = {
   ],
 };
 
+// Lotteries that need scaling on mobile (more than 7 columns)
+const WIDE_LOTTERIES = ['lottery_6_45', 'lottery_7_49'];
+
 /**
  * Visualize a single lottery ticket with numbered grid
  */
@@ -59,21 +63,32 @@ export const TicketVisualization: React.FC<TicketVisualizationProps> = ({
 
   // Determine layout direction: 4из20 has fields side-by-side, others top-to-bottom
   const isSideBySide = lottery.id === 'lottery_4_20' && layouts.length === 2;
+  const isWide = WIDE_LOTTERIES.includes(lottery.id);
 
   return (
-    <div className={cn('p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800 overflow-x-auto', className)}>
-      <div className={cn('min-w-min', isSideBySide ? 'flex gap-8' : 'space-y-4')}>
+    <div className={cn(
+      'p-3 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-800',
+      className
+    )}>
+      <div 
+        className={cn(
+          'origin-top-left inline-flex flex-col',
+          isSideBySide ? 'flex-row gap-4' : 'gap-3',
+          // Scale down wide lotteries on mobile
+          isWide && 'scale-[0.78] sm:scale-100'
+        )}
+        style={isWide ? { transformOrigin: 'top left' } : undefined}
+      >
         {/* Field 1 */}
         {layouts[0] && (
           <div>
-            <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+            <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
               Поле 1: {layouts[0].selected} из {layouts[0].totalNumbers}
             </div>
             <div
-              className="grid gap-2"
+              className="grid gap-1"
               style={{
-                gridTemplateColumns: `repeat(${layouts[0].columns}, minmax(2rem, 1fr))`,
-                width: `${Math.min(layouts[0].columns * 40, 100)}%`,
+                gridTemplateColumns: `repeat(${layouts[0].columns}, minmax(0, 1fr))`,
               }}
             >
               {Array.from({ length: layouts[0].totalNumbers }, (_, i) => {
@@ -83,7 +98,7 @@ export const TicketVisualization: React.FC<TicketVisualizationProps> = ({
                   <div
                     key={`f1-${i}`}
                     className={cn(
-                      'flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold border',
+                      'flex items-center justify-center w-7 h-7 rounded text-xs font-semibold border',
                       isSelected
                         ? 'bg-amber-500 dark:bg-amber-600 text-white border-amber-600 dark:border-amber-700'
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600'
@@ -100,14 +115,13 @@ export const TicketVisualization: React.FC<TicketVisualizationProps> = ({
         {/* Field 2 (if exists) */}
         {layouts[1] && ticket.field2 && (
           <div>
-            <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-2">
+            <div className="text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">
               Поле 2: {layouts[1].selected} из {layouts[1].totalNumbers}
             </div>
             <div
-              className="grid gap-2"
+              className="grid gap-1"
               style={{
-                gridTemplateColumns: `repeat(${layouts[1].columns}, minmax(2rem, 1fr))`,
-                width: `${Math.min(layouts[1].columns * 40, 100)}%`,
+                gridTemplateColumns: `repeat(${layouts[1].columns}, minmax(0, 1fr))`,
               }}
             >
               {Array.from({ length: layouts[1].totalNumbers }, (_, i) => {
@@ -117,7 +131,7 @@ export const TicketVisualization: React.FC<TicketVisualizationProps> = ({
                   <div
                     key={`f2-${i}`}
                     className={cn(
-                      'flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold border',
+                      'flex items-center justify-center w-7 h-7 rounded text-xs font-semibold border',
                       isSelected
                         ? 'bg-amber-500 dark:bg-amber-600 text-white border-amber-600 dark:border-amber-700'
                         : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600'

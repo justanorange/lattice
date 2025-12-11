@@ -11,7 +11,7 @@ import type {
   EVCalculation,
 } from './types';
 
-import { findPrizeForCombination, normalizeMatches, isSymmetricLottery, normalize12_24Matches } from './utils';
+import { findPrizeForCombination, isSymmetricLottery, normalize12_24Matches } from './utils';
 import { probabilityOfMatch } from '@/entities/calculations/probability';
 
 /**
@@ -49,7 +49,9 @@ export function calculatePrizeAmount(
   _superprice: number,
   _secondaryPrize?: number,
   poolAmount: number = 0,
-  lotteryId?: string
+  lotteryId?: string,
+  ticketCost?: number,
+  lottery?: Lottery
 ): number | 'Суперприз' | 'Приз' {
   // Find the row for these matches - using normalized lookup with lottery context
   const matchedRow = findPrizeForCombination(matches, prizeTable.rows, lotteryId);
@@ -58,8 +60,8 @@ export function calculatePrizeAmount(
     return 0;
   }
 
-  // Handle superprice marker
-  if (matchedRow.prize === 'Суперприз') {
+  // Handle superprice marker (both prize='Суперприз' and prizeNote='Суперприз')
+  if (matchedRow.prize === 'Суперприз' || matchedRow.prizeNote === 'Суперприз') {
     return 'Суперприз';
   }
 
@@ -75,9 +77,63 @@ export function calculatePrizeAmount(
 
   // Handle percentage-based prize
   if (matchedRow.prizePercent !== undefined && poolAmount > 0) {
+    // Calculate prize per winner: total category prize / expected winners
+    // Expected winners = totalTickets × probability
+    // NOTE: poolAmount is the PRIZE FUND (~50% of revenue), so real tickets ≈ 2× pool/ticketCost
+    if (ticketCost && ticketCost > 0 && lottery) {
+      const estimatedTickets = (poolAmount / ticketCost) * 2;
+      const probability = calculateMatchProbability(lottery, matchedRow.matches);
+      const expectedWinners = estimatedTickets * probability;
+      
+      if (expectedWinners > 0) {
+        const totalPrizeForCategory = (matchedRow.prizePercent / 100) * poolAmount;
+        return Math.floor(totalPrizeForCategory / expectedWinners);
+      }
+    }
+    // Fallback: full percentage (for display when no ticket info)
     return Math.floor((matchedRow.prizePercent / 100) * poolAmount);
   }
 
+  return 0;
+}
+
+/**
+ * Calculate probability of a specific match combination
+ */
+function calculateMatchProbability(lottery: Lottery, matches: number[]): number {
+  const isSymmetric = isSymmetricLottery(lottery.id);
+  
+  if (lottery.fieldCount === 1) {
+    const field = lottery.fields[0];
+    let prob = probabilityOfMatch(field.from, field.count, field.count, matches[0]);
+    
+    // 12/24 complement symmetry
+    if (lottery.id === 'lottery_12_24') {
+      const complement = field.count - matches[0];
+      if (complement !== matches[0]) {
+        prob += probabilityOfMatch(field.from, field.count, field.count, complement);
+      }
+    }
+    return prob;
+  }
+  
+  if (lottery.fieldCount === 2 && matches.length === 2) {
+    const field1 = lottery.fields[0];
+    const field2 = lottery.fields[1];
+    
+    const prob1 = probabilityOfMatch(field1.from, field1.count, field1.count, matches[0]);
+    const prob2 = probabilityOfMatch(field2.from, field2.count, field2.count, matches[1]);
+    let prob = prob1 * prob2;
+    
+    // Symmetric 2-field lottery
+    if (isSymmetric && matches[0] !== matches[1]) {
+      const prob1Swap = probabilityOfMatch(field1.from, field1.count, field1.count, matches[1]);
+      const prob2Swap = probabilityOfMatch(field2.from, field2.count, field2.count, matches[0]);
+      prob += prob1Swap * prob2Swap;
+    }
+    return prob;
+  }
+  
   return 0;
 }
 
@@ -149,25 +205,15 @@ export function calculateEV(
 
   let expectedValue = 0; // Sum of (prize * probability)
   const isSymmetric = isSymmetricLottery(lottery.id);
+  
+  // For pool_percentage lotteries: estimate number of tickets sold
+  // Assumption: pool ≈ total ticket sales (simplified model)
+  const estimatedTickets = ticketCost > 0 ? poolAmount / ticketCost : 0;
 
   // Calculate EV based on actual probabilities
   for (const row of prizeTable.rows) {
-    let prizeValue = 0;
-    
-    // Get prize value
-    if (row.prize === 'Суперприз') {
-      prizeValue = superprice;
-    } else if (row.prize === 'Приз' && secondaryPrize) {
-      prizeValue = secondaryPrize;
-    } else if (typeof row.prize === 'number') {
-      prizeValue = row.prize;
-    } else if (row.prizePercent !== undefined && poolAmount > 0) {
-      prizeValue = (row.prizePercent / 100) * poolAmount;
-    }
-
-    if (prizeValue <= 0) continue;
-
-    // Calculate probability for this match combination
+    // Calculate probability for this match combination FIRST
+    // (needed for pool_percentage prize calculation)
     let probability = 0;
 
     if (lottery.fieldCount === 1) {
@@ -183,11 +229,8 @@ export function calculateEV(
       );
       
       // For 12/24: matching X numbers is same as matching (field.count - X) numbers
-      // because if you pick 12 numbers and match X, the 12 numbers you didn't pick match (12-X)
-      // Example: 12 matches = 0 not-matches, 11 matches = 1 not-match - both win same prize
       if (lottery.id === 'lottery_12_24') {
         const complementMatches = field.count - matches;
-        // Only add complement probability if it's different from original (not middle point)
         if (complementMatches !== matches) {
           const complementProbability = probabilityOfMatch(
             field.from,
@@ -218,30 +261,52 @@ export function calculateEV(
         matches2
       );
 
-      // Probability of both fields matching = prob1 * prob2
       probability = prob1 * prob2;
       
       // For symmetric 2-field lotteries (4из20): [a,b] and [b,a] win same prize
-      // Prize table only contains normalized form [min,max], so we need to double the probability
-      // if the combination is not symmetric (a != b)
       if (isSymmetric && matches1 !== matches2) {
-        // The prize table is normalized, so [3,4] entry covers both [3,4] and [4,3]
-        // We need to add the probability of [4,3] as well
         const prob1Swap = probabilityOfMatch(
           field1.from,
           field1.count,
           field1.count,
-          matches2  // swapped
+          matches2
         );
         const prob2Swap = probabilityOfMatch(
           field2.from,
           field2.count,
           field2.count,
-          matches1  // swapped
+          matches1
         );
         probability += prob1Swap * prob2Swap;
       }
     }
+
+    // Now calculate prize value
+    let prizeValue = 0;
+    
+    if (row.prize === 'Суперприз' || row.prizeNote === 'Суперприз') {
+      // Superprice is always the user-editable value, regardless of pool_percentage
+      prizeValue = superprice;
+    } else if (row.prize === 'Приз' && secondaryPrize) {
+      prizeValue = secondaryPrize;
+    } else if (typeof row.prize === 'number') {
+      prizeValue = row.prize;
+    } else if (row.prizePercent !== undefined && poolAmount > 0) {
+      // For pool_percentage: prize pool is SHARED among all winners
+      // Expected winners in this category = estimatedTickets * probability
+      // Prize per winner = (percent * pool) / expectedWinners
+      const totalPrizeForCategory = (row.prizePercent / 100) * poolAmount;
+      const expectedWinners = estimatedTickets * probability;
+      
+      if (expectedWinners > 0) {
+        prizeValue = totalPrizeForCategory / expectedWinners;
+      } else {
+        // Fallback: if no expected winners, use full prize (edge case)
+        prizeValue = totalPrizeForCategory;
+      }
+    }
+
+    if (prizeValue <= 0 || probability <= 0) continue;
 
     // Add to expected value: prize * probability
     expectedValue += prizeValue * probability;
@@ -260,11 +325,11 @@ export function calculateEV(
 
 /**
  * Get prize category label for histogram/statistics
- * Normalizes symmetric combinations so [2,3] and [3,2] are counted together
+ * For display purposes, shows larger number first (e.g., "4+3" not "3+4")
  * For 12/24: normalizes complement matches (0→12, 1→11, etc.)
  * @param matches - Match counts
  * @param lotteryId - Optional lottery ID for special handling
- * @returns Category label (e.g., "4+1", "3+0", etc.) normalized for symmetric lotteries
+ * @returns Category label (e.g., "4+1", "3+0", etc.) with larger number first
  */
 export function getPrizeCategory(matches: number[], lotteryId?: string): string {
   // Handle 12/24 complement symmetry
@@ -273,9 +338,13 @@ export function getPrizeCategory(matches: number[], lotteryId?: string): string 
     return normalized[0].toString();
   }
   
-  // Normalize symmetric combinations to canonical form for 2-field lotteries
-  const normalized = normalizeMatches(matches);
-  return normalized.map((m) => m.toString()).join('+');
+  // For 2-field lotteries, display with larger number first (e.g., "4+3" not "3+4")
+  if (matches.length === 2) {
+    const [a, b] = matches;
+    return a >= b ? `${a}+${b}` : `${b}+${a}`;
+  }
+  
+  return matches.map((m) => m.toString()).join('+');
 }
 
 /**

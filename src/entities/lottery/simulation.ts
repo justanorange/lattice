@@ -104,7 +104,9 @@ export function simulateLottery(
         superprice,
         secondaryPrize,
         poolAmount,
-        lottery.id
+        lottery.id,
+        ticketCost,
+        lottery
       );
 
       const prizeValue =

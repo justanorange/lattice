@@ -16,25 +16,47 @@ interface PrizeTableSectionProps {
   superprice: number;
   secondaryPrize?: number;
   averagePool?: number;
+  ticketCost: number;
   onUpdateRow: (index: number, row: PrizeRow) => void;
   onReset: () => void;
 }
 
 /**
  * Calculate probability for a prize row
+ * For symmetric lotteries (4из20), includes both [a,b] and [b,a] combinations
  */
 function calculateRowProbability(lottery: Lottery, row: PrizeRow): number {
   if (lottery.fieldCount === 1) {
     const field = lottery.fields[0];
-    return probabilityOfMatch(field.from, field.count, field.count, row.matches[0]);
+    let prob = probabilityOfMatch(field.from, field.count, field.count, row.matches[0]);
+    
+    // For 12/24: complement symmetry (X matches = 12-X matches)
+    if (lottery.id === 'lottery_12_24') {
+      const complement = field.count - row.matches[0];
+      if (complement !== row.matches[0]) {
+        prob += probabilityOfMatch(field.from, field.count, field.count, complement);
+      }
+    }
+    return prob;
   }
 
   if (lottery.fieldCount === 2 && row.matches.length === 2) {
     const field1 = lottery.fields[0];
     const field2 = lottery.fields[1];
-    const prob1 = probabilityOfMatch(field1.from, field1.count, field1.count, row.matches[0]);
-    const prob2 = probabilityOfMatch(field2.from, field2.count, field2.count, row.matches[1]);
-    return prob1 * prob2;
+    const [m1, m2] = row.matches;
+    
+    const prob1 = probabilityOfMatch(field1.from, field1.count, field1.count, m1);
+    const prob2 = probabilityOfMatch(field2.from, field2.count, field2.count, m2);
+    let prob = prob1 * prob2;
+    
+    // For symmetric 2-field lotteries (4из20): [a,b] and [b,a] win same prize
+    if (lottery.id === 'lottery_4_20' && m1 !== m2) {
+      const prob1Swap = probabilityOfMatch(field1.from, field1.count, field1.count, m2);
+      const prob2Swap = probabilityOfMatch(field2.from, field2.count, field2.count, m1);
+      prob += prob1Swap * prob2Swap;
+    }
+    
+    return prob;
   }
 
   return 0;
@@ -56,6 +78,7 @@ export const PrizeTableSection: React.FC<PrizeTableSectionProps> = ({
   superprice,
   secondaryPrize,
   averagePool,
+  ticketCost,
   onUpdateRow,
   onReset,
 }) => {
@@ -104,6 +127,7 @@ export const PrizeTableSection: React.FC<PrizeTableSectionProps> = ({
                     superprice={superprice}
                     secondaryPrize={secondaryPrize}
                     averagePool={averagePool}
+                    ticketCost={ticketCost}
                     onUpdate={onUpdateRow}
                   />
                 )
@@ -129,6 +153,7 @@ interface PrizeTableRowProps {
   superprice: number;
   secondaryPrize?: number;
   averagePool?: number;
+  ticketCost: number;
   onUpdate: (index: number, row: PrizeRow) => void;
 }
 
@@ -140,10 +165,11 @@ const PrizeTableRow: React.FC<PrizeTableRowProps> = ({
   superprice,
   secondaryPrize,
   averagePool,
+  ticketCost,
   onUpdate,
 }) => {
   const isEditable = typeof row.prize === 'number' && row.prize >= 0;
-  const isSuperprice = row.prize === 'Суперприз';
+  const isSuperprice = row.prize === 'Суперприз' || row.prizeNote === 'Суперприз';
   const isSecondaryPrize = row.prize === 'Приз';
 
   const probability = calculateRowProbability(lottery, row);
@@ -157,9 +183,31 @@ const PrizeTableRow: React.FC<PrizeTableRowProps> = ({
     displayedPrize = secondaryPrize || 0;
   } else if (typeof row.prize === 'number') {
     displayedPrize = row.prize;
-  } else if (row.prizePercent !== undefined && averagePool) {
-    // Calculate from percentage and average pool
-    displayedPrize = Math.floor((row.prizePercent / 100) * averagePool);
+  } else if (row.prizePercent !== undefined && averagePool && ticketCost > 0) {
+    // Calculate prize per winner:
+    // Total for category = percent × pool
+    // Total tickets ≈ pool / ticketCost (approximation based on prize fund)
+    // Expected winners = totalTickets × probability
+    // Prize per winner = (percent × pool) / expectedWinners
+    //                  = (percent × pool) / ((pool / ticketCost) × prob)
+    //                  = (percent × ticketCost) / prob
+    // 
+    // NOTE: This assumes averagePool ≈ revenue, but actually averagePool is 
+    // the PRIZE FUND which is ~50% of revenue. So we need to use pool directly.
+    // Real formula: prize = (percent × pool) / ((pool / ticketCost) × prob)
+    //             BUT (pool / ticketCost) underestimates tickets by ~2x
+    // 
+    // Simplest fix: use pool directly in numerator and estimate tickets from pool
+    // expectedWinners = (averagePool / ticketCost) × probability × 2
+    // (×2 because pool is ~50% of revenue, so real tickets ≈ 2× pool/ticketCost)
+    
+    if (probability > 0) {
+      const estimatedTickets = (averagePool / ticketCost) * 2;
+      const expectedWinners = estimatedTickets * probability;
+      displayedPrize = Math.floor((row.prizePercent / 100 * averagePool) / expectedWinners);
+    } else {
+      displayedPrize = 0;
+    }
   } else {
     displayedPrize = 0;
   }

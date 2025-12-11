@@ -96,7 +96,7 @@ export const LOTTERY_4_FROM_20: Lottery = {
           { matches: [1, 3], prizePercent: 8.5 },
           { matches: [0, 3], prizePercent: 10.5 },
           { matches: [2, 2], prizePercent: 10.5 },
-          { matches: [1, 2], prize: 400 },
+          { matches: [1, 2], prize: 350 },
           { matches: [0, 2], prizePercent: 25 },
         ],
         currency: '₽',

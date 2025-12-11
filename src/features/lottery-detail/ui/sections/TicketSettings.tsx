@@ -19,7 +19,7 @@ interface TicketSettingsProps {
 }
 
 const SUPERPRICE_MIN = 0;
-const SUPERPRICE_MAX = 500_000_000;
+const SUPERPRICE_MAX = 100_000_000_000; // 100 billion
 const SUPERPRICE_STEP = 1_000_000;
 
 export const TicketSettings: React.FC<TicketSettingsProps> = ({

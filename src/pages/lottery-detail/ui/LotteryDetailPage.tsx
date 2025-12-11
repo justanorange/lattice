@@ -102,6 +102,7 @@ export const LotteryDetailPage: React.FC = () => {
           superprice={superprice}
           secondaryPrize={secondaryPrize}
           averagePool={averagePool}
+          ticketCost={ticketCost}
           onUpdateRow={updatePrizeRow}
           onReset={resetPrizeTable}
         />

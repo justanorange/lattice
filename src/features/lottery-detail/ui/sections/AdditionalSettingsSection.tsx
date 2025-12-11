@@ -23,9 +23,9 @@ interface AdditionalSettingsSectionProps {
 }
 
 const SECONDARY_PRIZE_MIN = 0;
-const SECONDARY_PRIZE_MAX = 500_000_000;
+const SECONDARY_PRIZE_MAX = 100_000_000_000; // 100 billion
 const AVERAGE_POOL_MIN = 0;
-const AVERAGE_POOL_MAX = 999_999_999;
+const AVERAGE_POOL_MAX = 100_000_000_000; // 100 billion
 
 export const AdditionalSettingsSection: React.FC<AdditionalSettingsSectionProps> = ({
   lottery,
@@ -132,27 +132,30 @@ export const AdditionalSettingsSection: React.FC<AdditionalSettingsSectionProps>
 
         {/* Average Pool (only for pool_percentage variant) */}
         {showAveragePool && (
-          <div className="relative">
-            <Input
-              type="text"
-              label="Предполагаемый размер призового фонда (₽)"
-              value={averagePoolInput}
-              onChange={handleAveragePoolChange}
-              onBlur={handleAveragePoolBlur}
-              helper={`По умолчанию: ${defaultAveragePool.toLocaleString()} ₽`}
-              className="pr-10"
-            />
-            {isAveragePoolModified && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onResetAveragePool}
-                title="Сбросить к значению по умолчанию"
-                className="absolute right-1 top-8"
-              >
-                <RotateCcw className="size-4" />
-              </Button>
-            )}
+          <div>
+            <label className="block text-sm font-medium text-gray-900 dark:text-white mb-1">
+              Предполагаемый размер призового фонда (₽)
+            </label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                value={averagePoolInput}
+                onChange={handleAveragePoolChange}
+                onBlur={handleAveragePoolBlur}
+                helper={defaultAveragePool > 0 ? `По умолчанию: ${defaultAveragePool.toLocaleString()} ₽` : undefined}
+                className="flex-1"
+              />
+              {isAveragePoolModified && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onResetAveragePool}
+                  title="Сбросить к значению по умолчанию"
+                >
+                  <RotateCcw className="size-4" />
+                </Button>
+              )}
+            </div>
           </div>
         )}
 

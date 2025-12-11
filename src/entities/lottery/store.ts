@@ -85,12 +85,16 @@ function getDefaultSettings(lottery: Lottery): LotterySettings {
       ? structuredClone(lottery.variants[0].prizeTable)
       : { rows: [], currency: '₽' };
 
+  // Find averagePool from any variant that has it
+  const variantWithPool = lottery.variants?.find(v => v.averagePool !== undefined);
+  const averagePool = variantWithPool?.averagePool;
+
   return {
     superprice: lottery.defaultSuperprice,
     secondaryPrize: lottery.defaultSecondaryPrize,
     ticketCost: lottery.defaultTicketCost,
     prizeTable,
-    averagePool: lottery.variants?.[0]?.averagePool,
+    averagePool,
     variant: lottery.variants?.[0]?.type,
   };
 }

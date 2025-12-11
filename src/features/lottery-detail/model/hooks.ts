@@ -73,9 +73,11 @@ export function useLotteryDetail(lotteryId: string): UseLotteryDetailReturn {
         selectedLottery,
         currentSuperprice,
         currentPrizeTable,
-        currentTicketCost
+        currentTicketCost,
+        currentSecondaryPrize,
+        currentAveragePool
       ),
-    [selectedLottery, currentSuperprice, currentPrizeTable, currentTicketCost]
+    [selectedLottery, currentSuperprice, currentPrizeTable, currentTicketCost, currentSecondaryPrize, currentAveragePool]
   );
 
   // Reset handlers for secondary prize and average pool
@@ -83,10 +85,14 @@ export function useLotteryDetail(lotteryId: string): UseLotteryDetailReturn {
     updateSecondaryPrize(selectedLottery.defaultSecondaryPrize || 0);
   }, [selectedLottery, updateSecondaryPrize]);
 
+  // Get default pool from selected variant or find variant with pool
+  const currentVariantConfig = selectedLottery.variants?.find(v => v.type === selectedVariant);
+  const variantWithPool = selectedLottery.variants?.find(v => v.averagePool !== undefined);
+  const defaultPool = currentVariantConfig?.averagePool ?? variantWithPool?.averagePool ?? 0;
+
   const resetAveragePool = React.useCallback(() => {
-    const defaultPool = selectedLottery.variants?.[0]?.averagePool || 0;
     updateAveragePool(defaultPool);
-  }, [selectedLottery, updateAveragePool]);
+  }, [defaultPool, updateAveragePool]);
 
   return {
     lottery: selectedLottery,
@@ -100,7 +106,7 @@ export function useLotteryDetail(lotteryId: string): UseLotteryDetailReturn {
     secondaryPrize: currentSecondaryPrize,
     defaultSecondaryPrize: selectedLottery.defaultSecondaryPrize,
     averagePool: currentAveragePool,
-    defaultAveragePool: selectedLottery.variants?.[0]?.averagePool,
+    defaultAveragePool: defaultPool,
     updateTicketCost,
     updateSuperprice,
     updatePrizeRow,

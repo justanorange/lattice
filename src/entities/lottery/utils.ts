@@ -125,7 +125,7 @@ export function isSymmetricLottery(lotteryId: string): boolean {
 
 /**
  * Group symmetric prize rows together for combined display
- * Returns rows with combined display text for symmetric pairs
+ * Returns rows with combined display text (larger number first, no brackets)
  * 
  * @param prizeRows - The prize table rows
  * @param lotteryId - The lottery ID
@@ -133,24 +133,14 @@ export function isSymmetricLottery(lotteryId: string): boolean {
  */
 export function getCombinedSymmetricDisplay(
   prizeRows: PrizeRow[],
-  lotteryId: string
+  _lotteryId: string
 ): Array<{ row: PrizeRow; displayLabel: string }> {
-  if (!isSymmetricLottery(lotteryId)) {
-    // No combination needed for non-symmetric lotteries
-    return prizeRows.map((row) => ({
-      row,
-      displayLabel: row.matches.join(' + '),
-    }));
-  }
-
-  // For symmetric lotteries, return combined display
   return prizeRows.map((row) => {
-    const label = getSymmetricLabel(row.matches);
-    if (label) {
-      return {
-        row,
-        displayLabel: `${row.matches.join(' + ')} (${label})`,
-      };
+    // For 2-field lotteries, show larger number first (e.g., "4 + 2" not "2 + 4")
+    if (row.matches.length === 2) {
+      const [a, b] = row.matches;
+      const displayLabel = a >= b ? `${a} + ${b}` : `${b} + ${a}`;
+      return { row, displayLabel };
     }
     return {
       row,
