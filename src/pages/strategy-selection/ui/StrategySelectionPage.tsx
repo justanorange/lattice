@@ -73,46 +73,46 @@ export const StrategySelectionPage: React.FC = () => {
         onBack={handleBack}
       />
 
-      <StrategyList
-        strategies={strategies}
-        selectedId={selectedStrategyId}
-        onSelect={handleStrategySelect}
-      />
+      <div className="space-y-5 mb-6">
+        <StrategyList
+          strategies={strategies}
+          selectedId={selectedStrategyId}
+          onSelect={handleStrategySelect}
+        />
 
-      {selectedStrategy && (
-        <>
-          <div ref={parametersRef}>
-            <StrategyParameters
-              strategy={selectedStrategy}
-              params={params}
-              onParamChange={updateParam}
+        {selectedStrategy && (
+          <>
+            <div ref={parametersRef}>
+              <StrategyParameters
+                strategy={selectedStrategy}
+                params={params}
+                onParamChange={updateParam}
+              />
+            </div>
+
+            <CalculationResult
+              calculatedTicketCount={calculatedTicketCount}
+              effectiveTicketCount={effectiveTicketCount}
+              effectiveBudget={effectiveBudget}
+              ticketCost={ticketCost}
+              customTicketCount={customTicketCount}
+              onTicketCountChange={setCustomTicketCount}
+              onBudgetChange={setBudget}
             />
-          </div>
 
-          <CalculationResult
-            calculatedTicketCount={calculatedTicketCount}
-            effectiveTicketCount={effectiveTicketCount}
-            effectiveBudget={effectiveBudget}
-            ticketCost={ticketCost}
-            customTicketCount={customTicketCount}
-            onTicketCountChange={setCustomTicketCount}
-            onBudgetChange={setBudget}
-          />
+            <ProbabilityTable
+              lottery={lottery}
+              prizeTable={prizeTable}
+              ticketCount={effectiveTicketCount}
+              superprice={superprice}
+            />
 
-          <ProbabilityTable
-            lottery={lottery}
-            prizeTable={prizeTable}
-            ticketCount={effectiveTicketCount}
-            superprice={superprice}
-          />
-
-          <div className="mb-6">
             <Button onClick={handleGenerate} variant="primary" className="w-full">
               Сгенерировать билеты
             </Button>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </Container>
   );
 };

@@ -12,7 +12,7 @@ interface GenerationStatsProps {
 
 export const GenerationStats: React.FC<GenerationStatsProps> = ({ result }) => {
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
           Статистика

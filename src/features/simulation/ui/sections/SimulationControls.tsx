@@ -35,7 +35,7 @@ export const SimulationControls: React.FC<SimulationControlsProps> = ({
   }, [hasResult]);
 
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader 
         className="cursor-pointer select-none"
         onClick={() => setIsExpanded(!isExpanded)}

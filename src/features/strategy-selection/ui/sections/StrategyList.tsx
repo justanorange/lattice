@@ -32,7 +32,7 @@ export const StrategyList: React.FC<StrategyListProps> = ({
   }, [selectedId]);
 
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader 
         className="cursor-pointer select-none border-b-0 pb-0"
         onClick={() => setIsExpanded(!isExpanded)}

@@ -81,7 +81,7 @@ export const PrizeDistribution: React.FC<PrizeDistributionProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-sm text-gray-600 dark:text-gray-400">
-                Выигрышей суперприза
+                Выигрышей
               </p>
               <p className="text-3xl font-bold text-amber-600 dark:text-amber-400">
                 {jackpotWins}
@@ -111,12 +111,12 @@ export const PrizeDistribution: React.FC<PrizeDistributionProps> = ({
       </Card>
 
       {/* Prize Distribution by Category */}
-      <Card className="mb-6">
+      <Card>
         <CardHeader>
           <div className="flex items-center gap-2">
             <Award className="size-5 text-gray-600 dark:text-gray-400" />
             <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
-              Статистика по комбинациям
+              Статистика комбинаций
             </h2>
           </div>
         </CardHeader>

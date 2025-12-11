@@ -53,7 +53,7 @@ export const PrizeTableSection: React.FC<PrizeTableSectionProps> = ({
   onReset,
 }) => {
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
         <div className="flex items-center justify-between">
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white">

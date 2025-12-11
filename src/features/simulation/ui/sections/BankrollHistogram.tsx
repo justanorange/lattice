@@ -66,13 +66,15 @@ function createHistogramBuckets(
   // Color scale from gray (0) through orange to amber (jackpot)
   const colors = [
     'bg-gray-400',
+    'bg-orange-100',
+    'bg-yellow-100',
     'bg-orange-200',
     'bg-orange-300', 
     'bg-orange-400',
     'bg-orange-500',
-    'bg-amber-400',
     'bg-amber-500',
     'bg-amber-600',
+    'bg-amber-700',
   ];
   
   // Format label
@@ -103,7 +105,7 @@ export const BankrollHistogram: React.FC<BankrollHistogramProps> = ({
   const totalRounds = result.roundsCount;
 
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
           <BarChart3 className="size-5 text-gray-600 dark:text-gray-400" />

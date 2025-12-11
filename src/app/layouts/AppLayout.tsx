@@ -5,7 +5,6 @@
 
 import { useEffect } from 'react';
 import { Outlet, useLocation } from 'react-router-dom';
-import { Container } from '@/shared/ui';
 import { ThemeMode } from '@/widgets/theme-mode/ui/ThemeMode';
 
 /**
@@ -40,9 +39,7 @@ export const AppLayout = () => {
 
       {/* Main Content */}
       <main className="pt-20">
-        <Container>
-          <Outlet />
-        </Container>
+        <Outlet />
       </main>
     </div>
   );

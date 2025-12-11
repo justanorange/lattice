@@ -51,32 +51,32 @@ export const GenerationPage: React.FC = () => {
         onBack={handleBack}
       />
 
-      {isGenerating && (
-        <Card className="mb-6">
-          <CardBody className="flex items-center justify-center py-12">
-            <div className="flex flex-col items-center gap-4">
-              <Spinner size="lg" />
-              <p className="text-gray-600 dark:text-gray-400">
-                Генерация билетов...
-              </p>
-            </div>
-          </CardBody>
-        </Card>
-      )}
+      <div className="space-y-5 mb-6">
+        {isGenerating && (
+          <Card>
+            <CardBody className="flex items-center justify-center py-12">
+              <div className="flex flex-col items-center gap-4">
+                <Spinner size="lg" />
+                <p className="text-gray-600 dark:text-gray-400">
+                  Генерация билетов...
+                </p>
+              </div>
+            </CardBody>
+          </Card>
+        )}
 
-      {error && (
-        <Card className="mb-6 border-red-200 dark:border-red-800">
-          <CardBody>
-            <p className="text-red-600 dark:text-red-400">{error}</p>
-          </CardBody>
-        </Card>
-      )}
+        {error && (
+          <Card className="mb-6 border-red-200 dark:border-red-800">
+            <CardBody>
+              <p className="text-red-600 dark:text-red-400">{error}</p>
+            </CardBody>
+          </Card>
+        )}
 
-      {result && !isGenerating && (
-        <>
-          <GenerationStats result={result} />
-          
-          <div className="mb-6">
+        {result && !isGenerating && (
+          <>
+            <GenerationStats result={result} />
+            
             <Button 
               onClick={regenerate} 
               variant="outline" 
@@ -85,22 +85,20 @@ export const GenerationPage: React.FC = () => {
             >
               Сгенерировать заново
             </Button>
-          </div>
 
-          <TicketsGrid result={result} lottery={lottery} />
+            <TicketsGrid result={result} lottery={lottery} />
 
-          <div className="mb-6 flex gap-3">
             <Button 
               onClick={handleSimulate} 
-              variant="primary" 
-              className="flex-1"
+              variant="primary"
               disabled={isGenerating}
+              className="w-full"
             >
               Симулировать тиражи
             </Button>
-          </div>
-        </>
-      )}
+          </>
+        )}
+      </div>
     </Container>
   );
 };

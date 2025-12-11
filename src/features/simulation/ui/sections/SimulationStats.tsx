@@ -14,7 +14,7 @@ export const SimulationStats: React.FC<SimulationStatsProps> = ({ result }) => {
   const { statistics } = result;
 
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
           Статистика

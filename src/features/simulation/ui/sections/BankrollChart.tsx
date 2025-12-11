@@ -22,7 +22,7 @@ export const BankrollChart: React.FC<BankrollChartProps> = ({ result }) => {
   const maxBankroll = Math.max(...bankrollValues);
 
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
           Динамика банкролла

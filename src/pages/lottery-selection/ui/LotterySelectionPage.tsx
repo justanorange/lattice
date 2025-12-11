@@ -53,7 +53,7 @@ export const LotterySelectionPage: React.FC = () => {
         </h1>
       </header>
       <Container>
-        <Grid cols={2} gap="md" className="mb-6">
+        <Grid cols={3} gap="md" className="mb-6">
           {lotteries.map((lottery) => (
             <button
               key={lottery.id}

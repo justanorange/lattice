@@ -18,7 +18,7 @@ export const StrategyParameters: React.FC<StrategyParametersProps> = ({
   onParamChange,
 }) => {
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           Параметры

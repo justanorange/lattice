@@ -20,7 +20,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
   return (
     <header className="fixed inset-x-16 top-0 z-20 flex h-[72px] flex-col items-center justify-center">
       {onBack && (
-        <div className="absolute inset-y-0 -left-8 flex items-center">
+        <div className="absolute inset-y-0 -left-12 flex items-center">
           <button
             type="button"
             onClick={onBack}

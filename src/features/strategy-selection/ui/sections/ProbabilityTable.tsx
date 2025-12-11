@@ -118,7 +118,7 @@ export const ProbabilityTable: React.FC<ProbabilityTableProps> = ({
   }
 
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           Таблица вероятностей
@@ -128,43 +128,41 @@ export const ProbabilityTable: React.FC<ProbabilityTableProps> = ({
         </p>
       </CardHeader>
       <CardBody>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-gray-200 dark:border-gray-800">
-                <th className="pb-2 text-left font-medium text-gray-600 dark:text-gray-400">
-                  Совп.
-                </th>
-                <th className="pb-2 text-right font-medium text-gray-600 dark:text-gray-400">
-                  Приз
-                </th>
-                <th className="pb-2 text-right font-medium text-gray-600 dark:text-gray-400">
-                  P (1 билет)
-                </th>
-                <th className="pb-2 text-right font-medium text-gray-600 dark:text-gray-400">
-                  P ({ticketCount} билет{ticketCount > 1 ? 'ов' : ''})
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
-              {winningRows.map((row, index) => {
-                const singleProb = calculateRowProbability(lottery, row);
-                const multiProb = multiTicketProbability(singleProb, ticketCount);
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-gray-200 dark:border-gray-800">
+              <th className="pb-2 px-2 text-left font-medium text-gray-600 dark:text-gray-400">
+                Совп.
+              </th>
+              <th className="pb-2 px-2 text-right font-medium text-gray-600 dark:text-gray-400">
+                Приз
+              </th>
+              <th className="pb-2 px-2 text-right font-medium text-gray-600 dark:text-gray-400 text-nowrap">
+                1 билет
+              </th>
+              <th className="pb-2 px-2 text-right font-medium text-gray-600 dark:text-gray-400 text-nowrap">
+                Расч.
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 dark:divide-gray-800">
+            {winningRows.map((row, index) => {
+              const singleProb = calculateRowProbability(lottery, row);
+              const multiProb = multiTicketProbability(singleProb, ticketCount);
 
-                return (
-                  <ProbabilityRow
-                    key={index}
-                    matches={formatMatches(row.matches)}
-                    prize={formatPrize(row, superprice)}
-                    singleProbability={formatProbability(singleProb)}
-                    multiProbability={formatProbability(multiProb)}
-                    isJackpot={row.prize === 'Суперприз'}
-                  />
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+              return (
+                <ProbabilityRow
+                  key={index}
+                  matches={formatMatches(row.matches)}
+                  prize={formatPrize(row, superprice)}
+                  singleProbability={formatProbability(singleProb)}
+                  multiProbability={formatProbability(multiProb)}
+                  isJackpot={row.prize === 'Суперприз'}
+                />
+              );
+            })}
+          </tbody>
+        </table>
       </CardBody>
     </Card>
   );
@@ -186,17 +184,17 @@ const ProbabilityRow: React.FC<ProbabilityRowProps> = ({
   isJackpot,
 }) => (
   <tr className={isJackpot ? 'bg-amber-50 dark:bg-amber-900/20' : ''}>
-    <td className="py-2 text-left font-mono text-gray-900 dark:text-white">
+    <td className="p-2 text-left font-mono text-gray-900 dark:text-white">
       {matches}
     </td>
-    <td className={`py-2 text-right ${isJackpot ? 'font-semibold text-amber-600 dark:text-amber-400' : 'text-gray-700 dark:text-gray-300'}`}>
+    <td className={`p-2 text-right ${isJackpot ? 'font-semibold text-amber-600 dark:text-amber-400' : 'text-gray-700 dark:text-gray-300'}`}>
       {prize}
     </td>
-    <td className="py-2 text-right text-xs text-gray-500 dark:text-gray-400">
+    <td className="p-2 text-right text-xs text-gray-500 dark:text-gray-400">
       <div>{singleProbability.percent}</div>
       <div className="text-gray-400 dark:text-gray-500">{singleProbability.ratio}</div>
     </td>
-    <td className="py-2 text-right text-xs font-medium text-gray-900 dark:text-white">
+    <td className="p-2 text-right text-xs font-medium text-gray-900 dark:text-white">
       <div>{multiProbability.percent}</div>
       <div className="text-gray-400 dark:text-gray-500">{multiProbability.ratio}</div>
     </td>

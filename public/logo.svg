@@ -1,31 +1,31 @@
 <svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
 <g clip-path="url(#clip0_43_33)">
 <rect width="512" height="512" fill="white"/>
-<circle cx="100" cy="100" r="30" fill="#D9D9D9"/>
-<circle cx="178" cy="100" r="30" fill="#D9D9D9"/>
-<circle cx="256" cy="100" r="30" fill="#FF9500"/>
-<circle cx="334" cy="100" r="30" fill="#FF9500"/>
-<circle cx="412" cy="100" r="30" fill="#D9D9D9"/>
-<circle cx="100" cy="178" r="30" fill="#D9D9D9"/>
-<circle cx="178" cy="178" r="30" fill="#FF9500"/>
-<circle cx="256" cy="178" r="30" fill="#D9D9D9"/>
-<circle cx="334" cy="178" r="30" fill="#D9D9D9"/>
-<circle cx="412" cy="178" r="30" fill="#FF9500"/>
-<circle cx="100" cy="256" r="30" fill="#D9D9D9"/>
-<circle cx="178" cy="256" r="30" fill="#D9D9D9"/>
-<circle cx="256" cy="256" r="30" fill="#D9D9D9"/>
-<circle cx="334" cy="256" r="30" fill="#D9D9D9"/>
-<circle cx="412" cy="256" r="30" fill="#FF9500"/>
-<circle cx="100" cy="334" r="30" fill="#FF9500"/>
-<circle cx="178" cy="334" r="30" fill="#D9D9D9"/>
-<circle cx="256" cy="334" r="30" fill="#FF9500"/>
-<circle cx="334" cy="334" r="30" fill="#D9D9D9"/>
-<circle cx="412" cy="334" r="30" fill="#D9D9D9"/>
-<circle cx="100" cy="412" r="30" fill="#D9D9D9"/>
-<circle cx="178" cy="412" r="30" fill="#FF9500"/>
-<circle cx="256" cy="412" r="30" fill="#D9D9D9"/>
-<circle cx="334" cy="412" r="30" fill="#D9D9D9"/>
-<circle cx="412" cy="412" r="30" fill="#D9D9D9"/>
+<circle cx="120" cy="120" r="26" fill="#D9D9D9"/>
+<circle cx="188" cy="120" r="26" fill="#D9D9D9"/>
+<circle cx="256" cy="120" r="26" fill="#FF9500"/>
+<circle cx="324" cy="120" r="26" fill="#FF9500"/>
+<circle cx="392" cy="120" r="26" fill="#D9D9D9"/>
+<circle cx="120" cy="188" r="26" fill="#D9D9D9"/>
+<circle cx="188" cy="188" r="26" fill="#FF9500"/>
+<circle cx="256" cy="188" r="26" fill="#D9D9D9"/>
+<circle cx="324" cy="188" r="26" fill="#D9D9D9"/>
+<circle cx="392" cy="188" r="26" fill="#FF9500"/>
+<circle cx="120" cy="256" r="26" fill="#D9D9D9"/>
+<circle cx="188" cy="256" r="26" fill="#D9D9D9"/>
+<circle cx="256" cy="256" r="26" fill="#D9D9D9"/>
+<circle cx="324" cy="256" r="26" fill="#D9D9D9"/>
+<circle cx="392" cy="256" r="26" fill="#FF9500"/>
+<circle cx="120" cy="324" r="26" fill="#FF9500"/>
+<circle cx="188" cy="324" r="26" fill="#D9D9D9"/>
+<circle cx="256" cy="324" r="26" fill="#FF9500"/>
+<circle cx="324" cy="324" r="26" fill="#D9D9D9"/>
+<circle cx="392" cy="324" r="26" fill="#D9D9D9"/>
+<circle cx="120" cy="392" r="26" fill="#D9D9D9"/>
+<circle cx="188" cy="392" r="26" fill="#FF9500"/>
+<circle cx="256" cy="392" r="26" fill="#D9D9D9"/>
+<circle cx="324" cy="392" r="26" fill="#D9D9D9"/>
+<circle cx="392" cy="392" r="26" fill="#D9D9D9"/>
 <rect width="512" height="512" fill="url(#paint0_linear_43_33)"/>
 </g>
 <defs>

@@ -77,7 +77,7 @@ export const TicketSettings: React.FC<TicketSettingsProps> = ({
   const isSuperpriceModified = superprice !== defaultSuperprice;
 
   return (
-    <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+    <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
       <Card>
         <CardBody className="space-y-4">
           <div className="relative">

@@ -14,7 +14,7 @@ interface TicketsGridProps {
 
 export const TicketsGrid: React.FC<TicketsGridProps> = ({ result, lottery }) => {
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
           Визуализация билетов

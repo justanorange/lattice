@@ -50,26 +50,26 @@ export const SimulationPage: React.FC = () => {
         onBack={handleBack}
       />
 
-      <SimulationControls
-        roundsCount={roundsCount}
-        onRoundsChange={setRoundsCount}
-        onRun={handleRunSimulation}
-        isRunning={isRunning}
-        hasTickets={generatedTickets.length > 0}
-        hasResult={!!result}
-      />
+      <div className="space-y-5 mb-6">
+        <SimulationControls
+          roundsCount={roundsCount}
+          onRoundsChange={setRoundsCount}
+          onRun={handleRunSimulation}
+          isRunning={isRunning}
+          hasTickets={generatedTickets.length > 0}
+          hasResult={!!result}
+        />
 
-      {result && !isRunning && (
-        <>
-          <SimulationStats result={result} />
-          <PrizeDistribution result={result} superprice={currentSuperprice} prizeTable={currentPrizeTable} />
-          <BankrollHistogram result={result} ticketCost={currentTicketCost} prizeTable={currentPrizeTable} superprice={currentSuperprice} />
-          <BankrollChart result={result} />
-        </>
-      )}
+        {result && !isRunning && (
+          <>
+            <SimulationStats result={result} />
+            <PrizeDistribution result={result} superprice={currentSuperprice} prizeTable={currentPrizeTable} />
+            <BankrollHistogram result={result} ticketCost={currentTicketCost} prizeTable={currentPrizeTable} superprice={currentSuperprice} />
+            <BankrollChart result={result} />
+          </>
+        )}
 
-      <div className="mb-6 flex gap-3">
-        <Button variant="secondary" onClick={handleBack} className="flex-1">
+        <Button variant="secondary" onClick={handleBack} className="w-full">
           К билетам
         </Button>
       </div>

@@ -166,7 +166,7 @@ export const EVChart: React.FC<EVChartProps> = ({
   const evRange = maxEV - minEV || 1;
 
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
         <div className="flex items-center gap-2">
           <TrendingUp className="size-5 text-gray-600 dark:text-gray-400" />

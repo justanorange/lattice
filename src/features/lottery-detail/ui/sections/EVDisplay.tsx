@@ -16,7 +16,7 @@ export const EVDisplay: React.FC<EVDisplayProps> = ({ ticketCost, evCalculation 
   const { expectedValue, evPercent, isProfitable } = evCalculation;
 
   return (
-    <Card className="mb-6">
+    <Card>
       <CardHeader>
         <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
           {STRINGS.detail_ev}

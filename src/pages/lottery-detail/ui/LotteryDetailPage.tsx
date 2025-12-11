@@ -59,37 +59,37 @@ export const LotteryDetailPage: React.FC = () => {
         onBack={handleBack}
       />
 
-      <TicketSettings
-        ticketCost={ticketCost}
-        superprice={superprice}
-        defaultTicketCost={defaultTicketCost}
-        defaultSuperprice={defaultSuperprice}
-        onTicketCostChange={handleTicketCostChange}
-        onSuperpriceChange={handleSuperpriceChange}
-        onResetTicketCost={resetTicketCost}
-        onResetSuperprice={resetSuperprice}
-      />
+      <div className="space-y-5 mb-6">
+        <TicketSettings
+          ticketCost={ticketCost}
+          superprice={superprice}
+          defaultTicketCost={defaultTicketCost}
+          defaultSuperprice={defaultSuperprice}
+          onTicketCostChange={handleTicketCostChange}
+          onSuperpriceChange={handleSuperpriceChange}
+          onResetTicketCost={resetTicketCost}
+          onResetSuperprice={resetSuperprice}
+        />
 
-      <PrizeTableSection
-        lottery={lottery}
-        prizeTable={prizeTable}
-        onUpdateRow={updatePrizeRow}
-        onReset={resetPrizeTable}
-      />
+        <PrizeTableSection
+          lottery={lottery}
+          prizeTable={prizeTable}
+          onUpdateRow={updatePrizeRow}
+          onReset={resetPrizeTable}
+        />
 
-      <EVDisplay
-        ticketCost={ticketCost}
-        evCalculation={evCalculation}
-      />
+        <EVDisplay
+          ticketCost={ticketCost}
+          evCalculation={evCalculation}
+        />
 
-      <EVChart
-        lottery={lottery}
-        prizeTable={prizeTable}
-        ticketCost={ticketCost}
-        currentSuperprice={superprice}
-      />
+        <EVChart
+          lottery={lottery}
+          prizeTable={prizeTable}
+          ticketCost={ticketCost}
+          currentSuperprice={superprice}
+        />
 
-      <div className="mb-6">
         <Button onClick={handleNext} variant="primary" className="w-full">
           Выбрать стратегию
         </Button>

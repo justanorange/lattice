@@ -25,7 +25,7 @@ export const CalculationResult: React.FC<CalculationResultProps> = ({
   onBudgetChange,
 }) => {
   return (
-    <Card className="mb-6 border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
+    <Card className="border-amber-200 bg-amber-50 dark:border-amber-800 dark:bg-amber-900/20">
       <CardHeader>
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
           Расчет по стратегии
