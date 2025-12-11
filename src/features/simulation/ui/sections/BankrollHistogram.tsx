@@ -72,9 +72,9 @@ function createHistogramBuckets(
     'bg-orange-300', 
     'bg-orange-400',
     'bg-orange-500',
-    'bg-amber-500',
     'bg-amber-600',
     'bg-amber-700',
+    'bg-amber-800',
   ];
   
   // Format label

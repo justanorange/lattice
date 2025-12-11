@@ -22,7 +22,7 @@ export const GenerationStats: React.FC<GenerationStatsProps> = ({ result }) => {
         <div className="grid grid-cols-2 gap-4">
           <div>
             <p className="text-sm text-gray-600 dark:text-gray-400">
-              Количество билетов
+              Всего билетов
             </p>
             <p className="text-2xl font-semibold text-gray-900 dark:text-white">
               {result.ticketCount}

@@ -88,7 +88,7 @@ export const LotterySelectionPage: React.FC = () => {
                 <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
                   {lottery.name}
                 </h3>
-                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                <p className="text-xs -tracking-[0.09em] text-gray-500 dark:text-gray-400 line-clamp-2">
                   {lottery.description}
                 </p>
               </div>

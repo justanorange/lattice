@@ -25,6 +25,7 @@ dist-ssr
 
 .forge/
 ENTRY.md
+NEXT.md
 SPEC.md
 .geminiignore
 local-scripts/

@@ -337,8 +337,8 @@ export const EVChart: React.FC<EVChartProps> = ({
                     )}
                     
                     {/* Tooltip on hover */}
-                    <div className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1 hidden -translate-x-1/2 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white group-hover:block dark:bg-gray-700">
-                      {formatAmount(point.superprice)}: {point.ev >= 0 ? '+' : ''}{point.ev.toFixed(2)}
+                    <div className="pointer-events-none absolute bottom-full left-1/2 z-30 mb-1 hidden -translate-x-1/2 translate-y-3 whitespace-nowrap rounded bg-gray-900 px-2 py-1 text-xs text-white group-hover:block dark:bg-gray-700">
+                      {formatAmount(point.superprice)}: {point.ev >= 0 ? '+' : ''}{point.ev.toFixed(2)} ₽
                     </div>
                   </div>
                 );
